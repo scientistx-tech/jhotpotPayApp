@@ -52,8 +52,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   cell: {
-    width: 48,
-    height: 48,
+    width: 40,
+    height: 40,
     borderWidth: 1,
     borderRadius: 8,
     justifyContent: 'center',

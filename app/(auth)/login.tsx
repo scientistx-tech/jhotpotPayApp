@@ -1,19 +1,24 @@
 import AuthBanner from '@/components/auth-banner';
 import CustomButton from '@/components/custom-button';
-import RoundedInput from '@/components/rounded-input';
+import FormInput from '@/components/form-input';
 import { ThemedText } from '@/components/themed-text';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { loginSchema } from '@/schemas/authSchema';
 import { saveToken } from '@/utils/auth';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React from 'react';
+import { useForm } from 'react-hook-form';
 import { StyleSheet, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 
 export default function Login() {
     const router = useRouter()
     const tinColor = useThemeColor({}, "tint")
-    const [phone, setPhone] = useState('')
-    const [pin, setPin] = useState('')
+    const { control, handleSubmit } = useForm({
+        resolver: zodResolver(loginSchema),
+        defaultValues: { phone: '', pin: '' }
+    })
 
     const handleLogin = async () => {
         // 👉 Call your API here
@@ -42,36 +47,23 @@ export default function Login() {
 
                 <View style={{ height: 24 }} />
 
-                <RoundedInput
-                    label="মোবাইল নম্বর"
-                    placeholder="মোবাইল নম্বর দিন"
-                    keyboardType="phone-pad"
-                    value={phone}
-                    onChangeText={setPhone}
-                />
+                <FormInput name="phone" control={control} label="মোবাইল নম্বর" placeholder="মোবাইল নম্বর দিন" keyboardType="phone-pad" />
 
-                <RoundedInput
-                    label="পিন"
-                    placeholder="পিন দিন"
-                    secureTextEntry
-                    keyboardType="numeric"
-                    value={pin}
-                    onChangeText={setPin}
-                />
+                <FormInput name="pin" control={control} label="পিন" placeholder="পিন দিন" secureTextEntry keyboardType="numeric" />
 
                 <View style={{ height: 8 }} />
 
                 <View style={{ marginTop: 20, width: '100%' }}>
-                    <CustomButton isLoading={false} title='পরবর্তী' onPress={async () => {
-                        // Call API here, for now fake token
+                    <CustomButton isLoading={false} title='পরবর্তী' onPress={handleSubmit(async (data: any) => {
+                        // Call API here with validated data
                         const fakeToken = 'abc123'
                         await saveToken(fakeToken)
                         router.replace('/(tabs)')
-                    }} />
+                    })} />
                 </View>
 
                 <View style={{ marginTop: 12, alignItems: 'center' }}>
-                    <ThemedText type="link" style={{ textAlign: 'center' }} onPress={() => router.push('registration')}>
+                    <ThemedText type="link" style={{ textAlign: 'center' }} onPress={() => router.push('registration_page_mobile_number' as any)}>
                         অ্যাকাউন্ট নেই? রেজিস্ট্রেশন করুন
                     </ThemedText>
                 </View>

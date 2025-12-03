@@ -14,3 +14,13 @@ export async function getToken() {
 export async function removeToken() {
   return await SecureStore.deleteItemAsync(TOKEN_KEY);
 }
+
+// Log out the current user by removing the stored auth token.
+export async function logout() {
+  try {
+    await removeToken();
+  } catch (err) {
+    // If removal fails, log a warning — callers handle navigation.
+    console.warn('logout: failed to remove token', err);
+  }
+}

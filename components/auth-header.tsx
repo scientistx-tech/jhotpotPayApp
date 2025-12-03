@@ -53,4 +53,34 @@ const styles = StyleSheet.create({
         borderBottomLeftRadius: 60,
         borderBottomRightRadius: 60,
     }
+    ,
+    backBtn: {
+        borderRadius: 30,
+        height: 35,
+        width: 35,
+        backgroundColor: '#fff',
+        justifyContent: 'center',
+        alignItems: 'center',
+        position: 'absolute',
+        left: 12,
+        top: 12,
+    },
+    topBox: {
+        height: 120,
+        width: 120,
+        borderRadius: 60,
+        shadowColor: '#000',
+        shadowOffset: { height: 8, width: 8 },
+        shadowOpacity: 6,
+        shadowRadius: 10,
+        backgroundColor: '#fff',
+        elevation: 6,
+        position: 'absolute',
+        top: 80,
+        left: '50%',
+        transform: [{ translateX: -60 }],
+        zIndex: 1,
+        justifyContent: 'center',
+        alignItems: 'center'
+    }
 })
