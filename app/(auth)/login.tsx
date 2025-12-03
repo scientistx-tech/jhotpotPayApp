@@ -30,7 +30,7 @@ export default function Login() {
     };
     return (
         <View style={{ flex: 1 }}>
-            <AuthBanner />
+            <AuthBanner showBack={false} />
 
             <ScrollView
                 style={{ flex: 1 }}

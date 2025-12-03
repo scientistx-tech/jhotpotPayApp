@@ -25,7 +25,7 @@ export default function RegistrationPhone() {
 
   return (
     <View style={{ flex: 1 }}>
-      <AuthBanner />
+      <AuthBanner  />
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={[styles.container, { flexGrow: 1, paddingTop: 80 }]}
@@ -39,24 +39,7 @@ export default function RegistrationPhone() {
         <FormInput name='phone' control={control} label='মোবাইল নম্বর' placeholder='মোবাইল নম্বর দিন' keyboardType='phone-pad' />
 
         <View style={{ height: 12 }} />
-        <CustomButton
-          title='পরবর্তী'
-          onPress={async () => {
-            // validate with Zod directly so we can set errors reliably
-            // const values = getValues();
-            // const result = phoneSchema.safeParse(values);
-            // if (!result.success) {
-            //   // set field errors so FormInput will render them
-            //   result.error.issues.forEach((issue) => {
-            //     const path = issue.path[0] as string;
-            //     setError(path, { type: 'manual', message: issue.message });
-            //   });
-            //   return;
-            // }
-            // valid
-            handleSubmit(onSubmit)();
-          }}
-        />
+        <CustomButton title="পরবর্তী" onPress={handleSubmit(onSubmit)} />
       </ScrollView>
     </View>
   )

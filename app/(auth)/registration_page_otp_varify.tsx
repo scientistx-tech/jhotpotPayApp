@@ -35,21 +35,7 @@ export default function RegistrationOtp() {
         <Controller control={control} name='otp' render={({ field }: { field: any }) => <OTPInput value={field.value} onChange={field.onChange} length={6} />} />
 
         <View style={{ height: 20 }} />
-        <CustomButton
-          title='পরবর্তী'
-          onPress={async () => {
-            // const values = getValues();
-            // const result = otpSchema.safeParse(values as any);
-            // if (!result.success) {
-            //   result.error.issues.forEach((issue) => {
-            //     const path = issue.path[0] as string;
-            //     setError(path, { type: 'manual', message: issue.message });
-            //   });
-            //   return;
-            // }
-            handleSubmit(onSubmit)();
-          }}
-        />
+        <CustomButton title="পরবর্তী" onPress={handleSubmit(onSubmit)} />
 
         <View style={{ height: 12 }} />
         <ThemedText type='link' style={{ textAlign: 'center', marginTop: 12 }}>মনে পড়ে না? ওটিপি পুনরায় পাঠান</ThemedText>
