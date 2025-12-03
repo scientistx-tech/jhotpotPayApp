@@ -1,26 +1,31 @@
 import { useThemeColor } from "@/hooks/use-theme-color"
-import { ActivityIndicator, Text, TouchableOpacity, TouchableOpacityProps } from "react-native"
+import { ActivityIndicator, StyleProp, Text, TouchableOpacity, TouchableOpacityProps, ViewStyle } from "react-native"
 
 export type CustomButtonProps = TouchableOpacityProps & {
     isLoading?: boolean
     title: string
+    style?: StyleProp<ViewStyle>
 }
 
 const CustomButton = (props: CustomButtonProps) => {
     const tinColor = useThemeColor({}, "tint")
+    const { isLoading, title, disabled, style, ...rest } = props
+
+    const baseStyle: ViewStyle = {
+        backgroundColor: tinColor,
+        height: 50,
+        borderRadius: 35,
+        justifyContent: "center",
+        alignItems: "center",
+        width: '100%'
+    }
+
     return (
-        <TouchableOpacity {...props} disabled={props.isLoading || props.disabled} style={{
-            backgroundColor: tinColor, flex: 1,
-            height: 50,
-            borderRadius: 35,
-            justifyContent: "center",
-            alignItems: "center"
-        }}>
-            {props.isLoading ? (<ActivityIndicator color={"#fff"} />) : (
-                <Text style={{
-                    color: "#fff",
-                    fontSize: 20
-                }}>{props.title}</Text>
+        <TouchableOpacity {...rest} disabled={isLoading || disabled} style={[baseStyle, style]}>
+            {isLoading ? (
+                <ActivityIndicator color={"#fff"} />
+            ) : (
+                <Text style={{ color: "#fff", fontSize: 20 }}>{title}</Text>
             )}
         </TouchableOpacity>
     )

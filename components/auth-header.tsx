@@ -1,4 +1,5 @@
 import { useThemeColor } from "@/hooks/use-theme-color";
+import { FontAwesome6 } from '@expo/vector-icons';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import type { NativeStackHeaderProps } from "@react-navigation/native-stack";
 import Constants from "expo-constants";
@@ -16,21 +17,20 @@ function AuthHeader(props: AuthHeaderProps) {
     const tinColor = useThemeColor({}, "tint")
     const router = useRouter()
     return (
-        <View style={[, styles.container, { backgroundColor: tinColor }]}>
+        <View style={[, styles.container, { backgroundColor: tinColor }]}
+        >
             <StatusBar style="light" />
-            <View style={{ height: statusBarHeight }}></View>
+            <View style={{ height: statusBarHeight }} />
+
             {props.isBack && (
-                <TouchableOpacity onPress={() => router.back()} style={{
-                    borderRadius: 30,
-                    height: 35,
-                    width: 35,
-                    backgroundColor: "#fff",
-                    justifyContent: "center",
-                    alignItems: "center"
-                }}>
+                <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
                     <Ionicons name="arrow-back" size={24} color={tinColor} />
                 </TouchableOpacity>
             )}
+
+            <View style={styles.topBox}>
+                <FontAwesome6 name="circle-user" size={40} color={tinColor} />
+            </View>
         </View>
     )
 }
