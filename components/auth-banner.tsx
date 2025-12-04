@@ -22,7 +22,7 @@ export default function AuthBanner({
   imageSource,
   showBack = true,
 }: AuthBannerProps) {
-  const tint = tintColor ?? useThemeColor({}, 'tint');
+  const tint =  useThemeColor({}, 'tint');
   const router = useRouter();
 
   return (

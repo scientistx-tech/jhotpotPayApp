@@ -1,32 +1,37 @@
-import AuthBanner from '@/components/auth-banner';
+import { useLoginMutation } from '@/api/authApi';
 import CustomButton from '@/components/custom-button';
 import FormInput from '@/components/form-input';
 import { ThemedText } from '@/components/themed-text';
-import { useThemeColor } from '@/hooks/use-theme-color';
 import { loginSchema } from '@/schemas/authSchema';
-import { saveToken } from '@/utils/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { StyleSheet, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
+import Toast from 'react-native-toast-message';
 
 export default function Login() {
     const router = useRouter()
-    const tinColor = useThemeColor({}, "tint")
+    const [loginApi, { isLoading }] = useLoginMutation()
     const { control, handleSubmit } = useForm({
         resolver: zodResolver(loginSchema),
         defaultValues: { phone: '', pin: '' }
     })
 
-    const handleLogin = async () => {
-        // 👉 Call your API here
-        // const res = await axios.post("your-api/auth/login", { email, password });
-        const fakeToken = "abc123";
+    const handleLogin = async (data: { phone: string, pin: string }) => {
+        try {
+            await loginApi({ password: data.pin, phone: data.phone }).unwrap()
+            router.replace("/(tabs)");
+        } catch (error: any) {
 
-        await saveToken(fakeToken);
-        router.replace("/(tabs)");
+            Toast.show({
+                type: "error",
+                text1: "Error",
+                text2: error?.data?.message
+            })
+        }
+
     };
     return (
         <View style={{ flex: 1 }}>
@@ -54,12 +59,7 @@ export default function Login() {
                 <View style={{ height: 8 }} />
 
                 <View style={{ marginTop: 20, width: '100%' }}>
-                    <CustomButton isLoading={false} title='পরবর্তী' onPress={handleSubmit(async (data: any) => {
-                        // Call API here with validated data
-                        const fakeToken = 'abc123'
-                        await saveToken(fakeToken)
-                        router.replace('/(tabs)')
-                    })} />
+                    <CustomButton isLoading={isLoading} title='পরবর্তী' onPress={handleSubmit(handleLogin)} />
                 </View>
 
                 <View style={{ marginTop: 12, alignItems: 'center' }}>
