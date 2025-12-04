@@ -1,6 +1,7 @@
 import { authApi } from '@/api/authApi';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { store } from '@/store/store';
+import { getToken } from '@/utils/auth';
 import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Slot, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -20,30 +21,23 @@ export default function RootLayout() {
   const segments = useSegments();
   const router = useRouter();
   const tinColor = useThemeColor({}, "tint")
-
+  const [authenticated, setAuthenticated] = useState(false);
   useEffect(() => {
     const checkAuth = async () => {
+      const token = await getToken();
       const inAuthGroup = segments[0] === "(auth)";
 
-      // 👉 Proper RTK Query call
-      try {
-        const result = await store.dispatch(
-          authApi.endpoints.checkAuth.initiate()
-        ).unwrap();
-
-        console.log("Auth user:", result);
-
-        // User exists but visiting login → redirect to dashboard
-        if (result) {
-          router.replace("/(tabs)");
-        }
-
-      } catch (error) {
-        console.log("Auth failed:", error);
-
-        // If token invalid → redirect to login
-        if (!inAuthGroup) {
-          router.replace("/(auth)/login");
+      if (!token) {
+        setAuthenticated(false);
+        if (!inAuthGroup) router.replace("/(auth)/login");
+      } else {
+        try {
+          await store.dispatch(authApi.endpoints.checkAuth.initiate()).unwrap();
+          setAuthenticated(true);
+          if (inAuthGroup) router.replace("/(tabs)");
+        } catch {
+          setAuthenticated(false);
+          if (!inAuthGroup) router.replace("/(auth)/login");
         }
       }
 
@@ -61,15 +55,21 @@ export default function RootLayout() {
     </View>
   ); // Loading screen optional
 
-  return (
-    <Provider store={store}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <ThemeProvider value={DefaultTheme}>
-          <Slot />
-          <StatusBar style="auto" />
-          <Toast />
-        </ThemeProvider>
-      </GestureHandlerRootView>
-    </Provider>
-  );
+  // ⚠️ Only render Slot if auth is confirmed or on login route
+  if ((segments[0] === "(auth)" && !authenticated) || (segments[0] !== "(auth)" && authenticated)) {
+    return (
+      <Provider store={store}>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <ThemeProvider value={DefaultTheme}>
+            <Slot />
+            <StatusBar style="auto" />
+            <Toast />
+          </ThemeProvider>
+        </GestureHandlerRootView>
+      </Provider>
+    );
+  }
+
+  // Otherwise render nothing (avoid flashing wrong screen)
+  return null;
 }
