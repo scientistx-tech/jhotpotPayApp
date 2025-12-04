@@ -21,7 +21,7 @@ export default function RegistrationOtp() {
 
   return (
     <View style={{ flex: 1 }}>
-      <AuthBanner iconName='mobile' />
+      {/* <AuthBanner iconName='mobile' /> */}
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={[styles.container, { flexGrow: 1, paddingTop: 80 }]}

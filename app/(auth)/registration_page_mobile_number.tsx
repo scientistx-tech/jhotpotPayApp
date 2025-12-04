@@ -25,7 +25,7 @@ export default function RegistrationPhone() {
 
   return (
     <View style={{ flex: 1 }}>
-      <AuthBanner  />
+
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={[styles.container, { flexGrow: 1, paddingTop: 80 }]}

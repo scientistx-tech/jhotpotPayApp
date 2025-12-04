@@ -21,7 +21,7 @@ export default function RegistrationForm() {
 
   return (
     <View style={{ flex: 1 }}>
-      <AuthBanner iconName='circle-user' />
+      {/* <AuthBanner iconName='circle-user' /> */}
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={[styles.container, { flexGrow: 1, paddingTop: 80 }]}
