@@ -5,6 +5,7 @@ import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import HomeHeader from '@/components/home-header';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -13,7 +14,7 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
+        // headerShown: false,
         tabBarButton: HapticTab,
       }}>
       <Tabs.Screen
@@ -21,6 +22,13 @@ export default function TabLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          header: (props) => <HomeHeader
+            userName="Omul Ahmed"
+            userTitle="Top for Shubaera"
+            greeting="স্বাগতম আবার!"
+            onNotificationPress={() => console.log('Notifications pressed')}
+            onSharePress={() => console.log('Share pressed')}
+          />
         }}
       />
       <Tabs.Screen
