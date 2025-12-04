@@ -1,15 +1,18 @@
 import {
   BannerSection,
   FloatingActionButton,
+  LiveChatModal,
   StatsSection,
   TollKhataSection,
   WalletSection,
 } from '@/components/home';
 import { ThemedView } from '@/components/themed-view';
-import React from 'react';
+import React, { useState } from 'react';
 import { ScrollView } from 'react-native';
 
 export default function HomeScreen() {
+  const [isChatVisible, setIsChatVisible] = useState(false);
+
   // Stats data arrays
   const firstRowStats = [
     { id: 1, amount: '500 TK', label: 'Total Recharge', bgColor: '#248AEF', fontSize: 24 },
@@ -50,7 +53,7 @@ export default function HomeScreen() {
   };
 
   const handleFabPress = () => {
-    console.log('FAB pressed');
+    setIsChatVisible(true);
   };
 
   return (
@@ -70,6 +73,8 @@ export default function HomeScreen() {
       </ScrollView>
 
       <FloatingActionButton onPress={handleFabPress} />
+      
+      <LiveChatModal visible={isChatVisible} onClose={() => setIsChatVisible(false)} />
     </ThemedView>
   );
 }
