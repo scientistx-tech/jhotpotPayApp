@@ -60,7 +60,6 @@ export default function HomeScreen() {
         contentContainerStyle={{ paddingBottom: 20 }}
         showsVerticalScrollIndicator={false}
       >
-
         <StatsSection firstRowStats={firstRowStats} secondRowStats={secondRowStats} />
 
         <BannerSection />
@@ -68,9 +67,9 @@ export default function HomeScreen() {
         <WalletSection items={walletItems} onItemPress={handleWalletItemPress} />
 
         <TollKhataSection items={tollKhataItems} onItemPress={handleTollKhataItemPress} />
-
-        <FloatingActionButton onPress={handleFabPress} />
       </ScrollView>
+
+      <FloatingActionButton onPress={handleFabPress} />
     </ThemedView>
   );
 }
