@@ -57,7 +57,7 @@ export default function RechargeDetailsModal({
               </View>
 
               <TouchableOpacity style={[styles.editBtn, { backgroundColor: `${tint}15` }]}>
-                <Ionicons name="pencil" size={16} color={tint} />
+                <Ionicons name="network" size={16} color={tint} />
               </TouchableOpacity>
             </View>
           </View>

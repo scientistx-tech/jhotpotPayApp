@@ -17,7 +17,7 @@ export default function RecipientCard({
   phone,
   avatarSource,
   onChangePress,
-  icon = 'phone',
+  icon = 'account-circle',
   iconColor = '#248AEF',
 }: RecipientCardProps) {
   const tint = useThemeColor({}, 'tint');
@@ -44,7 +44,7 @@ export default function RecipientCard({
         </View>
 
         <TouchableOpacity onPress={onChangePress} style={[styles.changeBtn, { backgroundColor: `${tint}15` }]}>
-          <MaterialCommunityIcons name="pencil" size={20} color={tint} />
+          <MaterialCommunityIcons name="network" size={20} color={tint} />
         </TouchableOpacity>
       </View>
     </View>
