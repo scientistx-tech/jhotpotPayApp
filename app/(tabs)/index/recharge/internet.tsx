@@ -52,6 +52,8 @@ export default function RechargeInternet() {
         setActiveCategory(category);
         if (category === 'call-rate') {
             router.replace('recharge/call-rate');
+        } else if (category === 'amount') {
+            router.replace('recharge/amount');
         }
     };
 
@@ -150,12 +152,11 @@ export default function RechargeInternet() {
                     <ActionButton
                         label="Back"
                         onPress={handleBackPress}
-                        style={{ marginBottom: 12 }}
+                        variant="secondary"
                     />
                 </View>
                 <View style={{ flex: 1 }}>
-                    <ActionButton label="Proceed" onPress={handleProceedPress} disabled={!selectedOfferId} />
-
+                    <ActionButton label="Next" onPress={handleProceedPress} disabled={!selectedOfferId} />
                 </View>
             </View>
 

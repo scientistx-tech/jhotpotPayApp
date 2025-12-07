@@ -35,6 +35,13 @@ export default function IndexLayout() {
           animationEnabled: true,
         }}
       />
+      <Stack.Screen
+        name="recharge/amount"
+        options={{
+          presentation: 'modal',
+          animationEnabled: true,
+        }}
+      />
     </Stack>
   );
 }

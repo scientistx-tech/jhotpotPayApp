@@ -18,7 +18,7 @@ export default function RechargeEnterNumber() {
 
   const handleNextPress = () => {
     if (canProceed) {
-      router.push('recharge/internet');
+      router.push('recharge/amount');
     }
   };
 
@@ -45,11 +45,11 @@ export default function RechargeEnterNumber() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.card}>
-          {/* <RecipientCard
+          <RecipientCard
             name={selectedRecipient.name}
             phone={selectedRecipient.phone}
             onChangePress={handleChangeRecipient}
-          /> */}
+          />
 
           <View style={styles.formSection}>
             <ThemedText type="defaultSemiBold" style={styles.label}>
@@ -68,7 +68,12 @@ export default function RechargeEnterNumber() {
       </ScrollView>
 
       <View style={styles.bottomSection}>
-        <ActionButton label="Proceed" onPress={handleNextPress} disabled={!canProceed} />
+        <View style={{ flex: 1 }}>
+          <ActionButton label="Back" onPress={handleBackPress} variant="secondary" />
+        </View>
+        <View style={{ flex: 1 }}>
+          <ActionButton label="Confirm Recharge" onPress={handleNextPress} disabled={!canProceed} />
+        </View>
       </View>
     </ThemedView>
   );
@@ -111,5 +116,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     paddingBottom: 24,
+    display: 'flex',
+    flexDirection: 'row',
+    gap: 12,
   },
 });
