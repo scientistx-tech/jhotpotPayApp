@@ -16,6 +16,12 @@ export type { OfferCardProps } from './offer-card';
 export { default as RechargeDetailsModal } from './recharge-details-modal';
 export type { RechargeDetailsModalProps } from './recharge-details-modal';
 
+export { default as OfferDetailsModal } from './offer-details-modal';
+export type { OfferDetailsModalProps } from './offer-details-modal';
+
+export { default as CallRateDetailsModal } from './call-rate-details-modal';
+export type { CallRateDetailsModalProps } from './call-rate-details-modal';
+
 export { default as ActionButton } from './action-button';
 export type { ActionButtonProps } from './action-button';
 

@@ -1,4 +1,4 @@
-import { ActionButton, RechargeDetailsModal, RechargeHeader, RecipientCard, TypeSelector } from '@/components/recharge';
+import { ActionButton, CallRateDetailsModal, RechargeHeader, RecipientCard, TypeSelector } from '@/components/recharge';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -156,12 +156,13 @@ export default function RechargeCallRate() {
         </View>
       </View>
 
-      <RechargeDetailsModal
+      <CallRateDetailsModal
         visible={showDetailsModal}
         onClose={() => setShowDetailsModal(false)}
-        recipientName="MD. Mystogan Islam"
-        recipientPhone="+880 123 345 678"
-        amount={selectedOffer?.price ?? 'BDT: --'}
+        rate={selectedOffer?.rate ?? 'N/A'}
+        validity={selectedOffer?.validity ?? ''}
+        price={selectedOffer?.price ?? 'BDT: --'}
+        isNew={selectedOffer?.isNew}
         availableBalance="20,000 BDT"
         onProceed={() => {
           setShowDetailsModal(false);

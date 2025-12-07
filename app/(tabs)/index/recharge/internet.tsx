@@ -1,4 +1,4 @@
-import { ActionButton, RechargeDetailsModal, RechargeHeader, RecipientCard, TypeSelector } from '@/components/recharge';
+import { ActionButton, OfferDetailsModal, RechargeHeader, RecipientCard, TypeSelector } from '@/components/recharge';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -160,12 +160,15 @@ export default function RechargeInternet() {
                 </View>
             </View>
 
-            <RechargeDetailsModal
+            <OfferDetailsModal
                 visible={showDetailsModal}
                 onClose={() => setShowDetailsModal(false)}
                 recipientName="MD. Mystogan Islam"
                 recipientPhone="+880 123 345 678"
-                amount={selectedOffer?.price ?? 'BDT: --'}
+                offerTitle={selectedOffer?.title ?? 'N/A'}
+                validity={selectedOffer?.validity ?? ''}
+                cashback={selectedOffer?.cashback}
+                price={selectedOffer?.price ?? 'BDT: --'}
                 availableBalance="20,000 BDT"
                 onProceed={() => {
                     setShowDetailsModal(false);
