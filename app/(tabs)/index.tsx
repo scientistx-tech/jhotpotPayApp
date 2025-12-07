@@ -7,10 +7,12 @@ import {
   WalletSection,
 } from '@/components/home';
 import { ThemedView } from '@/components/themed-view';
-import React, { useState } from 'react';
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import { ScrollView } from 'react-native';
 
 export default function HomeScreen() {
+  const router = useRouter();
   const [isChatVisible, setIsChatVisible] = useState(false);
 
   // Stats data arrays
@@ -45,7 +47,11 @@ export default function HomeScreen() {
   ];
 
   const handleWalletItemPress = (item: any) => {
-    console.log('Wallet item pressed:', item.label);
+    if (item.label === 'Recharge') {
+      router.push('/recharge_enter_number');
+    } else {
+      console.log('Wallet item pressed:', item.label);
+    }
   };
 
   const handleTollKhataItemPress = (item: any) => {
