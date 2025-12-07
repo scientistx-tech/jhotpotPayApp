@@ -20,9 +20,9 @@ const AMOUNT_OFFERS: Offer[] = [
   { id: '1', amount: '30', price: 'BDT: 30', isNew: true },
   { id: '2', amount: '50', price: 'BDT: 50' },
   { id: '3', amount: '100', price: 'BDT: 100', isNew: true },
-  { id: '4', amount: '150', price: 'BDT: 150' },
-  { id: '5', amount: '200', price: 'BDT: 200' },
-  { id: '6', amount: '500', price: 'BDT: 500', isNew: true },
+  // { id: '4', amount: '150', price: 'BDT: 150' },
+  // { id: '5', amount: '200', price: 'BDT: 200' },
+  // { id: '6', amount: '500', price: 'BDT: 500', isNew: true },
 ];
 
 const CATEGORIES: { id: AmountCategory; label: string }[] = [
@@ -130,13 +130,13 @@ export default function RechargeAmount() {
           </View>
 
           <View style={styles.typeAmountSection}>
-            <ThemedText style={styles.typeAmountLabel}>Type Amount</ThemedText>
+            {/* <ThemedText style={styles.typeAmountLabel}>Type Amount</ThemedText> */}
             <TextInput
-              placeholder="Enter amount..."
+              placeholder="Type Amount..."
               value={customAmount}
               onChangeText={setCustomAmount}
               keyboardType="numeric"
-              placeholderTextColor="#999"
+              placeholderTextColor="#248AEF"
               style={styles.customAmountInput}
             />
           </View>
@@ -271,11 +271,11 @@ const styles = StyleSheet.create({
   },
   customAmountInput: {
     backgroundColor: '#f5f7fb',
-    borderWidth: 2,
-    borderColor: '#248AEF',
+    // borderWidth: 2,
+    // borderColor: '#248AEF',
     borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 50,
     fontSize: 16,
     fontWeight: '600',
     color: '#222B45',

@@ -45,11 +45,11 @@ export default function RechargeEnterNumber() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.card}>
-          <RecipientCard
+          {/* <RecipientCard
             name={selectedRecipient.name}
             phone={selectedRecipient.phone}
             onChangePress={handleChangeRecipient}
-          />
+          /> */}
 
           <View style={styles.formSection}>
             <ThemedText type="defaultSemiBold" style={styles.label}>
@@ -68,9 +68,9 @@ export default function RechargeEnterNumber() {
       </ScrollView>
 
       <View style={styles.bottomSection}>
-        <View style={{ flex: 1 }}>
+        {/* <View style={{ flex: 1 }}>
           <ActionButton label="Back" onPress={handleBackPress} variant="secondary" />
-        </View>
+        </View> */}
         <View style={{ flex: 1 }}>
           <ActionButton label="Confirm Recharge" onPress={handleNextPress} disabled={!canProceed} />
         </View>
