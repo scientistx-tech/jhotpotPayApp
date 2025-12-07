@@ -1,6 +1,5 @@
 import { ThemedText } from '@/components/themed-text';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 type TollKhataItem = {
@@ -19,7 +18,7 @@ export default function TollKhataSection({ items, onItemPress }: Props) {
   return (
     <View style={styles.section}>
       <ThemedText type="title" style={{ fontSize: 18, marginBottom: 16 }}>
-        Toll Khata Section
+        Tali Khata Section
       </ThemedText>
       <View style={styles.gridContainer}>
         {items.map((item) => (

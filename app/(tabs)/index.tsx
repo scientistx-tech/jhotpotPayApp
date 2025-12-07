@@ -36,11 +36,11 @@ export default function HomeScreen() {
   ];
 
   const tollKhataItems = [
-    { id: 1, icon: 'store', label: 'দোকান খোলা', color: '#248AEF' },
-    { id: 2, icon: 'file-document', label: 'ডেটা হিসাব', color: '#FF6B6B' },
-    { id: 3, icon: 'account-multiple', label: 'সাথীদের সাথে', color: '#FFD93D' },
+    { id: 1, icon: 'store', label: 'বাকি খাতা', color: '#248AEF' },
+    { id: 2, icon: 'file-document', label: 'বেচা বিক্রি', color: '#FF6B6B' },
+    { id: 3, icon: 'account-multiple', label: 'বিক্রির খাতা', color: '#FFD93D' },
     { id: 4, icon: 'receipt', label: 'Pay Bill', color: '#6BCB77' },
-    { id: 5, icon: 'account-voice', label: 'অংশীদারি', color: '#4D96FF' },
+    { id: 5, icon: 'account-voice', label: 'গ্রাহক তালিকা', color: '#4D96FF' },
     { id: 6, icon: 'history', label: 'History', color: '#9B59B6' },
   ];
 
