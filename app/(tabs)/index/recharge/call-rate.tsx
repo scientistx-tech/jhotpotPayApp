@@ -11,20 +11,19 @@ type AmountCategory = 'amount' | 'internet' | 'minute' | 'bundle' | 'call-rate';
 
 type Offer = {
   id: string;
-  title: string;
+  rate: string;
   validity: string;
-  cashback?: string;
   price: string;
   isNew?: boolean;
 };
 
-const INTERNET_OFFERS: Offer[] = [
-  { id: '1', title: '30 GB', validity: '30 Days', cashback: '50 Taka Cashback', price: 'BDT: 550' },
-  { id: '2', title: '30 GB', validity: '30 Days', cashback: '50 Taka Cashback', price: 'BDT: 550', isNew: true },
-  { id: '3', title: '30 GB', validity: '30 Days', cashback: '50 Taka Cashback', price: 'BDT: 550' },
-  { id: '4', title: '30 GB', validity: '30 Days', cashback: '50 Taka Cashback', price: 'BDT: 550' },
-  { id: '5', title: '30 GB', validity: '30 Days', cashback: '50 Taka Cashback', price: 'BDT: 550' },
-  { id: '6', title: '30 GB', validity: '30 Days', cashback: '50 Taka Cashback', price: 'BDT: 550' },
+const CALL_RATE_OFFERS: Offer[] = [
+  { id: '1', rate: '1P/sec', validity: '3 Days', price: 'BDT: 29', isNew: true },
+  { id: '2', rate: '1P/sec', validity: '3 Days', price: 'BDT: 29' },
+  { id: '3', rate: '1P/sec', validity: '3 Days', price: 'BDT: 29', isNew: true },
+  { id: '4', rate: '1P/sec', validity: '3 Days', price: 'BDT: 29' },
+  { id: '5', rate: '1P/sec', validity: '3 Days', price: 'BDT: 29' },
+  { id: '6', rate: '1P/sec', validity: '3 Days', price: 'BDT: 29', isNew: true },
 ];
 
 const CATEGORIES: { id: AmountCategory; label: string }[] = [
@@ -35,23 +34,23 @@ const CATEGORIES: { id: AmountCategory; label: string }[] = [
   { id: 'call-rate', label: 'Call Rate' },
 ];
 
-export default function RechargeInternet() {
+export default function RechargeCallRate() {
   const router = useRouter();
   const tint = useThemeColor({}, 'tint');
   const [rechargeType, setRechargeType] = useState<RechargeType>('prepaid');
-  const [activeCategory, setActiveCategory] = useState<AmountCategory>('internet');
+  const [activeCategory, setActiveCategory] = useState<AmountCategory>('call-rate');
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   const selectedOffer = useMemo(
-    () => INTERNET_OFFERS.find((offer) => offer.id === selectedOfferId),
+    () => CALL_RATE_OFFERS.find((offer) => offer.id === selectedOfferId),
     [selectedOfferId],
   );
 
   const handleCategoryPress = (category: AmountCategory) => {
     setActiveCategory(category);
-    if (category === 'call-rate') {
-      router.replace('/recharge_call_rate');
+    if (category === 'internet') {
+      router.replace('recharge/internet');
     }
   };
 
@@ -61,9 +60,18 @@ export default function RechargeInternet() {
     }
   };
 
+  const handleBackPress = () => {
+    router.back();
+  };
+
   return (
     <ThemedView style={styles.container}>
-      <RechargeHeader title="Internet Offers" showBack={true} rightIcon="wallet-plus" />
+      <RechargeHeader 
+        title="Call Rate" 
+        showBack={true} 
+        rightIcon="wallet-plus"
+        onBackPress={handleBackPress}
+      />
 
       <ScrollView
         style={styles.content}
@@ -95,7 +103,7 @@ export default function RechargeInternet() {
         </View>
 
         <View style={styles.offerList}>
-          {INTERNET_OFFERS.map((offer) => {
+          {CALL_RATE_OFFERS.map((offer) => {
             const isSelected = selectedOfferId === offer.id;
             return (
               <TouchableOpacity
@@ -115,14 +123,11 @@ export default function RechargeInternet() {
                           <ThemedText style={[styles.badgeText, { color: tint }]}>New Offer</ThemedText>
                         </View>
                       )}
-                      <ThemedText style={styles.offerTitle}>{offer.title}</ThemedText>
+                      <ThemedText style={styles.offerTitle}>{offer.rate}</ThemedText>
                     </View>
 
                     <View style={styles.offerMetaRow}>
                       <ThemedText style={styles.metaText}>{offer.validity}</ThemedText>
-                      {offer.cashback ? (
-                        <ThemedText style={styles.metaText}>{offer.cashback}</ThemedText>
-                      ) : null}
                     </View>
                   </View>
                 </View>
@@ -139,7 +144,7 @@ export default function RechargeInternet() {
       <View style={styles.bottomSection}>
         <ActionButton
           label="Back"
-          onPress={() => router.back()}
+          onPress={handleBackPress}
           variant="secondary"
           style={{ marginBottom: 12 }}
         />

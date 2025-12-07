@@ -1,11 +1,12 @@
 import {
-  BannerSection,
-  FloatingActionButton,
-  LiveChatModal,
-  StatsSection,
-  TollKhataSection,
-  WalletSection,
+    BannerSection,
+    FloatingActionButton,
+    LiveChatModal,
+    StatsSection,
+    TollKhataSection,
+    WalletSection,
 } from '@/components/home';
+import HomeHeader from '@/components/home-header';
 import { ThemedView } from '@/components/themed-view';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -48,7 +49,7 @@ export default function HomeScreen() {
 
   const handleWalletItemPress = (item: any) => {
     if (item.label === 'Recharge') {
-      router.push('/recharge_enter_number');
+      router.push('./recharge/enter-number');
     } else {
       console.log('Wallet item pressed:', item.label);
     }
@@ -64,6 +65,14 @@ export default function HomeScreen() {
 
   return (
     <ThemedView style={{ flex: 1 }}>
+      <HomeHeader
+        userName="Omul Ahmed"
+        userTitle="Top for Shubaera"
+        greeting="স্বাগতম আবার!"
+        onNotificationPress={() => console.log('Notifications pressed')}
+        onSharePress={() => console.log('Share pressed')}
+      />
+
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: 20 }}

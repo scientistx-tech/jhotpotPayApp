@@ -1,5 +1,6 @@
 import { ThemedText } from '@/components/themed-text';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 import { Image, ImageSourcePropType, StyleSheet, TouchableOpacity, View } from 'react-native';
@@ -47,6 +48,17 @@ export default function RechargeHeader({
             <Image source={rightImage} style={styles.rightImage} resizeMode="contain" />
           </TouchableOpacity>
         )}
+
+        {/* {!rightImage && rightIcon && (
+          <TouchableOpacity onPress={onRightPress} style={[styles.iconBtn, { backgroundColor: '#fff' }]}>
+            <MaterialCommunityIcons name={rightIcon as any} size={24} color={tint} />
+          </TouchableOpacity>
+        )} */}
+        <Image
+          source={require('@/assets/images/logo.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
       </View>
     </View>
   );
@@ -55,7 +67,7 @@ export default function RechargeHeader({
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
-    paddingTop: 18,
+    paddingTop: 35,
     paddingBottom: 18,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
@@ -70,6 +82,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     minHeight: 48,
+  },
+    logo: {
+    width: 48,
+    height: 48,
   },
   backBtn: {
     width: 36,

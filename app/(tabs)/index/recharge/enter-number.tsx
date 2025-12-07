@@ -18,7 +18,7 @@ export default function RechargeEnterNumber() {
 
   const handleNextPress = () => {
     if (canProceed) {
-      router.push('/recharge_internet');
+      router.push('recharge/internet');
     }
   };
 
@@ -26,9 +26,18 @@ export default function RechargeEnterNumber() {
     // Open contact picker or manual entry
   };
 
+  const handleBackPress = () => {
+    router.back();
+  };
+
   return (
     <ThemedView style={styles.container}>
-      <RechargeHeader title="Mobile Recharge" showBack={true} rightIcon="wallet-plus" />
+      <RechargeHeader 
+        title="Mobile Recharge" 
+        showBack={true} 
+        rightIcon="wallet-plus"
+        onBackPress={handleBackPress}
+      />
 
       <ScrollView
         style={styles.content}
@@ -36,18 +45,18 @@ export default function RechargeEnterNumber() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.card}>
-          <RecipientCard
+          {/* <RecipientCard
             name={selectedRecipient.name}
             phone={selectedRecipient.phone}
             onChangePress={handleChangeRecipient}
-          />
+          /> */}
 
           <View style={styles.formSection}>
             <ThemedText type="defaultSemiBold" style={styles.label}>
-              Enter Phone Number
+              Recipient
             </ThemedText>
             <RoundedInput
-              placeholder="017XXXXXXXX"
+              placeholder="Enter phone number..."
               value={phone}
               onChangeText={setPhone}
               keyboardType="phone-pad"
@@ -88,8 +97,8 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   formSection: {
-    paddingHorizontal: 16,
-    paddingBottom: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 18,
   },
   label: {
     fontSize: 14,
