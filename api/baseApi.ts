@@ -11,6 +11,7 @@ const rawBaseQuery = fetchBaseQuery({
   },
 });
 
+
 const baseQueryWithAuth = async (args: any, api: any, extraOptions: any) => {
   let result = await rawBaseQuery(args, api, extraOptions);
 

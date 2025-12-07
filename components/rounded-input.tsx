@@ -1,6 +1,5 @@
 import { ThemedText } from '@/components/themed-text';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import React from 'react';
 import { StyleSheet, TextInput, TextInputProps, View } from 'react-native';
 
 export type RoundedInputProps = TextInputProps & {
@@ -9,7 +8,7 @@ export type RoundedInputProps = TextInputProps & {
 
 export default function RoundedInput({ label, style, ...props }: RoundedInputProps) {
   const tint = useThemeColor({}, 'tint');
-  const background = useThemeColor({}, 'background');
+  useThemeColor({}, 'background');
 
   return (
     <View style={styles.wrapper}>

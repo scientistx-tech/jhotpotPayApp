@@ -1,4 +1,3 @@
-import React from 'react';
 import { Control, Controller } from 'react-hook-form';
 import { StyleSheet, View } from 'react-native';
 import RoundedInput from './rounded-input';
@@ -19,7 +18,7 @@ export default function FormInput({ name, control, label, placeholder, secureTex
       control={control}
       name={name}
       render={({ field, fieldState }: { field: any; fieldState: any }) => {
-        const { onChange, onBlur, value } = field;
+        const { onChange, value } = field;
         return (
           <View style={styles.wrapper}>
             <RoundedInput

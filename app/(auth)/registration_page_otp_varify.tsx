@@ -1,22 +1,33 @@
-import AuthBanner from '@/components/auth-banner'
+import { useVerifyOtpMutation } from '@/api/authApi'
 import CustomButton from '@/components/custom-button'
 import OTPInput from '@/components/otp-input'
 import { ThemedText } from '@/components/themed-text'
 import { otpSchema } from '@/schemas/authSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useRouter } from 'expo-router'
-import React from 'react'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Controller, useForm } from 'react-hook-form'
 import { StyleSheet, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
+import Toast from 'react-native-toast-message'
 
 export default function RegistrationOtp() {
   const router = useRouter()
-  const { control, handleSubmit, setError, getValues } = useForm({ resolver: zodResolver(otpSchema), defaultValues: { otp: '' } })
+  const params = useLocalSearchParams()
+  const { control, handleSubmit } = useForm({ resolver: zodResolver(otpSchema), defaultValues: { otp: '' } })
+  const [verifyOtp, { isLoading }] = useVerifyOtpMutation()
 
-  const onSubmit = (data: any) => {
-    // verify OTP then go to profile form
-    router.push('registration_page_form' as any)
+  const onSubmit = async (data: any) => {
+    try {
+      const res = await verifyOtp({ phone: params.phone as string, otp: data.otp }).unwrap()
+      if (res.success && res.data.id) {
+        const otpId = res.data.id
+        router.push({ pathname: 'registration_page_form', params: { otpId, phone: params.phone as string } } as any)
+      } else {
+        Toast.show({ type: 'error', text1: 'OTP Verification', text2: res.message || 'OTP verify failed' })
+      }
+    } catch (err: any) {
+      Toast.show({ type: 'error', text1: 'OTP Verification', text2: err?.data?.message || 'OTP verify failed' })
+    }
   }
 
   return (
@@ -35,7 +46,7 @@ export default function RegistrationOtp() {
         <Controller control={control} name='otp' render={({ field }: { field: any }) => <OTPInput value={field.value} onChange={field.onChange} length={6} />} />
 
         <View style={{ height: 20 }} />
-        <CustomButton title="পরবর্তী" onPress={handleSubmit(onSubmit)} />
+        <CustomButton isLoading={isLoading} title="পরবর্তী" onPress={handleSubmit(onSubmit)} />
 
         <View style={{ height: 12 }} />
         <ThemedText type='link' style={{ textAlign: 'center', marginTop: 12 }}>মনে পড়ে না? ওটিপি পুনরায় পাঠান</ThemedText>

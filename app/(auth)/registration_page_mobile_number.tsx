@@ -1,26 +1,36 @@
-import AuthBanner from '@/components/auth-banner'
+import { useSendOtpMutation } from '@/api/authApi'
 import CustomButton from '@/components/custom-button'
 import FormInput from '@/components/form-input'
 import { ThemedText } from '@/components/themed-text'
 import { phoneSchema } from '@/schemas/authSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'expo-router'
-import React from 'react'
 import { useForm } from 'react-hook-form'
 import { StyleSheet, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
+import Toast from 'react-native-toast-message'
 
 export default function RegistrationPhone() {
   const router = useRouter()
 
-  const { control, handleSubmit, setError, getValues } = useForm({
+  const { control, handleSubmit } = useForm({
     resolver: zodResolver(phoneSchema),
     defaultValues: { phone: '' }
   })
 
-  const onSubmit = (data: any) => {
-    // Normally send OTP here then navigate
-    router.push('registration_page_otp_varify' as any)
+  const [sendOtp, { isLoading }] = useSendOtpMutation()
+
+  const onSubmit = async (data: any) => {
+    try {
+      const res = await sendOtp({ phone: data.phone }).unwrap()
+      if (res.success) {
+        router.push({ pathname: 'registration_page_otp_varify', params: { phone: data.phone } } as any)
+      } else {
+        Toast.show({ type: 'error', text1: 'OTP Error', text2: res.message || 'Failed to send OTP' })
+      }
+    } catch (err: any) {
+      Toast.show({ type: 'error', text1: 'OTP Error', text2: err?.data?.message || 'Failed to send OTP' })
+    }
   }
 
   return (
@@ -39,7 +49,7 @@ export default function RegistrationPhone() {
         <FormInput name='phone' control={control} label='মোবাইল নম্বর' placeholder='মোবাইল নম্বর দিন' keyboardType='phone-pad' />
 
         <View style={{ height: 12 }} />
-        <CustomButton title="পরবর্তী" onPress={handleSubmit(onSubmit)} />
+        <CustomButton isLoading={isLoading} title="পরবর্তী" onPress={handleSubmit(onSubmit)} />
       </ScrollView>
     </View>
   )

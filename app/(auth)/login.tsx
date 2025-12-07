@@ -5,7 +5,6 @@ import { ThemedText } from '@/components/themed-text';
 import { loginSchema } from '@/schemas/authSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'expo-router';
-import React from 'react';
 import { useForm } from 'react-hook-form';
 import { StyleSheet, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -21,17 +20,23 @@ export default function Login() {
 
     const handleLogin = async (data: { phone: string, pin: string }) => {
         try {
-            await loginApi({ password: data.pin, phone: data.phone }).unwrap()
-            router.replace("/(tabs)");
+            const res = await loginApi({ password: data.pin, phone: data.phone }).unwrap()
+            if (res.success && res.data?.token && res.data?.user) {
+                router.replace("/(tabs)");
+            } else {
+                Toast.show({
+                    type: "error",
+                    text1: "Error",
+                    text2: res.message || "Login failed"
+                })
+            }
         } catch (error: any) {
-
             Toast.show({
                 type: "error",
                 text1: "Error",
-                text2: error?.data?.message
+                text2: error?.data?.message || "Login failed"
             })
         }
-
     };
     return (
         <View style={{ flex: 1 }}>

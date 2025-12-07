@@ -1,17 +1,19 @@
-import AuthBanner from '@/components/auth-banner'
+import { useRegisterMutation } from '@/api/authApi'
 import PinPad from '@/components/pin-pad'
 import { ThemedText } from '@/components/themed-text'
-import { saveToken } from '@/utils/auth'
-import { useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import React from 'react'
 import { StyleSheet, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
+import Toast from 'react-native-toast-message'
 
 
 export default function RegistrationPinSetup() {
   const router = useRouter()
+  const params = useLocalSearchParams()
   const [pin, setPin] = React.useState('')
   const [pinError, setPinError] = React.useState('')
+  const [registerApi] = useRegisterMutation()
 
   return (
     <View style={{ flex: 1 }}>
@@ -31,15 +33,42 @@ export default function RegistrationPinSetup() {
           value={pin}
           onChange={setPin}
           onSubmit={async () => {
-            // ensure pin length is correct before finalizing
-            // if (pin.length < 4) {
-            //   setPinError('পিন ৪ অঙ্ক হতে হবে')
-            //   return
-            // }
-            // setPinError('')
-            const fakeToken = 'abc123'
-            await saveToken(fakeToken)
-            router.replace('/(tabs)')
+            try {
+              // parse profile passed from previous screen
+              const profileRaw = params.profile as string | undefined
+              if (!profileRaw) {
+                setPinError('Profile data missing')
+                return
+              }
+              const profile = JSON.parse(profileRaw)
+              const otpId = params.otpId as string | undefined
+              if (!otpId) {
+                setPinError('OTP verification missing')
+                return
+              }
+
+              const payload = {
+                name: profile.name,
+                password: profile.password,
+                nid: profile.nid,
+                email: profile.email || null,
+                occupation: profile.occupation,
+                income: Number(profile.income) || 0,
+                division: profile.division,
+                address: profile.address,
+                referralCode: profile.referralCode || null,
+                otpId,
+              }
+
+              const res = await registerApi(payload).unwrap()
+              if (res.success && res.data.token && res.data.user) {
+                router.replace('/(tabs)')
+              } else {
+                Toast.show({ type: 'error', text1: 'Registration', text2: res.message || 'Registration failed' })
+              }
+            } catch (err: any) {
+              Toast.show({ type: 'error', text1: 'Registration', text2: err?.data?.message || 'Registration failed' })
+            }
           }}
         />
         {pinError ? <ThemedText style={{ color: '#e53935', marginTop: 8 }}>{pinError}</ThemedText> : null}

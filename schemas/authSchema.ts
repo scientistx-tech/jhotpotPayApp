@@ -1,12 +1,12 @@
 import { z } from 'zod';
 
 export const loginSchema = z.object({
-  phone: z.string().min(8, 'মোবাইল নম্বর সঠিক নয়').regex(/^\+?[0-9]{8,15}$/, 'মোবাইল নম্বর সঠিক নয়'),
+  phone: z.string().length(11, 'মোবাইল নম্বর সঠিক নয়').regex(/^\+?[0-9]{8,15}$/, 'মোবাইল নম্বর সঠিক নয়'),
   pin: z.string().min(4, 'পিন ৪ সংখ্যা হতে হবে').max(6, 'পিন দীর্ঘ'),
 });
 
 export const phoneSchema = z.object({
-  phone: z.string().min(8, 'মোবাইল নম্বর সঠিক নয়').regex(/^\+?[0-9]{8,15}$/, 'মোবাইল নম্বর সঠিক নয়'),
+  phone: z.string().length(11, 'মোবাইল নম্বর সঠিক নয়').regex(/^\+?[0-9]{8,15}$/, 'মোবাইল নম্বর সঠিক নয়'),
 });
 
 export const otpSchema = z.object({
@@ -14,15 +14,32 @@ export const otpSchema = z.object({
 });
 
 export const profileSchema = z.object({
-  name: z.string().min(2, 'Name is required'),
-  phone: z.string().min(8),
-  nid: z.string().optional(),
-  email: z.string().email().optional(),
-  occupation: z.string().optional(),
-  income: z.string().optional(),
-  division: z.string().optional(),
-  address: z.string().optional(),
-  referral: z.string().optional(),
+    name: z.string().min(1, "Name is required"),
+  // phone: z.string().length(11, "Phone is not valid"), // adjust validation if needed
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  nid: z.string().min(5, "NID is required"),
+  email: z.string().email("Invalid email").optional().nullable(),
+  occupation: z.string().min(1, "Occupation is required"),
+  income: z.string().min(1, "Income is required").default("0"),
+  division: z.string().min(1, "Division is required"),
+  address: z.string().min(1, "Address is required"),
+  referralCode: z.string().optional().nullable(),
+  // otpId: z.string().uuid(),
+});
+
+
+ export const RegisterSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  phone: z.string().length(11, "Phone is not valid"), // adjust validation if needed
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  nid: z.string().min(5, "NID is required"),
+  email: z.string().email("Invalid email").optional().nullable(),
+  occupation: z.string().min(1, "Occupation is required"),
+  income: z.number().min(0, "Income must be >= 0").default(0),
+  division: z.string().min(1, "Division is required"),
+  address: z.string().min(1, "Address is required"),
+  referralCode: z.string().optional().nullable(),
+  otpId: z.string().uuid(),
 });
 
 export const pinSchema = z.object({
