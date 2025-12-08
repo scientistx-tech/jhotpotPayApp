@@ -1,4 +1,4 @@
-import { ActionButton, RechargeHeader, RecipientCard } from '@/components/recharge';
+import { ActionButton, RechargeHeader } from '@/components/recharge';
 import RoundedInput from '@/components/rounded-input';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -9,21 +9,13 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 export default function RechargeEnterNumber() {
   const router = useRouter();
   const [phone, setPhone] = useState('');
-  const [selectedRecipient, setSelectedRecipient] = useState({
-    name: 'MD. Mystogan Islam',
-    phone: '+880 123 345 678',
-  });
 
   const canProceed = useMemo(() => phone.trim().length >= 6, [phone]);
 
   const handleNextPress = () => {
     if (canProceed) {
-      router.push('recharge/amount');
+      router.push('/recharge/amount');
     }
-  };
-
-  const handleChangeRecipient = () => {
-    // Open contact picker or manual entry
   };
 
   const handleBackPress = () => {
@@ -32,9 +24,9 @@ export default function RechargeEnterNumber() {
 
   return (
     <ThemedView style={styles.container}>
-      <RechargeHeader 
-        title="Mobile Recharge" 
-        showBack={true} 
+      <RechargeHeader
+        title="Mobile Recharge"
+        showBack={true}
         rightIcon="wallet-plus"
         onBackPress={handleBackPress}
       />
@@ -45,12 +37,6 @@ export default function RechargeEnterNumber() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.card}>
-          {/* <RecipientCard
-            name={selectedRecipient.name}
-            phone={selectedRecipient.phone}
-            onChangePress={handleChangeRecipient}
-          /> */}
-
           <View style={styles.formSection}>
             <ThemedText type="defaultSemiBold" style={styles.label}>
               Recipient
@@ -68,9 +54,6 @@ export default function RechargeEnterNumber() {
       </ScrollView>
 
       <View style={styles.bottomSection}>
-        {/* <View style={{ flex: 1 }}>
-          <ActionButton label="Back" onPress={handleBackPress} variant="secondary" />
-        </View> */}
         <View style={{ flex: 1 }}>
           <ActionButton label="Confirm Recharge" onPress={handleNextPress} disabled={!canProceed} />
         </View>
@@ -83,6 +66,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f7fb',
+    marginBottom: 20,
   },
   content: {
     flex: 1,

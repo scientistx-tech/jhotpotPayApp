@@ -55,21 +55,15 @@ export default function RootLayout() {
     </View>
   ); // Loading screen optional
 
-  // ⚠️ Only render Slot if auth is confirmed or on login route
-  if ((segments[0] === "(auth)" && !authenticated) || (segments[0] !== "(auth)" && authenticated)) {
-    return (
-      <Provider store={store}>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <ThemeProvider value={DefaultTheme}>
-            <Slot />
-            <StatusBar style="auto" />
-            <Toast />
-          </ThemeProvider>
-        </GestureHandlerRootView>
-      </Provider>
-    );
-  }
-
-  // Otherwise render nothing (avoid flashing wrong screen)
-  return null;
+  return (
+    <Provider store={store}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <ThemeProvider value={DefaultTheme}>
+          <Slot />
+          <StatusBar style="auto" />
+          <Toast />
+        </ThemeProvider>
+      </GestureHandlerRootView>
+    </Provider>
+  );
 }

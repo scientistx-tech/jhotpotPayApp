@@ -49,7 +49,7 @@ export default function HomeScreen() {
 
   const handleWalletItemPress = (item: any) => {
     if (item.label === 'Recharge') {
-      router.push('./recharge/enter-number');
+      router.push('/(app)/recharge/enter-number');
     } else {
       console.log('Wallet item pressed:', item.label);
     }
@@ -57,7 +57,8 @@ export default function HomeScreen() {
 
   const handleTollKhataItemPress = (item: any) => {
     if (item.label === 'বেচা বিক্রি') {
-      router.push('./sales/order');
+      // router.push('/(app)/sales/order');
+      console.log('Toll Khata item pressed:', item.label);
     } else {
       console.log('Toll Khata item pressed:', item.label);
     }

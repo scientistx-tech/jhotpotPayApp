@@ -12,7 +12,6 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        // headerShown: false,
         tabBarButton: HapticTab,
       }}>
       <Tabs.Screen
@@ -20,6 +19,14 @@ export default function TabLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
+        name="sale"
+        options={{
+          title: 'বেচা বিক্রি',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="calculator" color={color} />,
           headerShown: false,
         }}
       />

@@ -1,7 +1,6 @@
 import { useThemeColor } from '@/hooks/use-theme-color';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 type HomeHeaderProps = {
@@ -10,6 +9,8 @@ type HomeHeaderProps = {
   greeting?: string;
   onNotificationPress?: () => void;
   onSharePress?: () => void;
+  showBackButton?: boolean;
+  onBackPress?: () => void;
 };
 
 export default function HomeHeader({
@@ -18,6 +19,8 @@ export default function HomeHeader({
   greeting = 'স্বাগতম আবার!',
   onNotificationPress,
   onSharePress,
+  showBackButton = false,
+  onBackPress,
 }: HomeHeaderProps) {
   const tint = useThemeColor({}, 'tint');
 
@@ -25,6 +28,15 @@ export default function HomeHeader({
     <View style={styles.container}>
       {/* Logo and User Info */}
       <View style={styles.leftSection}>
+        {showBackButton && (
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={onBackPress}
+            accessibilityLabel="Go Back"
+          >
+            <Ionicons name="arrow-back" size={24} color={tint} />
+          </TouchableOpacity>
+        )}
         <Image
           source={require('@/assets/images/logo.png')}
           style={styles.logo}
@@ -71,7 +83,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 50,
     paddingBottom: 25,
-    // marginBottom: 16,
     shadowColor: '#000',
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -82,6 +93,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+  },
+  backButton: {
+    padding: 4,
   },
   logo: {
     width: 48,

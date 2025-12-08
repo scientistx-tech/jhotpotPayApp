@@ -101,14 +101,17 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
+    
+    // marginBottom: 20,
   },
   modalContent: {
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingTop: 20,
     paddingHorizontal: 16,
-    paddingBottom: 24,
+    paddingBottom: 30,
     maxHeight: '85%',
+    
   },
   header: {
     flexDirection: 'row',
