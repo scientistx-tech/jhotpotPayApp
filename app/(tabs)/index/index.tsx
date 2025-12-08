@@ -1,10 +1,10 @@
 import {
-    BannerSection,
-    FloatingActionButton,
-    LiveChatModal,
-    StatsSection,
-    TollKhataSection,
-    WalletSection,
+  BannerSection,
+  FloatingActionButton,
+  LiveChatModal,
+  StatsSection,
+  TollKhataSection,
+  WalletSection,
 } from '@/components/home';
 import HomeHeader from '@/components/home-header';
 import { ThemedView } from '@/components/themed-view';
@@ -56,7 +56,11 @@ export default function HomeScreen() {
   };
 
   const handleTollKhataItemPress = (item: any) => {
-    console.log('Toll Khata item pressed:', item.label);
+    if (item.label === 'বেচা বিক্রি') {
+      router.push('./sales/order');
+    } else {
+      console.log('Toll Khata item pressed:', item.label);
+    }
   };
 
   const handleFabPress = () => {

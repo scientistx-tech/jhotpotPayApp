@@ -42,6 +42,13 @@ export default function IndexLayout() {
           animationEnabled: true,
         }}
       />
+      <Stack.Screen
+        name="sales/order"
+        options={{
+          presentation: 'modal',
+          animationEnabled: true,
+        }}
+      />
     </Stack>
   );
 }

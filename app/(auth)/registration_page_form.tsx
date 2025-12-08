@@ -73,7 +73,6 @@ export default function RegistrationForm() {
         showsVerticalScrollIndicator={false}
       >
         <ThemedText type='title' style={{ textAlign: 'center' }}>মাস্টার রেজিস্ট্রেশন প্রফাইল</ThemedText>
-
         <View style={{ height: 8 }} />
         <FormInput name='name' control={control} label='Name' placeholder='Name' />
         <FormInput name='password' control={control} label='Password' placeholder='Password' secureTextEntry />

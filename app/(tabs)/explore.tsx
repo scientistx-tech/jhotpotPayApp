@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 
 import { Collapsible } from '@/components/ui/collapsible';
 import { ExternalLink } from '@/components/external-link';
@@ -8,6 +8,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Fonts } from '@/constants/theme';
+import LogoutButton from '@/components/logout-button';
 
 export default function TabTwoScreen() {
   return (
@@ -21,6 +22,9 @@ export default function TabTwoScreen() {
           style={styles.headerImage}
         />
       }>
+        <View>
+      <LogoutButton/>
+        </View>
       <ThemedView style={styles.titleContainer}>
         <ThemedText
           type="title"

@@ -46,8 +46,16 @@ export const pinSchema = z.object({
   pin: z.string().length(4, 'Pin must be 4 digits'),
 });
 
+export const customerSchema = z.object({
+  name: z.string().min(1, 'গ্রাহক নাম প্রয়োজন'),
+  phone: z.string().length(11, 'মোবাইল নম্বর সঠিক নয়').regex(/^\+?[0-9]{8,15}$/, 'মোবাইল নম্বর সঠিক নয়'),
+  email: z.string().email('ইমেইল সঠিক নয়').optional().or(z.literal('')),
+  address: z.string().min(1, 'ঠিকানা প্রয়োজন'),
+});
+
 export type LoginSchema = z.infer<typeof loginSchema>;
 export type PhoneSchema = z.infer<typeof phoneSchema>;
+export type CustomerSchema = z.infer<typeof customerSchema>;
 export type OtpSchema = z.infer<typeof otpSchema>;
 export type ProfileSchema = z.infer<typeof profileSchema>;
 export type PinSchema = z.infer<typeof pinSchema>;
