@@ -52,6 +52,10 @@ export default function AppStackLayout() {
         name="wallet/cash-out"
         options={{ presentation: 'card', animation: 'slide_from_right' }}
       />
+      <Stack.Screen
+        name="wallet/change-pin"
+        options={{ presentation: 'card', animation: 'slide_from_right' }}
+      />
     </Stack>
   );
 }
