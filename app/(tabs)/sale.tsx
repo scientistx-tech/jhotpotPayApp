@@ -26,10 +26,12 @@ export default function Sale() {
   ];
 
   const handleMenuItemPress = (item: MenuItem) => {
-   if (item.label === 'বেচা বিক্রি') {
+    if (item.label === 'বেচা বিক্রি') {
       router.push('/(app)/sales/order');
+    } else if (item.label === 'বাকি খাতা') {
+      router.push('/(app)/sales/toll-khata');
     } else {
-      console.log('Toll Khata item pressed:', item.label);
+      console.log('Menu item pressed:', item.label);
     }
   };
 

@@ -28,6 +28,10 @@ export default function AppStackLayout() {
         name="sales/order"
         options={{ presentation: 'card', animation: 'slide_from_right' }}
       />
+      <Stack.Screen
+        name="sales/toll-khata"
+        options={{ presentation: 'card', animation: 'slide_from_right' }}
+      />
     </Stack>
   );
 }
