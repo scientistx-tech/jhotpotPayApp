@@ -47,9 +47,7 @@ export default function Sale() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.section}>
-          <ThemedText type="title" style={styles.sectionTitle}>
-            বেচা বিক্রি
-          </ThemedText>
+        
           <View style={styles.gridContainer}>
             {menuItems.map((item) => (
               <TouchableOpacity

@@ -66,10 +66,15 @@ export default function HomeScreen() {
 
   const handleTollKhataItemPress = (item: any) => {
     if (item.label === 'বেচা বিক্রি') {
-      // router.push('/(app)/sales/order');
-      console.log('Toll Khata item pressed:', item.label);
+      router.push('/(app)/sales/order');
+    } else if (item.label === 'বাকি খাতা') {
+      router.push('/(app)/sales/toll-khata');
+    } else if (item.label === 'Product Management') {
+      router.push('/(app)/sales/product-management');
+    } else if (item.label === 'গ্রাহক তালিকা') {
+      router.push('/(app)/sales/customer-list');
     } else {
-      console.log('Toll Khata item pressed:', item.label);
+      console.log('Menu item pressed:', item.label);
     }
   };
 
