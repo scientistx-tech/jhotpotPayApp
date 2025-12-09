@@ -56,6 +56,8 @@ export default function HomeScreen() {
       router.push('/(app)/recharge/enter-number');
     } else if (item.label === 'PIN Change') {
       router.push('/(app)/wallet/change-pin');
+    } else if (item.label === 'Pay Bill') {
+      router.push('/(app)/wallet/pay-bill');
     } else {
       console.log('Wallet item pressed:', item.label);
     }
