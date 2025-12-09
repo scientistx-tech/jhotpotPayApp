@@ -20,6 +20,7 @@ const MAPPING = {
   'calculator': 'calculate',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
+  'wallet.pass.fill': 'wallet',
 } as const satisfies Partial<Record<IconSymbolName, ComponentProps<typeof MaterialIcons>['name']>>;
 
 /**

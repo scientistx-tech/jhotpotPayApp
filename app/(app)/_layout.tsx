@@ -60,6 +60,10 @@ export default function AppStackLayout() {
         name="wallet/pay-bill"
         options={{ presentation: 'card', animation: 'slide_from_right' }}
       />
+      <Stack.Screen
+        name="wallet/history"
+        options={{ presentation: 'card', animation: 'slide_from_right' }}
+      />
     </Stack>
   );
 }

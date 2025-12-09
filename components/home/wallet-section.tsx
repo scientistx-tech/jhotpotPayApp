@@ -1,6 +1,5 @@
 import { ThemedText } from '@/components/themed-text';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 type WalletItem = {
@@ -18,9 +17,6 @@ type Props = {
 export default function WalletSection({ items, onItemPress }: Props) {
   return (
     <View style={styles.section}>
-      <ThemedText type="title" style={{ fontSize: 18, marginBottom: 16 }}>
-        Wallet Section
-      </ThemedText>
       <View style={styles.gridContainer}>
         {items.map((item) => (
           <TouchableOpacity

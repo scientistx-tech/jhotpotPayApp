@@ -1,4 +1,3 @@
-import HomeHeader from '@/components/home-header';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -41,13 +40,6 @@ export default function Sale() {
 
   return (
     <ThemedView style={styles.container}>
-      <HomeHeader
-        userName="Omul Ahmed"
-        userTitle="Top for Shubaera"
-        greeting="স্বাগতম আবার!"
-        onNotificationPress={() => console.log('Notifications pressed')}
-        onSharePress={() => console.log('Share pressed')}
-      />
 
       <ScrollView
         style={styles.content}
