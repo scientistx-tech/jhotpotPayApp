@@ -50,6 +50,8 @@ export default function HomeScreen() {
   const handleWalletItemPress = (item: any) => {
     if (item.label === 'Add Balance') {
       router.push('/(app)/wallet/add-balance');
+    } else if (item.label === 'Cash Out') {
+      router.push('/(app)/wallet/cash-out');
     } else if (item.label === 'Recharge') {
       router.push('/(app)/recharge/enter-number');
     } else {

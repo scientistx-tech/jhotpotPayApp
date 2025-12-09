@@ -8,7 +8,6 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, View, type ImageSourcePropType } from 'react-native';
 
-import appLogo from '@/assets/images/logo.png';
 import bkashLogo from '@/assets/online_payment/bkash.png';
 import nagadLogo from '@/assets/online_payment/nagad.png';
 import rocketLogo from '@/assets/online_payment/rocket.png';

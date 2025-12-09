@@ -48,6 +48,10 @@ export default function AppStackLayout() {
         name="wallet/add-balance"
         options={{ presentation: 'card', animation: 'slide_from_right' }}
       />
+      <Stack.Screen
+        name="wallet/cash-out"
+        options={{ presentation: 'card', animation: 'slide_from_right' }}
+      />
     </Stack>
   );
 }
