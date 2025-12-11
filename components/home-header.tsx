@@ -30,6 +30,10 @@ export default function HomeHeader({
     router.push('/(app)/wallet/history');
   };
 
+  const handleProfilePress = () => {
+    router.push('/(app)/profile');
+  };
+
   return (
     <View style={styles.container}>
       {/* Logo and User Info */}
@@ -68,8 +72,8 @@ export default function HomeHeader({
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.iconButton}
-          onPress={onSharePress}
-          accessibilityLabel="Share"
+          onPress={handleProfilePress}
+          accessibilityLabel="Profile"
         >
           <FontAwesome6 name="circle-user" size={20} color={tint} />
         </TouchableOpacity>
