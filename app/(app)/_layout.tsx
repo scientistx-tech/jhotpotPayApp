@@ -37,6 +37,10 @@ export default function AppStackLayout() {
         options={{ presentation: 'card', animation: 'slide_from_right' }}
       />
       <Stack.Screen
+        name="sales/product-list"
+        options={{ presentation: 'card', animation: 'slide_from_right' }}
+      />
+      <Stack.Screen
         name="sales/product-add"
         options={{ presentation: 'card', animation: 'slide_from_right' }}
       />

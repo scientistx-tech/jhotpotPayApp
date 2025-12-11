@@ -59,11 +59,11 @@ export default function ProductAdd() {
                 <View style={[styles.card, { backgroundColor: bg }]}>
                     <View style={styles.rowBetween}>
                         <View style={styles.inputBlock}>
-                            <ThemedText style={styles.label}>Total Stock</ThemedText>
+                            <ThemedText style={styles.label}>Unit Price</ThemedText>
                             <TextInput style={styles.input} placeholder="" keyboardType="numeric" />
                         </View>
                         <View style={styles.inputBlock}>
-                            <ThemedText style={styles.label}>Stock Value</ThemedText>
+                            <ThemedText style={styles.label}>Tax</ThemedText>
                             <TextInput style={styles.input} placeholder="" keyboardType="numeric" />
                         </View>
                     </View>

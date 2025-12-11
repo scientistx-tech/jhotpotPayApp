@@ -20,17 +20,17 @@ export default function Sale() {
     { id: 3, icon: 'book-open-variant', label: 'বিক্রির খাতা', color: '#FFD93D' },
     { id: 4, icon: 'receipt', label: 'Pay Bill', color: '#6BCB77' },
     { id: 5, icon: 'account-multiple', label: 'গ্রাহক তালিকা', color: '#4D96FF' },
-    { id: 6, icon: 'history', label: 'History', color: '#9B59B6' },
+    // { id: 6, icon: 'history', label: 'History', color: '#9B59B6' },
     { id: 7, icon: 'package-variant', label: 'Product Management', color: '#E67E22' },
   ];
 
   const handleMenuItemPress = (item: MenuItem) => {
-    if (item.label === 'বেচা বিক্রি') {
-      router.push('/(app)/sales/order');
-    } else if (item.label === 'বাকি খাতা') {
+    if (item.label === 'বাকি খাতা') {
       router.push('/(app)/sales/toll-khata');
+    } else if (item.label === 'বেচা বিক্রি') {
+      router.push('/(app)/sales/order');
     } else if (item.label === 'Product Management') {
-      router.push('/(app)/sales/product-management');
+      router.push('/(app)/sales/product-list');
     } else if (item.label === 'গ্রাহক তালিকা') {
       router.push('/(app)/sales/customer-list');
     } else {
