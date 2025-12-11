@@ -1,6 +1,7 @@
 import { useThemeColor } from '@/hooks/use-theme-color';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useRouter } from 'expo-router';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 type HomeHeaderProps = {
@@ -22,7 +23,12 @@ export default function HomeHeader({
   showBackButton = false,
   onBackPress,
 }: HomeHeaderProps) {
+  const router = useRouter();
   const tint = useThemeColor({}, 'tint');
+
+  const handleNotificationPress = () => {
+    router.push('/(app)/wallet/history');
+  };
 
   return (
     <View style={styles.container}>
@@ -55,7 +61,7 @@ export default function HomeHeader({
       <View style={styles.rightSection}>
         <TouchableOpacity
           style={styles.iconButton}
-          onPress={onNotificationPress}
+          onPress={handleNotificationPress}
           accessibilityLabel="Notifications"
         >
           <Ionicons name="notifications" size={24} color={tint} />
