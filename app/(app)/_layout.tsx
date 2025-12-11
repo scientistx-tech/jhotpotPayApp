@@ -76,6 +76,10 @@ export default function AppStackLayout() {
         name="upgrade-plan"
         options={{ presentation: 'card', animation: 'slide_from_right' }}
       />
+      <Stack.Screen
+        name="contact-us"
+        options={{ presentation: 'card', animation: 'slide_from_right' }}
+      />
     </Stack>
   );
 }

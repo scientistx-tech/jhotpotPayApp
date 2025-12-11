@@ -208,7 +208,10 @@ export default function ProfilePage() {
 
         {/* Footer Links */}
         <View style={[styles.card, { backgroundColor: bg, marginTop: 20 }]}>
-          <TouchableOpacity style={[styles.linkSection, { borderBottomWidth: 1, borderBottomColor: '#E5E8ED' }]}>
+          <TouchableOpacity 
+            style={[styles.linkSection, { borderBottomWidth: 1, borderBottomColor: '#E5E8ED' }]}
+            onPress={() => router.push('/(app)/contact-us')}
+          >
             <ThemedText style={styles.linkText}>Contact Us</ThemedText>
             <Ionicons name="chevron-forward" size={20} color={tint} />
           </TouchableOpacity>
