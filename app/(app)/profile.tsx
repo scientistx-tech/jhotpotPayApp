@@ -215,7 +215,10 @@ export default function ProfilePage() {
             <ThemedText style={styles.linkText}>Contact Us</ThemedText>
             <Ionicons name="chevron-forward" size={20} color={tint} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.linkSection}>
+          <TouchableOpacity 
+            style={styles.linkSection}
+            onPress={() => router.push('/(app)/about-us')}
+          >
             <ThemedText style={styles.linkText}>About Jhotpot Pay</ThemedText>
             <Ionicons name="chevron-forward" size={20} color={tint} />
           </TouchableOpacity>
