@@ -1,4 +1,4 @@
-import { ActionButton, RechargeDetailsModal, RechargeHeader, RecipientCard, TypeSelector } from '@/components/recharge';
+import { ActionButton, RechargeDetailsModal, RechargeHeader, RecipientCard } from '@/components/recharge';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -6,7 +6,9 @@ import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
-type RechargeType = 'prepaid' | 'postpaid' | 'skitto';
+import { z } from 'zod';
+const sim_type = z.enum(["PRE_PAID", "POST_PAID"]);
+type SimType = z.infer<typeof sim_type>;
 type AmountCategory = 'amount' | 'internet' | 'minute' | 'bundle' | 'call-rate';
 
 type Offer = {
@@ -22,6 +24,20 @@ const AMOUNT_OFFERS: Offer[] = [
   { id: '3', amount: '100', price: 'BDT: 100', isNew: true },
 ];
 
+// Minute Offers
+const MINUTE_OFFERS: { id: string; minutes: string; validity: string; price: string; isNew?: boolean }[] = [
+  { id: '1', minutes: '50 Min', validity: '3 Days', price: 'BDT: 29', isNew: true },
+  { id: '2', minutes: '100 Min', validity: '7 Days', price: 'BDT: 49' },
+  { id: '3', minutes: '200 Min', validity: '15 Days', price: 'BDT: 99', isNew: true },
+];
+
+// Bundle Offers
+const BUNDLE_OFFERS: { id: string; title: string; details: string; validity: string; price: string; isNew?: boolean }[] = [
+  { id: '1', title: 'Combo 1', details: '1GB + 50 Min', validity: '7 Days', price: 'BDT: 59', isNew: true },
+  { id: '2', title: 'Combo 2', details: '2GB + 100 Min', validity: '15 Days', price: 'BDT: 109' },
+  { id: '3', title: 'Combo 3', details: '3GB + 200 Min', validity: '30 Days', price: 'BDT: 199', isNew: true },
+];
+
 const CATEGORIES: { id: AmountCategory; label: string }[] = [
   { id: 'amount', label: 'Amount' },
   { id: 'internet', label: 'Internet' },
@@ -33,7 +49,7 @@ const CATEGORIES: { id: AmountCategory; label: string }[] = [
 export default function RechargeAmount() {
   const router = useRouter();
   const tint = useThemeColor({}, 'tint');
-  const [rechargeType, setRechargeType] = useState<RechargeType>('prepaid');
+  const [simType, setSimType] = useState<SimType>('PRE_PAID');
   const [activeCategory, setActiveCategory] = useState<AmountCategory>('amount');
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
   const [customAmount, setCustomAmount] = useState('');
@@ -84,7 +100,33 @@ export default function RechargeAmount() {
         <View style={styles.card}>
           <RecipientCard name="MD. Mystogan Islam" phone="+880 123 345 678" />
 
-          <TypeSelector selectedType={rechargeType} onTypeChange={setRechargeType} />
+          {/* TypeSelector replaced with simType selector */}
+          <View style={{ marginVertical: 12, marginHorizontal: 16 }}>
+            <View style={{ flexDirection: 'row', gap: 20 }}>
+              {["PRE_PAID", "POST_PAID"].map((type) => (
+                <TouchableOpacity
+                  key={type}
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
+                  onPress={() => setSimType(type as SimType)}
+                >
+                  <View style={{
+                    width: 20,
+                    height: 20,
+                    borderRadius: 10,
+                    borderWidth: 2,
+                    borderColor: tint,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}>
+                    {simType === type && (
+                      <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: tint }} />
+                    )}
+                  </View>
+                  <ThemedText style={{ fontSize: 14, fontWeight: '500' }}>{type === 'PRE_PAID' ? 'Prepaid' : 'Postpaid'}</ThemedText>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
 
           <View style={styles.categoryRow}>
             {CATEGORIES.map((cat) => {
@@ -105,38 +147,114 @@ export default function RechargeAmount() {
           </View>
         </View>
 
-        <View style={styles.amountSelectionContainer}>
-          <View style={styles.amountButtonsColumn}>
-            {AMOUNT_OFFERS.map((offer) => {
-              const isSelected = selectedOfferId === offer.id && !customAmount;
+        {/* Amount Tab */}
+        {activeCategory === 'amount' && (
+          <View style={styles.amountSelectionContainer}>
+            <View style={styles.amountButtonsColumn}>
+              {AMOUNT_OFFERS.map((offer) => {
+                const isSelected = selectedOfferId === offer.id && !customAmount;
+                return (
+                  <TouchableOpacity
+                    key={offer.id}
+                    style={[styles.amountButton, isSelected && styles.amountButtonActive]}
+                    onPress={() => {
+                      setSelectedOfferId(offer.id);
+                      setCustomAmount('');
+                    }}
+                  >
+                    <ThemedText style={[styles.amountButtonText, isSelected && styles.amountButtonTextActive]}>
+                      {offer.amount}
+                    </ThemedText>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            <View style={styles.typeAmountSection}>
+              <TextInput
+                placeholder="Type Amount..."
+                value={customAmount}
+                onChangeText={setCustomAmount}
+                keyboardType="numeric"
+                placeholderTextColor="#248AEF"
+                style={styles.customAmountInput}
+              />
+            </View>
+          </View>
+        )}
+
+        {/* Minute Tab */}
+        {activeCategory === 'minute' && (
+          <View style={styles.offerList}>
+            {MINUTE_OFFERS.map((offer) => {
+              const isSelected = selectedOfferId === offer.id;
               return (
                 <TouchableOpacity
                   key={offer.id}
-                  style={[styles.amountButton, isSelected && styles.amountButtonActive]}
+                  style={[styles.offerCard, isSelected && styles.offerCardActive]}
                   onPress={() => {
                     setSelectedOfferId(offer.id);
                     setCustomAmount('');
                   }}
                 >
-                  <ThemedText style={[styles.amountButtonText, isSelected && styles.amountButtonTextActive]}>
-                    {offer.amount}
-                  </ThemedText>
+                  <View style={styles.offerLeft}>
+                    <View>
+                      <View style={styles.offerTitleRow}>
+                        <ThemedText style={styles.offerTitle}>{offer.minutes}</ThemedText>
+                        {offer.isNew && (
+                          <View style={[styles.badge, { backgroundColor: tint + '22' }]}> 
+                            <ThemedText style={[styles.badgeText, { color: tint }]}>NEW</ThemedText>
+                          </View>
+                        )}
+                      </View>
+                      <View style={styles.offerMetaRow}>
+                        <ThemedText style={styles.metaText}>{offer.validity}</ThemedText>
+                      </View>
+                    </View>
+                  </View>
+                  <ThemedText style={styles.price}>{offer.price}</ThemedText>
                 </TouchableOpacity>
               );
             })}
           </View>
+        )}
 
-          <View style={styles.typeAmountSection}>
-            <TextInput
-              placeholder="Type Amount..."
-              value={customAmount}
-              onChangeText={setCustomAmount}
-              keyboardType="numeric"
-              placeholderTextColor="#248AEF"
-              style={styles.customAmountInput}
-            />
+        {/* Bundle Tab */}
+        {activeCategory === 'bundle' && (
+          <View style={styles.offerList}>
+            {BUNDLE_OFFERS.map((offer) => {
+              const isSelected = selectedOfferId === offer.id;
+              return (
+                <TouchableOpacity
+                  key={offer.id}
+                  style={[styles.offerCard, isSelected && styles.offerCardActive]}
+                  onPress={() => {
+                    setSelectedOfferId(offer.id);
+                    setCustomAmount('');
+                  }}
+                >
+                  <View style={styles.offerLeft}>
+                    <View>
+                      <View style={styles.offerTitleRow}>
+                        <ThemedText style={styles.offerTitle}>{offer.title}</ThemedText>
+                        {offer.isNew && (
+                          <View style={[styles.badge, { backgroundColor: tint + '22' }]}> 
+                            <ThemedText style={[styles.badgeText, { color: tint }]}>NEW</ThemedText>
+                          </View>
+                        )}
+                      </View>
+                      <View style={styles.offerMetaRow}>
+                        <ThemedText style={styles.metaText}>{offer.details}</ThemedText>
+                        <ThemedText style={styles.metaText}>{offer.validity}</ThemedText>
+                      </View>
+                    </View>
+                  </View>
+                  <ThemedText style={styles.price}>{offer.price}</ThemedText>
+                </TouchableOpacity>
+              );
+            })}
           </View>
-        </View>
+        )}
 
         <View style={styles.availableBalanceContainer}>
           <ThemedText style={styles.availableBalanceText}>Available Balance: 20,000 BDT</ThemedText>

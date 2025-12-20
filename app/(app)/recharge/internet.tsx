@@ -1,4 +1,4 @@
-import { ActionButton, OfferDetailsModal, RechargeHeader, RecipientCard, TypeSelector } from '@/components/recharge';
+import { ActionButton, OfferDetailsModal, RechargeHeader, RecipientCard } from '@/components/recharge';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -6,7 +6,9 @@ import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
-type RechargeType = 'prepaid' | 'postpaid' | 'skitto';
+import { z } from 'zod';
+const sim_type = z.enum(["PRE_PAID", "POST_PAID"]);
+type SimType = z.infer<typeof sim_type>;
 type AmountCategory = 'amount' | 'internet' | 'minute' | 'bundle' | 'call-rate';
 
 type Offer = {
@@ -38,7 +40,7 @@ const CATEGORIES: { id: AmountCategory; label: string }[] = [
 export default function RechargeInternet() {
   const router = useRouter();
   const tint = useThemeColor({}, 'tint');
-  const [rechargeType, setRechargeType] = useState<RechargeType>('prepaid');
+  const [simType, setSimType] = useState<SimType>('PRE_PAID');
   const [activeCategory, setActiveCategory] = useState<AmountCategory>('internet');
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -83,7 +85,33 @@ export default function RechargeInternet() {
         <View style={styles.card}>
           <RecipientCard name="MD. Mystogan Islam" phone="+880 123 345 678" />
 
-          <TypeSelector selectedType={rechargeType} onTypeChange={setRechargeType} />
+          {/* TypeSelector replaced with simType selector */}
+          <View style={{ marginVertical: 12 }}>
+            <View style={{ flexDirection: 'row', gap: 20 }}>
+              {["PRE_PAID", "POST_PAID"].map((type) => (
+                <TouchableOpacity
+                  key={type}
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
+                  onPress={() => setSimType(type as SimType)}
+                >
+                  <View style={{
+                    width: 20,
+                    height: 20,
+                    borderRadius: 10,
+                    borderWidth: 2,
+                    borderColor: tint,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}>
+                    {simType === type && (
+                      <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: tint }} />
+                    )}
+                  </View>
+                  <ThemedText style={{ fontSize: 14, fontWeight: '500' }}>{type === 'PRE_PAID' ? 'Prepaid' : 'Postpaid'}</ThemedText>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
 
           <View style={styles.categoryRow}>
             {CATEGORIES.map((cat) => {
