@@ -75,7 +75,7 @@ export default function RechargeBundle() {
         <View style={styles.card}>
           <RecipientCard name="MD. Mystogan Islam" phone="+880 123 345 678" />
 
-          <View style={{ marginVertical: 12 }}>
+          <View style={{ marginVertical: 12 , paddingHorizontal: 16 }}>
             <View style={{ flexDirection: 'row', gap: 20 }}>
               {["PRE_PAID", "POST_PAID"].map((type) => (
                 <TouchableOpacity
