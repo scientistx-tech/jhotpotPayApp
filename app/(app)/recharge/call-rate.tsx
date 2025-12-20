@@ -6,27 +6,13 @@ import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
+import { useGetRechargeOffersQuery } from '@/api/rechargeApi';
+
 import { z } from 'zod';
+
 const sim_type = z.enum(["PRE_PAID", "POST_PAID"]);
 type SimType = z.infer<typeof sim_type>;
 type AmountCategory = 'amount' | 'internet' | 'minute' | 'bundle' | 'call-rate';
-
-type Offer = {
-  id: string;
-  rate: string;
-  validity: string;
-  price: string;
-  isNew?: boolean;
-};
-
-const CALL_RATE_OFFERS: Offer[] = [
-  { id: '1', rate: '1P/sec', validity: '3 Days', price: 'BDT: 29', isNew: true },
-  { id: '2', rate: '1P/sec', validity: '3 Days', price: 'BDT: 29' },
-  { id: '3', rate: '1P/sec', validity: '3 Days', price: 'BDT: 29', isNew: true },
-  { id: '4', rate: '1P/sec', validity: '3 Days', price: 'BDT: 29' },
-  { id: '5', rate: '1P/sec', validity: '3 Days', price: 'BDT: 29' },
-  { id: '6', rate: '1P/sec', validity: '3 Days', price: 'BDT: 29', isNew: true },
-];
 
 const CATEGORIES: { id: AmountCategory; label: string }[] = [
   { id: 'amount', label: 'Amount' },
@@ -36,6 +22,7 @@ const CATEGORIES: { id: AmountCategory; label: string }[] = [
   { id: 'call-rate', label: 'Call Rate' },
 ];
 
+
 export default function RechargeCallRate() {
   const router = useRouter();
   const tint = useThemeColor({}, 'tint');
@@ -44,10 +31,12 @@ export default function RechargeCallRate() {
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
-  const selectedOffer = useMemo(
-    () => CALL_RATE_OFFERS.find((offer) => offer.id === selectedOfferId),
-    [selectedOfferId],
-  );
+  // Assume network_type is fixed for demo, or get from navigation params if available
+  const networkType = 'GRAMEENPHONE';
+  const { data, isLoading } = useGetRechargeOffersQuery({ sim_type: simType, network_type: networkType });
+  const offers = data?.data || [];
+  const filteredOffers = useMemo(() => offers.filter((offer) => offer.type === 'CALL_RATE'), [offers]);
+  const selectedOffer = useMemo(() => filteredOffers.find((offer) => offer.id === selectedOfferId), [filteredOffers, selectedOfferId]);
 
   const handleCategoryPress = (category: AmountCategory) => {
     setActiveCategory(category);
@@ -133,39 +122,40 @@ export default function RechargeCallRate() {
         </View>
 
         <View style={styles.offerList}>
-          {CALL_RATE_OFFERS.map((offer) => {
-            const isSelected = selectedOfferId === offer.id;
-            return (
-              <TouchableOpacity
-                key={offer.id}
-                style={[styles.offerCard, isSelected && styles.offerCardActive]}
-                onPress={() => setSelectedOfferId(offer.id)}
-              >
-                <View style={styles.offerLeft}>
-                  <View style={[styles.radio, { borderColor: tint }]}>
-                    {isSelected ? <View style={[styles.radioDot, { backgroundColor: tint }]} /> : null}
-                  </View>
-
-                  <View style={{ flex: 1 }}>
-                    <View style={styles.offerTitleRow}>
-                      {offer.isNew && (
-                        <View style={[styles.badge, { backgroundColor: `${tint}20` }]}>
-                          <ThemedText style={[styles.badgeText, { color: tint }]}>New Offer</ThemedText>
-                        </View>
-                      )}
-                      <ThemedText style={styles.offerTitle}>{offer.rate}</ThemedText>
+          {isLoading ? (
+            <ThemedText>Loading...</ThemedText>
+          ) : filteredOffers.length === 0 ? (
+            <ThemedText>No offers found.</ThemedText>
+          ) : (
+            filteredOffers.map((offer) => {
+              const isSelected = selectedOfferId === offer.id;
+              return (
+                <TouchableOpacity
+                  key={offer.id}
+                  style={[styles.offerCard, isSelected && styles.offerCardActive]}
+                  onPress={() => setSelectedOfferId(offer.id)}
+                >
+                  <View style={styles.offerLeft}>
+                    <View style={[styles.radio, { borderColor: tint }]}>
+                      {isSelected ? <View style={[styles.radioDot, { backgroundColor: tint }]} /> : null}
                     </View>
-
-                    <View style={styles.offerMetaRow}>
-                      <ThemedText style={styles.metaText}>{offer.validity}</ThemedText>
+                    <View style={{ flex: 1 }}>
+                      <View style={styles.offerTitleRow}>
+                        <ThemedText style={styles.offerTitle}>{offer.name}</ThemedText>
+                      </View>
+                      <View style={styles.offerMetaRow}>
+                        <ThemedText style={styles.metaText}>{offer.validity}</ThemedText>
+                        {offer.cash_back ? (
+                          <ThemedText style={styles.metaText}>{offer.cash_back} Taka Cashback</ThemedText>
+                        ) : null}
+                      </View>
                     </View>
                   </View>
-                </View>
-
-                <ThemedText style={[styles.price, { color: tint }]}>{offer.price}</ThemedText>
-              </TouchableOpacity>
-            );
-          })}
+                  <ThemedText style={[styles.price, { color: tint }]}>{offer.price} BDT</ThemedText>
+                </TouchableOpacity>
+              );
+            })
+          )}
         </View>
 
         <View style={styles.spacer} />
@@ -189,10 +179,10 @@ export default function RechargeCallRate() {
       <CallRateDetailsModal
         visible={showDetailsModal}
         onClose={() => setShowDetailsModal(false)}
-        rate={selectedOffer?.rate ?? 'N/A'}
+        rate={selectedOffer?.name ?? 'N/A'}
         validity={selectedOffer?.validity ?? ''}
-        price={selectedOffer?.price ?? 'BDT: --'}
-        isNew={selectedOffer?.isNew}
+        price={selectedOffer?.price ? `${selectedOffer.price} BDT` : 'BDT: --'}
+        isNew={false}
         availableBalance="20,000 BDT"
         onProceed={() => {
           setShowDetailsModal(false);
