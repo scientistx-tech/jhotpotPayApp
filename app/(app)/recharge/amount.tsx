@@ -67,6 +67,8 @@ export default function RechargeAmount() {
       router.replace('/(app)/recharge/minute');
     } else if (category === 'bundle') {
       router.replace('/(app)/recharge/bundle');
+    }else if (category === 'amount') {
+      router.replace('/(app)/recharge/amount');
     }
   };
 

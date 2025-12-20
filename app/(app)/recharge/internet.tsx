@@ -41,10 +41,17 @@ export default function RechargeInternet() {
   const handleCategoryPress = (category: AmountCategory) => {
     setActiveCategory(category);
     if (category === 'call-rate') {
-      router.replace('/recharge/call-rate');
+      router.replace('/(app)/recharge/call-rate');
     } else if (category === 'amount') {
-      router.replace('/recharge/amount');
+      router.replace('/(app)/recharge/amount');
+    }else if (category === 'minute') {
+      router.replace('/(app)/recharge/minute');
+    } else if (category === 'bundle') {
+      router.replace('/(app)/recharge/bundle');
+    }else if (category === 'internet') {
+      router.replace('/(app)/recharge/internet');
     }
+
   };
 
   const handleProceedPress = () => {

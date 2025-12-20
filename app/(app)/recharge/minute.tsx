@@ -35,14 +35,14 @@ export default function RechargeMinute() {
 
   const handleCategoryPress = (category: AmountCategory) => {
     setActiveCategory(category);
-    if (category === 'call-rate') {
-      router.replace('/(app)/recharge/call-rate');
+    if (category === 'amount') {
+      router.replace('/(app)/recharge/amount');
     } else if (category === 'internet') {
       router.replace('/(app)/recharge/internet');
     } else if (category === 'bundle') {
       router.replace('/(app)/recharge/bundle');
-    } else if (category === 'amount') {
-      router.replace('/(app)/recharge/amount');
+    } else if (category === 'call-rate') {
+      router.replace('/recharge/call-rate');
     }
   };
 
