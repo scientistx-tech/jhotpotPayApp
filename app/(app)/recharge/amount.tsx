@@ -8,9 +8,10 @@ import { ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react
 import { usePhone } from '../../../context/PhoneContext';
 
 
-import { useGetRechargeOffersQuery, useRechargeMutation } from '@/api/rechargeApi';
+import { useRechargeMutation } from '@/api/rechargeApi';
 import OfferDetailsModal from '@/components/recharge/offer-details-modal';
 import { z } from 'zod';
+import { set } from 'react-hook-form';
 
 const sim_type = z.enum(["PRE_PAID", "POST_PAID"]);
 type SimType = z.infer<typeof sim_type>;
@@ -23,11 +24,7 @@ type Offer = {
   isNew?: boolean;
 };
 
-const AMOUNT_OFFERS: Offer[] = [
-  { id: '1', amount: '30', price: 'BDT: 30', isNew: true },
-  { id: '2', amount: '50', price: 'BDT: 50' },
-  { id: '3', amount: '100', price: 'BDT: 100', isNew: true },
-];
+const AMOUNT_OFFERS: Offer[] = [];
 
 const CATEGORIES: { id: AmountCategory; label: string }[] = [
   { id: 'amount', label: 'Amount' },
@@ -56,16 +53,10 @@ export default function RechargeAmount() {
   const [rechargeResult, setRechargeResult] = useState<any>(null);
 
   const networkType = initialNetworkType;
-  const { data, isLoading } = useGetRechargeOffersQuery({ sim_type: simType, network_type: networkType });
-  const offers = data?.data || [];
-  const minuteOffers = useMemo(() => offers.filter((offer) => offer.type === 'MINUTE'), [offers]);
-  const bundleOffers = useMemo(() => offers.filter((offer) => offer.type === 'BUNDLE'), [offers]);
-  const selectedMinuteOffer = useMemo(() => minuteOffers.find((offer) => offer.id === selectedOfferId), [minuteOffers, selectedOfferId]);
-  const selectedBundleOffer = useMemo(() => bundleOffers.find((offer) => offer.id === selectedOfferId), [bundleOffers, selectedOfferId]);
-  const selectedOffer = useMemo(() => AMOUNT_OFFERS.find((offer) => offer.id === selectedOfferId), [selectedOfferId]);
+  const { data, isLoading } = { data: { data: [] }, isLoading: false }; // Mocking the query for offers
 
-  const finalAmount = useMemo(() => customAmount || selectedOffer?.amount || null, [customAmount, selectedOffer]);
-  const finalPrice = useMemo(() => customAmount ? `BDT: ${customAmount}` : selectedOffer?.price ?? null, [customAmount, selectedOffer]);
+  const finalAmount = useMemo(() => customAmount || null, [customAmount]);
+  const finalPrice = useMemo(() => customAmount ? `BDT: ${customAmount}` : null, [customAmount]);
 
   const handleCategoryPress = (category: AmountCategory) => {
     setActiveCategory(category);
@@ -86,7 +77,6 @@ export default function RechargeAmount() {
     console.log('handleProceedPress called, canProceed:', canProceed);
     if (canProceed) {
       setShowDetailsModal(true);
-      console.log('setShowDetailsModal(true) called');
     }
   };
 
@@ -97,22 +87,27 @@ export default function RechargeAmount() {
       return;
     }
     let payload: any = {
-      sim_type,
+      sim_type: simType,
       network_type: networkType,
       phone,
     };
+    console.log(payload, "aa")
     if (customAmount) {
       payload.amount = Number(customAmount);
-    } else if (selectedOfferId) {
-      payload.offerId = selectedOfferId;
     }
+    console.log(payload, "outside")
     // Never send both amount and offerId
     try {
       const result = await recharge(payload).unwrap();
       setRechargeResult(result);
-      setShowDetailsModal(false);
-      alert('Recharge request created successfully!');
-      // Optionally, navigate or reset state here
+
+      if (result?.success) {
+        alert('Recharge successful!');
+        setShowDetailsModal(false);
+      }
+      console.log(result)
+
+      // Do not close modal or show alert here; let modal show success/error
     } catch (e: any) {
       // Error handled by isRechargeError
     }
@@ -226,7 +221,7 @@ export default function RechargeAmount() {
           </View>
         )}
 
-{/*  */}
+        {/*  */}
         <View style={styles.availableBalanceContainer}>
           <ThemedText style={styles.availableBalanceText}>Available Balance: 20,000 BDT</ThemedText>
         </View>
@@ -236,17 +231,17 @@ export default function RechargeAmount() {
 
       {
         !showDetailsModal && <View style={styles.bottomSection}>
-        <View style={{ flex: 1 }}>
-          <ActionButton
-            label="Back"
-            onPress={handleBackPress}
-            variant="secondary"
-          />
+          <View style={{ flex: 1 }}>
+            <ActionButton
+              label="Back"
+              onPress={handleBackPress}
+              variant="secondary"
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <ActionButton label="Next" onPress={handleProceedPress} disabled={!canProceed} />
+          </View>
         </View>
-        <View style={{ flex: 1 }}>
-          <ActionButton label="Next" onPress={handleProceedPress} disabled={!canProceed} />
-        </View>
-      </View>
       }
 
       <OfferDetailsModal
@@ -254,9 +249,9 @@ export default function RechargeAmount() {
         onClose={() => setShowDetailsModal(false)}
         recipientName="MD. Mystogan Islam"
         recipientPhone={phone || ''}
-        offerTitle={selectedOffer?.amount ? `${selectedOffer.amount} Amount` : customAmount ? `${customAmount} Amount` : 'N/A'}
-        validity={selectedOffer?.validity ?? ''}
-        cashback={selectedOffer?.cash_back ? `${selectedOffer.cash_back} Taka Cashback` : undefined}
+        offerTitle={customAmount ? `${customAmount} Amount` : 'N/A'}
+        validity={''}
+        cashback={undefined}
         price={finalPrice ?? 'BDT: --'}
         availableBalance="20,000 BDT"
         onProceed={handleRecharge}

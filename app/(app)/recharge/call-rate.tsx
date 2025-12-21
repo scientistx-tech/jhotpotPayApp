@@ -74,14 +74,16 @@ export default function RechargeCallRate() {
        phone,
        offerId: selectedOfferId,
      };
-     try {
-       await recharge(payload).unwrap();
-       setShowDetailsModal(false);
-       alert('Recharge request created successfully!');
-       // Optionally, navigate or reset state here
-     } catch {
-       // Error handled by isRechargeError
-     }
+    try {
+      const result = await recharge(payload).unwrap();
+      if (result.success) {
+        alert('Recharge request created successfully!');
+        setShowDetailsModal(false);
+      }
+      // Optionally, navigate or reset state here
+    } catch {
+      // Error handled by isRechargeError
+    }
    };
  
    const handleBackPress = () => {

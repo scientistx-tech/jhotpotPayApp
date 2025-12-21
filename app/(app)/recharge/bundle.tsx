@@ -75,10 +75,12 @@ export default function RechargeBundle() {
       offerId: selectedOfferId,
     };
     try {
-      await recharge(payload).unwrap();
-      setShowDetailsModal(false);
-      alert('Recharge request created successfully!');
-      // Optionally, navigate or reset state here
+      const result = await recharge(payload).unwrap();
+
+      if (result.success) {
+        alert('Recharge request created successfully!');
+        setShowDetailsModal(false);
+      }
     } catch {
       // Error handled by isRechargeError
     }
@@ -105,7 +107,7 @@ export default function RechargeBundle() {
         <View style={styles.card}>
           <RecipientCard name="MD. Mystogan Islam" phone={phone || ''} />
 
-          <View style={{ marginVertical: 12 , paddingHorizontal: 16 }}>
+          <View style={{ marginVertical: 12, paddingHorizontal: 16 }}>
             <View style={{ flexDirection: 'row', gap: 20 }}>
               {["PRE_PAID", "POST_PAID"].map((type) => (
                 <TouchableOpacity
@@ -151,7 +153,7 @@ export default function RechargeBundle() {
           </View>
         </View>
 
-        <View style={[styles.offerList, { flexDirection: 'column' }]}> 
+        <View style={[styles.offerList, { flexDirection: 'column' }]}>
           {isLoading ? (
             <ThemedText>Loading...</ThemedText>
           ) : filteredOffers.length === 0 ? (
@@ -166,7 +168,7 @@ export default function RechargeBundle() {
                   onPress={() => setSelectedOfferId(offer.id)}
                 >
                   <View style={styles.offerLeft}>
-                    <View style={[styles.radio, { borderColor: tint }]}> 
+                    <View style={[styles.radio, { borderColor: tint }]}>
                       {isSelected ? <View style={[styles.radioDot, { backgroundColor: tint }]} /> : null}
                     </View>
                     <View style={{ flex: 1 }}>
