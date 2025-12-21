@@ -64,8 +64,8 @@ export default function RechargeAmount() {
   const selectedBundleOffer = useMemo(() => bundleOffers.find((offer) => offer.id === selectedOfferId), [bundleOffers, selectedOfferId]);
   const selectedOffer = useMemo(() => AMOUNT_OFFERS.find((offer) => offer.id === selectedOfferId), [selectedOfferId]);
 
-  const finalAmount = customAmount || selectedOffer?.amount || null;
-  const finalPrice = customAmount ? `BDT: ${customAmount}` : selectedOffer?.price ?? null;
+  const finalAmount = useMemo(() => customAmount || selectedOffer?.amount || null, [customAmount, selectedOffer]);
+  const finalPrice = useMemo(() => customAmount ? `BDT: ${customAmount}` : selectedOffer?.price ?? null, [customAmount, selectedOffer]);
 
   const handleCategoryPress = (category: AmountCategory) => {
     setActiveCategory(category);
@@ -83,8 +83,10 @@ export default function RechargeAmount() {
 
 
   const handleProceedPress = () => {
+    console.log('handleProceedPress called, canProceed:', canProceed);
     if (canProceed) {
       setShowDetailsModal(true);
+      console.log('setShowDetailsModal(true) called');
     }
   };
 
@@ -120,7 +122,7 @@ export default function RechargeAmount() {
     router.back();
   };
 
-  const canProceed = finalAmount !== null && finalAmount !== '';
+  const canProceed = useMemo(() => finalAmount !== null && finalAmount !== '', [finalAmount]);
 
   return (
     <ThemedView style={styles.container}>
@@ -260,6 +262,7 @@ export default function RechargeAmount() {
         onProceed={handleRecharge}
         loading={isRechargeLoading}
         error={isRechargeError ? (rechargeError?.data?.message || 'Recharge failed') : undefined}
+        headerTitle="Recharge Details"
       />
     </ThemedView>
   );
