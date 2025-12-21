@@ -52,13 +52,13 @@ export default function OfferDetailsModal({
           {/* Offer Details Section */}
           <View style={styles.section}>
             <View style={styles.offerMetaRow}>
-              <View style={styles.metaItem}>
+              {/* <View style={styles.metaItem}>
                 <ThemedText style={styles.metaLabel}>30 GB</ThemedText>
               </View>
               <View style={styles.metaDivider} />
               <View style={styles.metaItem}>
                 <ThemedText style={styles.metaLabel}>30 Days</ThemedText>
-              </View>
+              </View> */}
               {cashback && (
                 <>
                   <View style={styles.metaDivider} />
