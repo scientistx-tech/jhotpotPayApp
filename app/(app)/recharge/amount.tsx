@@ -11,6 +11,7 @@ import { usePhone } from '../../../context/PhoneContext';
 import { useGetRechargeOffersQuery, useRechargeMutation } from '@/api/rechargeApi';
 import OfferDetailsModal from '@/components/recharge/offer-details-modal';
 import { z } from 'zod';
+
 const sim_type = z.enum(["PRE_PAID", "POST_PAID"]);
 type SimType = z.infer<typeof sim_type>;
 type AmountCategory = 'amount' | 'internet' | 'minute' | 'bundle' | 'call-rate';
@@ -211,7 +212,10 @@ export default function RechargeAmount() {
               <TextInput
                 placeholder="Type Amount..."
                 value={customAmount}
-                onChangeText={setCustomAmount}
+                onChangeText={(text) => {
+                  setCustomAmount(text);
+                  if (text !== '') setSelectedOfferId(null);
+                }}
                 keyboardType="numeric"
                 placeholderTextColor="#248AEF"
                 style={styles.customAmountInput}
@@ -271,7 +275,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    paddingBottom: 150,
+    paddingBottom: 120,
     paddingHorizontal: 16,
   },
   card: {
@@ -312,60 +316,59 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   amountSelectionContainer: {
-    flexDirection: 'row',
     marginTop: 20,
-    gap: 16,
+    marginHorizontal: 16,
   },
   amountButtonsColumn: {
-    gap: 10,
-    justifyContent: 'flex-start',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
   },
   amountButton: {
-    backgroundColor: '#e8f0f8',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    minWidth: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
     borderWidth: 1,
-    borderColor: '#d0dfe8',
+    borderColor: '#E3E7ED',
+    alignItems: 'center',
+    flex: 1,
+    marginHorizontal: 4,
   },
   amountButtonActive: {
-    backgroundColor: '#248AEF',
     borderColor: '#248AEF',
   },
   amountButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#666',
-  },
-  amountButtonTextActive: {
-    color: '#fff',
-  },
-  typeAmountSection: {
-    flex: 1,
-    justifyContent: 'flex-start',
-  },
-  customAmountInput: {
-    backgroundColor: '#f5f7fb',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 50,
     fontSize: 16,
     fontWeight: '600',
-    color: '#222B45',
-    textAlign: 'center',
+    color: '#11181C',
+  },
+  amountButtonTextActive: {
+    color: '#248AEF',
+  },
+  typeAmountSection: {
+    marginTop: 12,
+    marginBottom: 8,
+  },
+  customAmountInput: {
+    backgroundColor: '#F8FAFD',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E3E7ED',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#11181C',
   },
   availableBalanceContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 20,
-    marginTop: 20,
+    marginTop: 16,
+    alignItems: 'center',
   },
   availableBalanceText: {
-    fontSize: 12,
-    color: '#666',
-    textAlign: 'center',
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#248AEF',
   },
   spacer: {
     height: 20,
@@ -378,4 +381,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
   },
-})
+});
+
+
