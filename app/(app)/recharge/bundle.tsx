@@ -1,4 +1,4 @@
-import { useGetRechargeOffersQuery } from '@/api/rechargeApi';
+import { useGetRechargeOffersQuery, useRechargeMutation } from '@/api/rechargeApi';
 import { ActionButton, RechargeHeader, RecipientCard } from '@/components/recharge';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -6,6 +6,7 @@ import { useThemeColor } from '@/hooks/use-theme-color';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { usePhone } from '../../../context/PhoneContext';
 type SimType = 'PRE_PAID' | 'POST_PAID';
 type AmountCategory = 'amount' | 'internet' | 'minute' | 'bundle' | 'call-rate';
 
@@ -22,12 +23,16 @@ export default function RechargeBundle() {
   const tint = useThemeColor({}, 'tint');
   // Get params from navigation
   const params = typeof router === 'object' && 'params' in router ? (router as any).params : (router as any)?.getCurrentRoute?.()?.params;
+  const { phone: phoneContext } = usePhone();
+  const phone = params?.phone || phoneContext;
   const initialSimType = params?.sim_type || 'PRE_PAID';
   const initialNetworkType = params?.network_type || 'GRAMEENPHONE';
   const [simType, setSimType] = useState<SimType>(initialSimType);
   const [activeCategory, setActiveCategory] = useState<AmountCategory>('bundle');
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [recharge, { isLoading: isRechargeLoading, isSuccess: isRechargeSuccess, isError: isRechargeError, error: rechargeError }] = useRechargeMutation();
+  const [rechargeResult, setRechargeResult] = useState<any>(null);
 
   const networkType = initialNetworkType;
   const { data, isLoading } = useGetRechargeOffersQuery({ sim_type: simType, network_type: networkType });
@@ -38,20 +43,45 @@ export default function RechargeBundle() {
 
   const handleCategoryPress = (category: AmountCategory) => {
     setActiveCategory(category);
+    const navParams = { phone, network_type: params?.network_type, sim_type: params?.sim_type };
     if (category === 'amount') {
-      router.replace('/(app)/recharge/amount');
+      router.replace({ pathname: '/(app)/recharge/amount', params: navParams });
     } else if (category === 'internet') {
-      router.replace('/(app)/recharge/internet');
+      router.replace({ pathname: '/(app)/recharge/internet', params: navParams });
     } else if (category === 'minute') {
-      router.replace('/(app)/recharge/minute');
+      router.replace({ pathname: '/(app)/recharge/minute', params: navParams });
     } else if (category === 'call-rate') {
-      router.replace('/(app)/recharge/call-rate');
+      router.replace({ pathname: '/(app)/recharge/call-rate', params: navParams });
     }
   };
+
 
   const handleProceedPress = () => {
     if (selectedOfferId) {
       setShowDetailsModal(true);
+    }
+  };
+
+  const handleRecharge = async () => {
+    if (!selectedOfferId) return;
+    if (!phone) {
+      alert('Phone number is required.');
+      return;
+    }
+    let payload: any = {
+      sim_type: simType,
+      network_type: networkType,
+      phone,
+      offerId: selectedOfferId,
+    };
+    try {
+      const result = await recharge(payload).unwrap();
+      setRechargeResult(result);
+      setShowDetailsModal(false);
+      alert('Recharge request created successfully!');
+      // Optionally, navigate or reset state here
+    } catch (e: any) {
+      // Error handled by isRechargeError
     }
   };
 
@@ -74,7 +104,7 @@ export default function RechargeBundle() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.card}>
-          <RecipientCard name="MD. Mystogan Islam" phone="+880 123 345 678" />
+          <RecipientCard name="MD. Mystogan Islam" phone={phone || ''} />
 
           <View style={{ marginVertical: 12 , paddingHorizontal: 16 }}>
             <View style={{ flexDirection: 'row', gap: 20 }}>
@@ -178,6 +208,28 @@ export default function RechargeBundle() {
       }
 
       {/* You can add a modal for offer details if needed */}
+      {/* Modal for recharge confirmation */}
+      {showDetailsModal && (
+        <>
+          <RechargeHeader
+            title="Confirm Recharge"
+            showBack={true}
+            onBackPress={() => setShowDetailsModal(false)}
+          />
+          {/* You can use a custom modal or reuse an existing one. For now, use alert/confirm style. */}
+          <View style={{ position: 'absolute', top: 100, left: 0, right: 0, backgroundColor: '#fff', margin: 24, padding: 24, borderRadius: 16, elevation: 8 }}>
+            <ThemedText style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 12 }}>Proceed with recharge?</ThemedText>
+            <ThemedText>Phone: {phone}</ThemedText>
+            <ThemedText>Offer: {filteredOffers.find(o => o.id === selectedOfferId)?.name}</ThemedText>
+            <ThemedText>Price: {filteredOffers.find(o => o.id === selectedOfferId)?.price} BDT</ThemedText>
+            {isRechargeError && <ThemedText style={{ color: 'red', marginTop: 8 }}>{rechargeError?.data?.message || 'Recharge failed'}</ThemedText>}
+            <View style={{ flexDirection: 'row', marginTop: 16, gap: 12 }}>
+              <ActionButton label="Cancel" onPress={() => setShowDetailsModal(false)} variant="secondary" />
+              <ActionButton label={isRechargeLoading ? 'Processing...' : 'Confirm'} onPress={handleRecharge} disabled={isRechargeLoading} />
+            </View>
+          </View>
+        </>
+      )}
     </ThemedView>
   );
 }

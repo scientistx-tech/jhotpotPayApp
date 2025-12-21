@@ -6,6 +6,7 @@ import { useThemeColor } from '@/hooks/use-theme-color';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { usePhone } from '../../../context/PhoneContext';
 
 const NETWORK_TYPES = [
   { id: 'GRAMEENPHONE', label: 'Grameenphone' },
@@ -22,10 +23,12 @@ export default function RechargeEnterNumber() {
   const [phone, setPhone] = useState('');
   const [networkType, setNetworkType] = useState('GRAMEENPHONE');
 
+  const { setPhone: setPhoneContext } = usePhone();
   const canProceed = useMemo(() => phone.trim().length >= 11 && networkType, [phone, networkType]);
 
   const handleNextPress = () => {
     if (canProceed) {
+      setPhoneContext(phone);
       router.push({
         pathname: '/(app)/recharge/amount',
         params: { phone, network_type: networkType },

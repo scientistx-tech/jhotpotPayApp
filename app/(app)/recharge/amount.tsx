@@ -5,9 +5,10 @@ import { useThemeColor } from '@/hooks/use-theme-color';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { usePhone } from '../../../context/PhoneContext';
 
 
-import { useGetRechargeOffersQuery } from '@/api/rechargeApi';
+import { useGetRechargeOffersQuery, useRechargeMutation } from '@/api/rechargeApi';
 import { z } from 'zod';
 const sim_type = z.enum(["PRE_PAID", "POST_PAID"]);
 type SimType = z.infer<typeof sim_type>;
@@ -40,6 +41,8 @@ export default function RechargeAmount() {
   const tint = useThemeColor({}, 'tint');
   // Get params from navigation
   const params = typeof router === 'object' && 'params' in router ? (router as any).params : (router as any)?.getCurrentRoute?.()?.params;
+  const { phone: phoneContext } = usePhone();
+  const phone = params?.phone || phoneContext;
   const initialSimType = params?.sim_type || 'PRE_PAID';
   const initialNetworkType = params?.network_type || 'GRAMEENPHONE';
   const [simType, setSimType] = useState<SimType>(initialSimType);
@@ -47,6 +50,8 @@ export default function RechargeAmount() {
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
   const [customAmount, setCustomAmount] = useState('');
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [recharge, { isLoading: isRechargeLoading, isSuccess: isRechargeSuccess, isError: isRechargeError, error: rechargeError }] = useRechargeMutation();
+  const [rechargeResult, setRechargeResult] = useState<any>(null);
 
   const networkType = initialNetworkType;
   const { data, isLoading } = useGetRechargeOffersQuery({ sim_type: simType, network_type: networkType });
@@ -62,20 +67,50 @@ export default function RechargeAmount() {
 
   const handleCategoryPress = (category: AmountCategory) => {
     setActiveCategory(category);
+    const navParams = { phone, network_type: params?.network_type, sim_type: params?.sim_type };
     if (category === 'internet') {
-      router.replace('/(app)/recharge/internet');
+      router.replace({ pathname: '/(app)/recharge/internet', params: navParams });
     } else if (category === 'call-rate') {
-      router.replace('/(app)/recharge/call-rate');
+      router.replace({ pathname: '/(app)/recharge/call-rate', params: navParams });
     } else if (category === 'minute') {
-      router.replace('/(app)/recharge/minute');
+      router.replace({ pathname: '/(app)/recharge/minute', params: navParams });
     } else if (category === 'bundle') {
-      router.replace('/(app)/recharge/bundle');
+      router.replace({ pathname: '/(app)/recharge/bundle', params: navParams });
     }
   };
 
+
   const handleProceedPress = () => {
-    if (finalAmount) {
+    if (canProceed) {
       setShowDetailsModal(true);
+    }
+  };
+
+  const handleRecharge = async () => {
+    if (!canProceed) return;
+    if (!phone) {
+      alert('Phone number is required.');
+      return;
+    }
+    let payload: any = {
+      sim_type,
+      network_type: networkType,
+      phone,
+    };
+    if (customAmount) {
+      payload.amount = Number(customAmount);
+    } else if (selectedOfferId) {
+      payload.offerId = selectedOfferId;
+    }
+    // Never send both amount and offerId
+    try {
+      const result = await recharge(payload).unwrap();
+      setRechargeResult(result);
+      setShowDetailsModal(false);
+      alert('Recharge request created successfully!');
+      // Optionally, navigate or reset state here
+    } catch (e: any) {
+      // Error handled by isRechargeError
     }
   };
 
@@ -99,7 +134,7 @@ export default function RechargeAmount() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.card}>
-          <RecipientCard name="MD. Mystogan Islam" phone="+880 123 345 678" />
+          <RecipientCard name="MD. Mystogan Islam" phone={phone} />
 
           {/* TypeSelector replaced with simType selector */}
           <View style={{ marginVertical: 12, marginHorizontal: 16 }}>
@@ -211,12 +246,12 @@ export default function RechargeAmount() {
         visible={showDetailsModal}
         onClose={() => setShowDetailsModal(false)}
         recipientName="MD. Mystogan Islam"
-        recipientPhone="+880 123 345 678"
+        recipientPhone={phone}
         amount={finalPrice ?? 'BDT: --'}
         availableBalance="20,000 BDT"
-        onProceed={() => {
-          setShowDetailsModal(false);
-        }}
+        onProceed={handleRecharge}
+        loading={isRechargeLoading}
+        error={isRechargeError ? (rechargeError?.data?.message || 'Recharge failed') : undefined}
       />
     </ThemedView>
   );

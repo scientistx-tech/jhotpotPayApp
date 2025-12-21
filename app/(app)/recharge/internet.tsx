@@ -6,7 +6,8 @@ import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
-import { useGetRechargeOffersQuery } from '@/api/rechargeApi';
+import { useGetRechargeOffersQuery, useRechargeMutation } from '@/api/rechargeApi';
+import { usePhone } from '../../../context/PhoneContext';
 
 import { z } from 'zod';
 
@@ -28,12 +29,16 @@ export default function RechargeInternet() {
   const tint = useThemeColor({}, 'tint');
   // Get params from navigation
   const params = typeof router === 'object' && 'params' in router ? (router as any).params : (router as any)?.getCurrentRoute?.()?.params;
+  const { phone: phoneContext } = usePhone();
+  const phone = params?.phone || phoneContext;
   const initialSimType = params?.sim_type || 'PRE_PAID';
   const initialNetworkType = params?.network_type || 'GRAMEENPHONE';
   const [simType, setSimType] = useState<SimType>(initialSimType);
   const [activeCategory, setActiveCategory] = useState<AmountCategory>('internet');
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [recharge, { isLoading: isRechargeLoading, isSuccess: isRechargeSuccess, isError: isRechargeError, error: rechargeError }] = useRechargeMutation();
+  const [rechargeResult, setRechargeResult] = useState<any>(null);
 
   const networkType = initialNetworkType;
   const { data, isLoading } = useGetRechargeOffersQuery({ sim_type: simType, network_type: networkType });
@@ -43,21 +48,45 @@ export default function RechargeInternet() {
 
   const handleCategoryPress = (category: AmountCategory) => {
     setActiveCategory(category);
+    const navParams = { phone, network_type: params?.network_type, sim_type: params?.sim_type };
     if (category === 'call-rate') {
-      router.replace('/(app)/recharge/call-rate');
+      router.replace({ pathname: '/(app)/recharge/call-rate', params: navParams });
     } else if (category === 'amount') {
-      router.replace('/(app)/recharge/amount');
-    }else if (category === 'minute') {
-      router.replace('/(app)/recharge/minute');
+      router.replace({ pathname: '/(app)/recharge/amount', params: navParams });
+    } else if (category === 'minute') {
+      router.replace({ pathname: '/(app)/recharge/minute', params: navParams });
     } else if (category === 'bundle') {
-      router.replace('/(app)/recharge/bundle');
+      router.replace({ pathname: '/(app)/recharge/bundle', params: navParams });
     }
-
   };
+
 
   const handleProceedPress = () => {
     if (selectedOfferId) {
       setShowDetailsModal(true);
+    }
+  };
+
+  const handleRecharge = async () => {
+    if (!selectedOfferId) return;
+    if (!phone) {
+      alert('Phone number is required.');
+      return;
+    }
+    let payload: any = {
+      sim_type,
+      network_type: networkType,
+      phone,
+      offerId: selectedOfferId,
+    };
+    try {
+      const result = await recharge(payload).unwrap();
+      setRechargeResult(result);
+      setShowDetailsModal(false);
+      alert('Recharge request created successfully!');
+      // Optionally, navigate or reset state here
+    } catch (e: any) {
+      // Error handled by isRechargeError
     }
   };
 
@@ -79,7 +108,7 @@ export default function RechargeInternet() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.card}>
-          <RecipientCard name="MD. Mystogan Islam" phone="+880 123 345 678" />
+          <RecipientCard name="MD. Mystogan Islam" phone={phone || ''} />
 
           {/* TypeSelector replaced with simType selector */}
           <View style={{ marginVertical: 12 ,marginHorizontal:16 }}>
@@ -187,15 +216,15 @@ export default function RechargeInternet() {
         visible={showDetailsModal}
         onClose={() => setShowDetailsModal(false)}
         recipientName="MD. Mystogan Islam"
-        recipientPhone="+880 123 345 678"
+        recipientPhone={phone || ''}
         offerTitle={selectedOffer?.name ?? 'N/A'}
         validity={selectedOffer?.validity ?? ''}
         cashback={selectedOffer?.cash_back ? `${selectedOffer.cash_back} Taka Cashback` : undefined}
         price={selectedOffer?.price ? `${selectedOffer.price} BDT` : 'BDT: --'}
         availableBalance="20,000 BDT"
-        onProceed={() => {
-          setShowDetailsModal(false);
-        }}
+        onProceed={handleRecharge}
+        loading={isRechargeLoading}
+        error={isRechargeError ? (rechargeError?.data?.message || 'Recharge failed') : undefined}
       />
     </ThemedView>
   );
