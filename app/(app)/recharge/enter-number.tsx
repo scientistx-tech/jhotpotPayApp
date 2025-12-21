@@ -27,7 +27,7 @@ export default function RechargeEnterNumber() {
   const handleNextPress = () => {
     if (canProceed) {
       router.push({
-        pathname: '/recharge/amount',
+        pathname: '/(app)/recharge/amount',
         params: { phone, network_type: networkType },
       });
     }

@@ -1,17 +1,12 @@
-import { ActionButton, OfferDetailsModal, RechargeHeader, RecipientCard } from '@/components/recharge';
+import { useGetRechargeOffersQuery } from '@/api/rechargeApi';
+import { ActionButton, RechargeHeader, RecipientCard } from '@/components/recharge';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
-
-import { useGetRechargeOffersQuery } from '@/api/rechargeApi';
-
-import { z } from 'zod';
-
-const sim_type = z.enum(["PRE_PAID", "POST_PAID"]);
-type SimType = z.infer<typeof sim_type>;
+type SimType = 'PRE_PAID' | 'POST_PAID';
 type AmountCategory = 'amount' | 'internet' | 'minute' | 'bundle' | 'call-rate';
 
 const CATEGORIES: { id: AmountCategory; label: string }[] = [
@@ -22,34 +17,33 @@ const CATEGORIES: { id: AmountCategory; label: string }[] = [
   { id: 'call-rate', label: 'Call Rate' },
 ];
 
-
-export default function RechargeInternet() {
+export default function RechargeBundle() {
   const router = useRouter();
   const tint = useThemeColor({}, 'tint');
   const [simType, setSimType] = useState<SimType>('PRE_PAID');
-  const [activeCategory, setActiveCategory] = useState<AmountCategory>('internet');
+  const [activeCategory, setActiveCategory] = useState<AmountCategory>('bundle');
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   // Assume network_type is fixed for demo, or get from navigation params if available
   const networkType = 'GRAMEENPHONE';
   const { data, isLoading } = useGetRechargeOffersQuery({ sim_type: simType, network_type: networkType });
-  const offers = data?.data || [];
-  const filteredOffers = useMemo(() => offers.filter((offer) => offer.type === 'INTERNET'), [offers]);
-  const selectedOffer = useMemo(() => filteredOffers.find((offer) => offer.id === selectedOfferId), [filteredOffers, selectedOfferId]);
+  const filteredOffers = useMemo(() => {
+    const offers = data?.data || [];
+    return offers.filter((offer) => offer.type === 'BUNDLE');
+  }, [data]);
 
   const handleCategoryPress = (category: AmountCategory) => {
     setActiveCategory(category);
-    if (category === 'call-rate') {
-      router.replace('/(app)/recharge/call-rate');
-    } else if (category === 'amount') {
+    if (category === 'amount') {
       router.replace('/(app)/recharge/amount');
-    }else if (category === 'minute') {
+    } else if (category === 'internet') {
+      router.replace('/(app)/recharge/internet');
+    } else if (category === 'minute') {
       router.replace('/(app)/recharge/minute');
-    } else if (category === 'bundle') {
-      router.replace('/(app)/recharge/bundle');
+    } else if (category === 'call-rate') {
+      router.replace('/(app)/recharge/call-rate');
     }
-
   };
 
   const handleProceedPress = () => {
@@ -65,8 +59,9 @@ export default function RechargeInternet() {
   return (
     <ThemedView style={styles.container}>
       <RechargeHeader
-        title="Mobile Recharge"
+        title="Bundle Offers"
         showBack={true}
+        rightIcon="wallet-plus"
         onBackPress={handleBackPress}
       />
 
@@ -78,8 +73,7 @@ export default function RechargeInternet() {
         <View style={styles.card}>
           <RecipientCard name="MD. Mystogan Islam" phone="+880 123 345 678" />
 
-          {/* TypeSelector replaced with simType selector */}
-          <View style={{ marginVertical: 12 ,marginHorizontal:16 }}>
+          <View style={{ marginVertical: 12 , paddingHorizontal: 16 }}>
             <View style={{ flexDirection: 'row', gap: 20 }}>
               {["PRE_PAID", "POST_PAID"].map((type) => (
                 <TouchableOpacity
@@ -125,7 +119,7 @@ export default function RechargeInternet() {
           </View>
         </View>
 
-        <View style={styles.offerList}>
+        <View style={[styles.offerList, { flexDirection: 'column' }]}> 
           {isLoading ? (
             <ThemedText>Loading...</ThemedText>
           ) : filteredOffers.length === 0 ? (
@@ -140,7 +134,7 @@ export default function RechargeInternet() {
                   onPress={() => setSelectedOfferId(offer.id)}
                 >
                   <View style={styles.offerLeft}>
-                    <View style={[styles.radio, { borderColor: tint }]}>
+                    <View style={[styles.radio, { borderColor: tint }]}> 
                       {isSelected ? <View style={[styles.radioDot, { backgroundColor: tint }]} /> : null}
                     </View>
                     <View style={{ flex: 1 }}>
@@ -165,35 +159,22 @@ export default function RechargeInternet() {
         <View style={styles.spacer} />
       </ScrollView>
 
-     {
-      !showDetailsModal &&  <View style={styles.bottomSection}>
-        <View style={{ flex: 1 }}>
-          <ActionButton
-            label="Back"
-            onPress={handleBackPress}
-            variant="secondary"
-          />
+      {
+        !showDetailsModal && <View style={styles.bottomSection}>
+          <View style={{ flex: 1 }}>
+            <ActionButton
+              label="Back"
+              onPress={handleBackPress}
+              variant="secondary"
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <ActionButton label="Next" onPress={handleProceedPress} disabled={!selectedOfferId} />
+          </View>
         </View>
-        <View style={{ flex: 1 }}>
-          <ActionButton label="Next" onPress={handleProceedPress} disabled={!selectedOfferId} />
-        </View>
-      </View>
-     }
+      }
 
-      <OfferDetailsModal
-        visible={showDetailsModal}
-        onClose={() => setShowDetailsModal(false)}
-        recipientName="MD. Mystogan Islam"
-        recipientPhone="+880 123 345 678"
-        offerTitle={selectedOffer?.name ?? 'N/A'}
-        validity={selectedOffer?.validity ?? ''}
-        cashback={selectedOffer?.cash_back ? `${selectedOffer.cash_back} Taka Cashback` : undefined}
-        price={selectedOffer?.price ? `${selectedOffer.price} BDT` : 'BDT: --'}
-        availableBalance="20,000 BDT"
-        onProceed={() => {
-          setShowDetailsModal(false);
-        }}
-      />
+      {/* You can add a modal for offer details if needed */}
     </ThemedView>
   );
 }

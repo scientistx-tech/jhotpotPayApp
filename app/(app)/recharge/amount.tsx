@@ -6,6 +6,8 @@ import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
+
+import { useGetRechargeOffersQuery } from '@/api/rechargeApi';
 import { z } from 'zod';
 const sim_type = z.enum(["PRE_PAID", "POST_PAID"]);
 type SimType = z.infer<typeof sim_type>;
@@ -24,20 +26,6 @@ const AMOUNT_OFFERS: Offer[] = [
   { id: '3', amount: '100', price: 'BDT: 100', isNew: true },
 ];
 
-// Minute Offers
-const MINUTE_OFFERS: { id: string; minutes: string; validity: string; price: string; isNew?: boolean }[] = [
-  { id: '1', minutes: '50 Min', validity: '3 Days', price: 'BDT: 29', isNew: true },
-  { id: '2', minutes: '100 Min', validity: '7 Days', price: 'BDT: 49' },
-  { id: '3', minutes: '200 Min', validity: '15 Days', price: 'BDT: 99', isNew: true },
-];
-
-// Bundle Offers
-const BUNDLE_OFFERS: { id: string; title: string; details: string; validity: string; price: string; isNew?: boolean }[] = [
-  { id: '1', title: 'Combo 1', details: '1GB + 50 Min', validity: '7 Days', price: 'BDT: 59', isNew: true },
-  { id: '2', title: 'Combo 2', details: '2GB + 100 Min', validity: '15 Days', price: 'BDT: 109' },
-  { id: '3', title: 'Combo 3', details: '3GB + 200 Min', validity: '30 Days', price: 'BDT: 199', isNew: true },
-];
-
 const CATEGORIES: { id: AmountCategory; label: string }[] = [
   { id: 'amount', label: 'Amount' },
   { id: 'internet', label: 'Internet' },
@@ -45,6 +33,7 @@ const CATEGORIES: { id: AmountCategory; label: string }[] = [
   { id: 'bundle', label: 'Bundle' },
   { id: 'call-rate', label: 'Call Rate' },
 ];
+
 
 export default function RechargeAmount() {
   const router = useRouter();
@@ -55,10 +44,15 @@ export default function RechargeAmount() {
   const [customAmount, setCustomAmount] = useState('');
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
-  const selectedOffer = useMemo(
-    () => AMOUNT_OFFERS.find((offer) => offer.id === selectedOfferId),
-    [selectedOfferId],
-  );
+  // Assume network_type is fixed for demo, or get from navigation params if available
+  const networkType = 'GRAMEENPHONE';
+  const { data, isLoading } = useGetRechargeOffersQuery({ sim_type: simType, network_type: networkType });
+  const offers = data?.data || [];
+  const minuteOffers = useMemo(() => offers.filter((offer) => offer.type === 'MINUTE'), [offers]);
+  const bundleOffers = useMemo(() => offers.filter((offer) => offer.type === 'BUNDLE'), [offers]);
+  const selectedMinuteOffer = useMemo(() => minuteOffers.find((offer) => offer.id === selectedOfferId), [minuteOffers, selectedOfferId]);
+  const selectedBundleOffer = useMemo(() => bundleOffers.find((offer) => offer.id === selectedOfferId), [bundleOffers, selectedOfferId]);
+  const selectedOffer = useMemo(() => AMOUNT_OFFERS.find((offer) => offer.id === selectedOfferId), [selectedOfferId]);
 
   const finalAmount = customAmount || selectedOffer?.amount || null;
   const finalPrice = customAmount ? `BDT: ${customAmount}` : selectedOffer?.price ?? null;
@@ -66,9 +60,13 @@ export default function RechargeAmount() {
   const handleCategoryPress = (category: AmountCategory) => {
     setActiveCategory(category);
     if (category === 'internet') {
-      router.replace('/recharge/internet');
+      router.replace('/(app)/recharge/internet');
     } else if (category === 'call-rate') {
-      router.replace('/recharge/call-rate');
+      router.replace('/(app)/recharge/call-rate');
+    } else if (category === 'minute') {
+      router.replace('/(app)/recharge/minute');
+    } else if (category === 'bundle') {
+      router.replace('/(app)/recharge/bundle');
     }
   };
 
@@ -183,78 +181,7 @@ export default function RechargeAmount() {
           </View>
         )}
 
-        {/* Minute Tab */}
-        {activeCategory === 'minute' && (
-          <View style={styles.offerList}>
-            {MINUTE_OFFERS.map((offer) => {
-              const isSelected = selectedOfferId === offer.id;
-              return (
-                <TouchableOpacity
-                  key={offer.id}
-                  style={[styles.offerCard, isSelected && styles.offerCardActive]}
-                  onPress={() => {
-                    setSelectedOfferId(offer.id);
-                    setCustomAmount('');
-                  }}
-                >
-                  <View style={styles.offerLeft}>
-                    <View>
-                      <View style={styles.offerTitleRow}>
-                        <ThemedText style={styles.offerTitle}>{offer.minutes}</ThemedText>
-                        {offer.isNew && (
-                          <View style={[styles.badge, { backgroundColor: tint + '22' }]}> 
-                            <ThemedText style={[styles.badgeText, { color: tint }]}>NEW</ThemedText>
-                          </View>
-                        )}
-                      </View>
-                      <View style={styles.offerMetaRow}>
-                        <ThemedText style={styles.metaText}>{offer.validity}</ThemedText>
-                      </View>
-                    </View>
-                  </View>
-                  <ThemedText style={styles.price}>{offer.price}</ThemedText>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        )}
-
-        {/* Bundle Tab */}
-        {activeCategory === 'bundle' && (
-          <View style={styles.offerList}>
-            {BUNDLE_OFFERS.map((offer) => {
-              const isSelected = selectedOfferId === offer.id;
-              return (
-                <TouchableOpacity
-                  key={offer.id}
-                  style={[styles.offerCard, isSelected && styles.offerCardActive]}
-                  onPress={() => {
-                    setSelectedOfferId(offer.id);
-                    setCustomAmount('');
-                  }}
-                >
-                  <View style={styles.offerLeft}>
-                    <View>
-                      <View style={styles.offerTitleRow}>
-                        <ThemedText style={styles.offerTitle}>{offer.title}</ThemedText>
-                        {offer.isNew && (
-                          <View style={[styles.badge, { backgroundColor: tint + '22' }]}> 
-                            <ThemedText style={[styles.badgeText, { color: tint }]}>NEW</ThemedText>
-                          </View>
-                        )}
-                      </View>
-                      <View style={styles.offerMetaRow}>
-                        <ThemedText style={styles.metaText}>{offer.details}</ThemedText>
-                        <ThemedText style={styles.metaText}>{offer.validity}</ThemedText>
-                      </View>
-                    </View>
-                  </View>
-                  <ThemedText style={styles.price}>{offer.price}</ThemedText>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        )}
+{/*  */}
 
         <View style={styles.availableBalanceContainer}>
           <ThemedText style={styles.availableBalanceText}>Available Balance: 20,000 BDT</ThemedText>
@@ -410,4 +337,4 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
   },
-});
+})
