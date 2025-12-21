@@ -182,7 +182,6 @@ export default function RechargeAmount() {
         )}
 
 {/*  */}
-
         <View style={styles.availableBalanceContainer}>
           <ThemedText style={styles.availableBalanceText}>Available Balance: 20,000 BDT</ThemedText>
         </View>
