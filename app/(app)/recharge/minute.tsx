@@ -20,13 +20,16 @@ const CATEGORIES: { id: AmountCategory; label: string }[] = [
 export default function RechargeMinute() {
   const router = useRouter();
   const tint = useThemeColor({}, 'tint');
-  const [simType, setSimType] = useState<SimType>('PRE_PAID');
+  // Get params from navigation
+  const params = typeof router === 'object' && 'params' in router ? (router as any).params : (router as any)?.getCurrentRoute?.()?.params;
+  const initialSimType = params?.sim_type || 'PRE_PAID';
+  const initialNetworkType = params?.network_type || 'GRAMEENPHONE';
+  const [simType, setSimType] = useState<SimType>(initialSimType);
   const [activeCategory, setActiveCategory] = useState<AmountCategory>('minute');
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
-  // Assume network_type is fixed for demo, or get from navigation params if available
-  const networkType = 'GRAMEENPHONE';
+  const networkType = initialNetworkType;
   const { data, isLoading } = useGetRechargeOffersQuery({ sim_type: simType, network_type: networkType });
   const filteredOffers = useMemo(() => {
     const offers = data?.data || [];
