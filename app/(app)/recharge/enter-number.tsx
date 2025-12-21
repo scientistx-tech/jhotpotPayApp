@@ -21,7 +21,6 @@ export default function RechargeEnterNumber() {
   const tint = useThemeColor({}, 'tint');
   const [phone, setPhone] = useState('');
   const [networkType, setNetworkType] = useState('GRAMEENPHONE');
-  const [simType, setSimType] = useState<'PRE_PAID' | 'POST_PAID'>('PRE_PAID');
 
   const canProceed = useMemo(() => phone.trim().length >= 11 && networkType, [phone, networkType]);
 
@@ -29,7 +28,7 @@ export default function RechargeEnterNumber() {
     if (canProceed) {
       router.push({
         pathname: '/(app)/recharge/amount',
-        params: { phone, network_type: networkType, sim_type: simType },
+        params: { phone, network_type: networkType },
       });
     }
   };
@@ -88,31 +87,7 @@ export default function RechargeEnterNumber() {
                 </TouchableOpacity>
               ))}
             </View>
-            <ThemedText type="defaultSemiBold" style={[styles.label, { marginTop: 16 }]}>SIM Type</ThemedText>
-            <View style={{ flexDirection: 'row', gap: 20, marginTop: 8 }}>
-              {['PRE_PAID', 'POST_PAID'].map((type) => (
-                <TouchableOpacity
-                  key={type}
-                  style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
-                  onPress={() => setSimType(type as 'PRE_PAID' | 'POST_PAID')}
-                >
-                  <View style={{
-                    width: 20,
-                    height: 20,
-                    borderRadius: 10,
-                    borderWidth: 2,
-                    borderColor: tint,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}>
-                    {simType === type && (
-                      <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: tint }} />
-                    )}
-                  </View>
-                  <ThemedText style={{ fontSize: 14, fontWeight: '500' }}>{type === 'PRE_PAID' ? 'Prepaid' : 'Postpaid'}</ThemedText>
-                </TouchableOpacity>
-              ))}
-            </View>
+
           </View>
         </View>
         <View style={styles.spacer} />
