@@ -1,4 +1,4 @@
-import { ActionButton, RechargeDetailsModal, RechargeHeader, RecipientCard } from '@/components/recharge';
+import { ActionButton, RechargeHeader, RecipientCard } from '@/components/recharge';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -9,6 +9,7 @@ import { usePhone } from '../../../context/PhoneContext';
 
 
 import { useGetRechargeOffersQuery, useRechargeMutation } from '@/api/rechargeApi';
+import OfferDetailsModal from '@/components/recharge/offer-details-modal';
 import { z } from 'zod';
 const sim_type = z.enum(["PRE_PAID", "POST_PAID"]);
 type SimType = z.infer<typeof sim_type>;
@@ -242,12 +243,15 @@ export default function RechargeAmount() {
       </View>
       }
 
-      <RechargeDetailsModal
+      <OfferDetailsModal
         visible={showDetailsModal}
         onClose={() => setShowDetailsModal(false)}
         recipientName="MD. Mystogan Islam"
-        recipientPhone={phone}
-        amount={finalPrice ?? 'BDT: --'}
+        recipientPhone={phone || ''}
+        offerTitle={selectedOffer?.amount ? `${selectedOffer.amount} Amount` : customAmount ? `${customAmount} Amount` : 'N/A'}
+        validity={selectedOffer?.validity ?? ''}
+        cashback={selectedOffer?.cash_back ? `${selectedOffer.cash_back} Taka Cashback` : undefined}
+        price={finalPrice ?? 'BDT: --'}
         availableBalance="20,000 BDT"
         onProceed={handleRecharge}
         loading={isRechargeLoading}

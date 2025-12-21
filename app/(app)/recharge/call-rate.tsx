@@ -1,4 +1,4 @@
-import { ActionButton, CallRateDetailsModal, RechargeHeader, RecipientCard } from '@/components/recharge';
+import { ActionButton, RechargeHeader, RecipientCard } from '@/components/recharge';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -11,6 +11,7 @@ import { usePhone } from '../../../context/PhoneContext';
 
 import { z } from 'zod';
 
+import OfferDetailsModal from '@/components/recharge/offer-details-modal';
 const sim_type = z.enum(["PRE_PAID", "POST_PAID"]);
 type SimType = z.infer<typeof sim_type>;
 type AmountCategory = 'amount' | 'internet' | 'minute' | 'bundle' | 'call-rate';
@@ -213,13 +214,15 @@ export default function RechargeCallRate() {
         </View>
       }
 
-      <CallRateDetailsModal
+      <OfferDetailsModal
         visible={showDetailsModal}
         onClose={() => setShowDetailsModal(false)}
-        rate={selectedOffer?.name ?? 'N/A'}
+        recipientName="MD. Mystogan Islam"
+        recipientPhone={phone || ''}
+        offerTitle={selectedOffer?.name ?? 'N/A'}
         validity={selectedOffer?.validity ?? ''}
+        cashback={selectedOffer?.cash_back ? `${selectedOffer.cash_back} Taka Cashback` : undefined}
         price={selectedOffer?.price ? `${selectedOffer.price} BDT` : 'BDT: --'}
-        isNew={false}
         availableBalance="20,000 BDT"
         onProceed={handleRecharge}
         loading={isRechargeLoading}

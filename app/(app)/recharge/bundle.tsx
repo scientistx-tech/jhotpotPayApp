@@ -1,5 +1,6 @@
 import { useGetRechargeOffersQuery, useRechargeMutation } from '@/api/rechargeApi';
 import { ActionButton, RechargeHeader, RecipientCard } from '@/components/recharge';
+import OfferDetailsModal from '@/components/recharge/offer-details-modal';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -31,8 +32,7 @@ export default function RechargeBundle() {
   const [activeCategory, setActiveCategory] = useState<AmountCategory>('bundle');
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [recharge, { isLoading: isRechargeLoading, isSuccess: isRechargeSuccess, isError: isRechargeError, error: rechargeError }] = useRechargeMutation();
-  const [rechargeResult, setRechargeResult] = useState<any>(null);
+  const [recharge] = useRechargeMutation();
 
   const networkType = initialNetworkType;
   const { data, isLoading } = useGetRechargeOffersQuery({ sim_type: simType, network_type: networkType });
@@ -75,12 +75,11 @@ export default function RechargeBundle() {
       offerId: selectedOfferId,
     };
     try {
-      const result = await recharge(payload).unwrap();
-      setRechargeResult(result);
+      await recharge(payload).unwrap();
       setShowDetailsModal(false);
       alert('Recharge request created successfully!');
       // Optionally, navigate or reset state here
-    } catch (e: any) {
+    } catch {
       // Error handled by isRechargeError
     }
   };
@@ -207,29 +206,18 @@ export default function RechargeBundle() {
         </View>
       }
 
-      {/* You can add a modal for offer details if needed */}
-      {/* Modal for recharge confirmation */}
-      {showDetailsModal && (
-        <>
-          <RechargeHeader
-            title="Confirm Recharge"
-            showBack={true}
-            onBackPress={() => setShowDetailsModal(false)}
-          />
-          {/* You can use a custom modal or reuse an existing one. For now, use alert/confirm style. */}
-          <View style={{ position: 'absolute', top: 100, left: 0, right: 0, backgroundColor: '#fff', margin: 24, padding: 24, borderRadius: 16, elevation: 8 }}>
-            <ThemedText style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 12 }}>Proceed with recharge?</ThemedText>
-            <ThemedText>Phone: {phone}</ThemedText>
-            <ThemedText>Offer: {filteredOffers.find(o => o.id === selectedOfferId)?.name}</ThemedText>
-            <ThemedText>Price: {filteredOffers.find(o => o.id === selectedOfferId)?.price} BDT</ThemedText>
-            {isRechargeError && <ThemedText style={{ color: 'red', marginTop: 8 }}>{rechargeError?.data?.message || 'Recharge failed'}</ThemedText>}
-            <View style={{ flexDirection: 'row', marginTop: 16, gap: 12 }}>
-              <ActionButton label="Cancel" onPress={() => setShowDetailsModal(false)} variant="secondary" />
-              <ActionButton label={isRechargeLoading ? 'Processing...' : 'Confirm'} onPress={handleRecharge} disabled={isRechargeLoading} />
-            </View>
-          </View>
-        </>
-      )}
+      <OfferDetailsModal
+        visible={showDetailsModal}
+        onClose={() => setShowDetailsModal(false)}
+        recipientName="MD. Mystogan Islam"
+        recipientPhone={phone || ''}
+        offerTitle={filteredOffers.find(o => o.id === selectedOfferId)?.name ?? 'N/A'}
+        validity={filteredOffers.find(o => o.id === selectedOfferId)?.validity ?? ''}
+        cashback={filteredOffers.find(o => o.id === selectedOfferId)?.cash_back ? `${filteredOffers.find(o => o.id === selectedOfferId)?.cash_back} Taka Cashback` : undefined}
+        price={filteredOffers.find(o => o.id === selectedOfferId)?.price ? `${filteredOffers.find(o => o.id === selectedOfferId)?.price} BDT` : 'BDT: --'}
+        availableBalance="20,000 BDT"
+        onProceed={handleRecharge}
+      />
     </ThemedView>
   );
 }
