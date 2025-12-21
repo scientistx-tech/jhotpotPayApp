@@ -1,30 +1,15 @@
+import { useGetRechargeOffersQuery, useRechargeMutation } from '@/api/rechargeApi';
 import { ActionButton, RechargeHeader, RecipientCard } from '@/components/recharge';
+import OfferDetailsModal from '@/components/recharge/offer-details-modal';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { usePhone } from '../../../context/PhoneContext';
-
-
-import { useRechargeMutation } from '@/api/rechargeApi';
-import OfferDetailsModal from '@/components/recharge/offer-details-modal';
-import { z } from 'zod';
-import { set } from 'react-hook-form';
-
-const sim_type = z.enum(["PRE_PAID", "POST_PAID"]);
-type SimType = z.infer<typeof sim_type>;
+type SimType = 'PRE_PAID' | 'POST_PAID';
 type AmountCategory = 'amount' | 'internet' | 'minute' | 'bundle' | 'call-rate';
-
-type Offer = {
-  id: string;
-  amount: string;
-  price: string;
-  isNew?: boolean;
-};
-
-const AMOUNT_OFFERS: Offer[] = [];
 
 const CATEGORIES: { id: AmountCategory; label: string }[] = [
   { id: 'amount', label: 'Amount' },
@@ -34,8 +19,7 @@ const CATEGORIES: { id: AmountCategory; label: string }[] = [
   { id: 'call-rate', label: 'Call Rate' },
 ];
 
-
-export default function RechargeAmount() {
+export default function RechargeMinute() {
   const router = useRouter();
   const tint = useThemeColor({}, 'tint');
   // Get params from navigation
@@ -45,43 +29,41 @@ export default function RechargeAmount() {
   const initialSimType = params?.sim_type || 'PRE_PAID';
   const initialNetworkType = params?.network_type || 'GRAMEENPHONE';
   const [simType, setSimType] = useState<SimType>(initialSimType);
-  const [activeCategory, setActiveCategory] = useState<AmountCategory>('amount');
+  const [activeCategory, setActiveCategory] = useState<AmountCategory>('minute');
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
-  const [customAmount, setCustomAmount] = useState('');
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [recharge, { isLoading: isRechargeLoading, isSuccess: isRechargeSuccess, isError: isRechargeError, error: rechargeError }] = useRechargeMutation();
-  const [rechargeResult, setRechargeResult] = useState<any>(null);
+  const [recharge] = useRechargeMutation();
 
   const networkType = initialNetworkType;
-  const { data, isLoading } = { data: { data: [] }, isLoading: false }; // Mocking the query for offers
-
-  const finalAmount = useMemo(() => customAmount || null, [customAmount]);
-  const finalPrice = useMemo(() => customAmount ? `BDT: ${customAmount}` : null, [customAmount]);
+  const { data, isLoading } = useGetRechargeOffersQuery({ sim_type: simType, network_type: networkType });
+  const filteredOffers = useMemo(() => {
+    const offers = data?.data || [];
+    return offers.filter((offer) => offer.type === 'MINUTE');
+  }, [data]);
 
   const handleCategoryPress = (category: AmountCategory) => {
     setActiveCategory(category);
     const navParams = { phone, network_type: params?.network_type, sim_type: params?.sim_type };
-    if (category === 'internet') {
+    if (category === 'amount') {
+      router.replace({ pathname: '/(app)/recharge/amount', params: navParams });
+    } else if (category === 'internet') {
       router.replace({ pathname: '/(app)/recharge/internet', params: navParams });
-    } else if (category === 'call-rate') {
-      router.replace({ pathname: '/(app)/recharge/call-rate', params: navParams });
-    } else if (category === 'minute') {
-      router.replace({ pathname: '/(app)/recharge/minute', params: navParams });
     } else if (category === 'bundle') {
       router.replace({ pathname: '/(app)/recharge/bundle', params: navParams });
+    } else if (category === 'call-rate') {
+      router.replace({ pathname: '/(app)/recharge/call-rate', params: navParams });
     }
   };
 
 
   const handleProceedPress = () => {
-    console.log('handleProceedPress called, canProceed:', canProceed);
-    if (canProceed) {
+    if (selectedOfferId) {
       setShowDetailsModal(true);
     }
   };
 
   const handleRecharge = async () => {
-    if (!canProceed) return;
+    if (!selectedOfferId) return;
     if (!phone) {
       alert('Phone number is required.');
       return;
@@ -90,25 +72,16 @@ export default function RechargeAmount() {
       sim_type: simType,
       network_type: networkType,
       phone,
+      offerId: selectedOfferId,
     };
-    console.log(payload, "aa")
-    if (customAmount) {
-      payload.amount = Number(customAmount);
-    }
-    console.log(payload, "outside")
-    // Never send both amount and offerId
     try {
-      const result = await recharge(payload).unwrap();
-      setRechargeResult(result);
-
-      if (result?.success) {
-        alert('Recharge successful!');
-        setShowDetailsModal(false);
-      }
-      console.log(result)
-
-      // Do not close modal or show alert here; let modal show success/error
-    } catch (e: any) {
+     const result = await recharge(payload).unwrap();
+     if (result.success) {
+       alert('Recharge request created successfully!');
+       setShowDetailsModal(false);
+     }
+      // Optionally, navigate or reset state here
+    } catch {
       // Error handled by isRechargeError
     }
   };
@@ -117,13 +90,12 @@ export default function RechargeAmount() {
     router.back();
   };
 
-  const canProceed = useMemo(() => finalAmount !== null && finalAmount !== '', [finalAmount]);
-
   return (
     <ThemedView style={styles.container}>
       <RechargeHeader
-        title="Mobile Recharge"
+        title="Minute Offers"
         showBack={true}
+        rightIcon="wallet-plus"
         onBackPress={handleBackPress}
       />
 
@@ -133,9 +105,8 @@ export default function RechargeAmount() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.card}>
-          <RecipientCard name="MD. Mystogan Islam" phone={phone} />
+          <RecipientCard name="MD. Mystogan Islam" phone={phone || ''} />
 
-          {/* TypeSelector replaced with simType selector */}
           <View style={{ marginVertical: 12, marginHorizontal: 16 }}>
             <View style={{ flexDirection: 'row', gap: 20 }}>
               {["PRE_PAID", "POST_PAID"].map((type) => (
@@ -182,48 +153,41 @@ export default function RechargeAmount() {
           </View>
         </View>
 
-        {/* Amount Tab */}
-        {activeCategory === 'amount' && (
-          <View style={styles.amountSelectionContainer}>
-            <View style={styles.amountButtonsColumn}>
-              {AMOUNT_OFFERS.map((offer) => {
-                const isSelected = selectedOfferId === offer.id && !customAmount;
-                return (
-                  <TouchableOpacity
-                    key={offer.id}
-                    style={[styles.amountButton, isSelected && styles.amountButtonActive]}
-                    onPress={() => {
-                      setSelectedOfferId(offer.id);
-                      setCustomAmount('');
-                    }}
-                  >
-                    <ThemedText style={[styles.amountButtonText, isSelected && styles.amountButtonTextActive]}>
-                      {offer.amount}
-                    </ThemedText>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-
-            <View style={styles.typeAmountSection}>
-              <TextInput
-                placeholder="Type Amount..."
-                value={customAmount}
-                onChangeText={(text) => {
-                  setCustomAmount(text);
-                  if (text !== '') setSelectedOfferId(null);
-                }}
-                keyboardType="numeric"
-                placeholderTextColor="#248AEF"
-                style={styles.customAmountInput}
-              />
-            </View>
-          </View>
-        )}
-
-        {/*  */}
-        <View style={styles.availableBalanceContainer}>
-          <ThemedText style={styles.availableBalanceText}>Available Balance: 20,000 BDT</ThemedText>
+        <View style={[styles.offerList, { flexDirection: 'column' }]}> 
+          {isLoading ? (
+            <ThemedText>Loading...</ThemedText>
+          ) : filteredOffers.length === 0 ? (
+            <ThemedText>No offers found.</ThemedText>
+          ) : (
+            filteredOffers.map((offer) => {
+              const isSelected = selectedOfferId === offer.id;
+              return (
+                <TouchableOpacity
+                  key={offer.id}
+                  style={[styles.offerCard, isSelected && styles.offerCardActive]}
+                  onPress={() => setSelectedOfferId(offer.id)}
+                >
+                  <View style={styles.offerLeft}>
+                    <View style={[styles.radio, { borderColor: tint }]}> 
+                      {isSelected ? <View style={[styles.radioDot, { backgroundColor: tint }]} /> : null}
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <View style={styles.offerTitleRow}>
+                        <ThemedText style={styles.offerTitle}>{offer.name}</ThemedText>
+                      </View>
+                      <View style={styles.offerMetaRow}>
+                        <ThemedText style={styles.metaText}>{offer.validity}</ThemedText>
+                        {offer.cash_back ? (
+                          <ThemedText style={styles.metaText}>{offer.cash_back} Taka Cashback</ThemedText>
+                        ) : null}
+                      </View>
+                    </View>
+                  </View>
+                  <ThemedText style={[styles.price, { color: tint }]}>{offer.price} BDT</ThemedText>
+                </TouchableOpacity>
+              );
+            })
+          )}
         </View>
 
         <View style={styles.spacer} />
@@ -239,7 +203,7 @@ export default function RechargeAmount() {
             />
           </View>
           <View style={{ flex: 1 }}>
-            <ActionButton label="Next" onPress={handleProceedPress} disabled={!canProceed} />
+            <ActionButton label="Next" onPress={handleProceedPress} disabled={!selectedOfferId} />
           </View>
         </View>
       }
@@ -249,15 +213,12 @@ export default function RechargeAmount() {
         onClose={() => setShowDetailsModal(false)}
         recipientName="MD. Mystogan Islam"
         recipientPhone={phone || ''}
-        offerTitle={customAmount ? `${customAmount} Amount` : 'N/A'}
-        validity={''}
-        cashback={undefined}
-        price={finalPrice ?? 'BDT: --'}
+        offerTitle={filteredOffers.find(o => o.id === selectedOfferId)?.name ?? 'N/A'}
+        validity={filteredOffers.find(o => o.id === selectedOfferId)?.validity ?? ''}
+        cashback={filteredOffers.find(o => o.id === selectedOfferId)?.cash_back ? `${filteredOffers.find(o => o.id === selectedOfferId)?.cash_back} Taka Cashback` : undefined}
+        price={filteredOffers.find(o => o.id === selectedOfferId)?.price ? `${filteredOffers.find(o => o.id === selectedOfferId)?.price} BDT` : 'BDT: --'}
         availableBalance="20,000 BDT"
         onProceed={handleRecharge}
-        loading={isRechargeLoading}
-        error={isRechargeError ? (rechargeError?.data?.message || 'Recharge failed') : undefined}
-        headerTitle="Recharge Details"
       />
     </ThemedView>
   );
@@ -313,60 +274,75 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginTop: 8,
   },
-  amountSelectionContainer: {
-    marginTop: 20,
-    marginHorizontal: 16,
+  offerList: {
+    marginTop: 16,
+    gap: 12,
   },
-  amountButtonsColumn: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-  },
-  amountButton: {
+  offerCard: {
     backgroundColor: '#fff',
     borderRadius: 12,
-    paddingVertical: 14,
-    paddingHorizontal: 24,
-    borderWidth: 1,
-    borderColor: '#E3E7ED',
+    padding: 14,
+    flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
-    marginHorizontal: 4,
+    justifyContent: 'space-between',
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
-  amountButtonActive: {
+  offerCardActive: {
+    borderWidth: 1,
     borderColor: '#248AEF',
   },
-  amountButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#11181C',
+  offerLeft: {
+    flexDirection: 'row',
+    gap: 10,
+    flex: 1,
   },
-  amountButtonTextActive: {
-    color: '#248AEF',
-  },
-  typeAmountSection: {
-    marginTop: 12,
-    marginBottom: 8,
-  },
-  customAmountInput: {
-    backgroundColor: '#F8FAFD',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E3E7ED',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#11181C',
-  },
-  availableBalanceContainer: {
-    marginTop: 16,
+  radio: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  availableBalanceText: {
+  radioDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  offerTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  offerTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#248AEF',
+  },
+  offerMetaRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 6,
+  },
+  metaText: {
+    fontSize: 12,
+    opacity: 0.7,
+  },
+  price: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  badge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  badgeText: {
+    fontSize: 11,
+    fontWeight: '600',
   },
   spacer: {
     height: 20,
@@ -380,5 +356,3 @@ const styles = StyleSheet.create({
     gap: 12,
   },
 });
-
-

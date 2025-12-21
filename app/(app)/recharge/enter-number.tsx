@@ -6,58 +6,32 @@ import { useThemeColor } from '@/hooks/use-theme-color';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { usePhone } from '../../../context/PhoneContext';
 
-const OPERATOR_PREFIXES: Record<string, { name: string; services: string[] }> = {
-  '170': { name: 'Grameenphone', services: ['Skitto', 'Prepaid', 'Postpaid'] },
-  '171': { name: 'Grameenphone', services: ['Skitto', 'Prepaid', 'Postpaid'] },
-  '172': { name: 'Grameenphone', services: ['Skitto', 'Prepaid', 'Postpaid'] },
-  '173': { name: 'Grameenphone', services: ['Skitto', 'Prepaid', 'Postpaid'] },
-  '174': { name: 'Grameenphone', services: ['Skitto', 'Prepaid', 'Postpaid'] },
-  '175': { name: 'Grameenphone', services: ['Skitto', 'Prepaid', 'Postpaid'] },
-  '176': { name: 'Grameenphone', services: ['Skitto', 'Prepaid', 'Postpaid'] },
-  '177': { name: 'Grameenphone', services: ['Skitto', 'Prepaid', 'Postpaid'] },
-  '178': { name: 'Grameenphone', services: ['Skitto', 'Prepaid', 'Postpaid'] },
-  '179': { name: 'Grameenphone', services: ['Skitto', 'Prepaid', 'Postpaid'] },
-  '180': { name: 'Banglalink', services: ['Prepaid', 'Postpaid'] },
-  '181': { name: 'Banglalink', services: ['Prepaid', 'Postpaid'] },
-  '182': { name: 'Banglalink', services: ['Prepaid', 'Postpaid'] },
-  '183': { name: 'Banglalink', services: ['Prepaid', 'Postpaid'] },
-  '184': { name: 'Banglalink', services: ['Prepaid', 'Postpaid'] },
-  '185': { name: 'Banglalink', services: ['Prepaid', 'Postpaid'] },
-  '186': { name: 'Banglalink', services: ['Prepaid', 'Postpaid'] },
-  '187': { name: 'Banglalink', services: ['Prepaid', 'Postpaid'] },
-  '188': { name: 'Banglalink', services: ['Prepaid', 'Postpaid'] },
-  '189': { name: 'Banglalink', services: ['Prepaid', 'Postpaid'] },
-  '190': { name: 'Robi', services: ['Prepaid', 'Postpaid'] },
-  '191': { name: 'Robi', services: ['Prepaid', 'Postpaid'] },
-  '192': { name: 'Robi', services: ['Prepaid', 'Postpaid'] },
-  '193': { name: 'Robi', services: ['Prepaid', 'Postpaid'] },
-  '194': { name: 'Robi', services: ['Prepaid', 'Postpaid'] },
-  '195': { name: 'Robi', services: ['Prepaid', 'Postpaid'] },
-  '196': { name: 'Robi', services: ['Prepaid', 'Postpaid'] },
-  '197': { name: 'Robi', services: ['Prepaid', 'Postpaid'] },
-  '198': { name: 'Robi', services: ['Prepaid', 'Postpaid'] },
-  '199': { name: 'Robi', services: ['Prepaid', 'Postpaid'] },
-};
+const NETWORK_TYPES = [
+  { id: 'GRAMEENPHONE', label: 'Grameenphone' },
+  { id: 'ROBI', label: 'Robi' },
+  { id: 'AIRTEL', label: 'Airtel' },
+  { id: 'BANGLALINK', label: 'Banglalink' },
+  { id: 'TELETALK', label: 'Teletalk' },
+  { id: 'SKITTO', label: 'Skitto' },
+];
 
 export default function RechargeEnterNumber() {
   const router = useRouter();
   const tint = useThemeColor({}, 'tint');
   const [phone, setPhone] = useState('');
-  const [selectedService, setSelectedService] = useState<string | null>(null);
+  const [networkType, setNetworkType] = useState('GRAMEENPHONE');
 
-  const operatorInfo = useMemo(() => {
-    const prefix = phone.slice(1, 4);
-    return OPERATOR_PREFIXES[prefix] || null;
-  }, [phone]);
-
-  const canProceed = useMemo(() => phone.trim().length >= 11 && selectedService, [phone, selectedService]);
+  const { setPhone: setPhoneContext } = usePhone();
+  const canProceed = useMemo(() => phone.trim().length >= 11 && networkType, [phone, networkType]);
 
   const handleNextPress = () => {
-    if (canProceed && operatorInfo) {
+    if (canProceed) {
+      setPhoneContext(phone);
       router.push({
-        pathname: '/recharge/amount',
-        params: { phone, operator: operatorInfo.name, service: selectedService },
+        pathname: '/(app)/recharge/amount',
+        params: { phone, network_type: networkType },
       });
     }
   };
@@ -88,55 +62,37 @@ export default function RechargeEnterNumber() {
             <RoundedInput
               placeholder="Enter phone number..."
               value={phone}
-              onChangeText={(text) => {
-                setPhone(text);
-                setSelectedService(null);
-              }}
+              onChangeText={setPhone}
               keyboardType="phone-pad"
             />
-          </View>
-        </View>
-
-        {operatorInfo && (
-          <View style={styles.operatorCard}>
-            <View style={styles.operatorHeader}>
-              <ThemedText style={styles.operatorName}>{operatorInfo.name}</ThemedText>
-              <View style={[styles.operatorBadge, { backgroundColor: tint }]}>
-                <ThemedText style={styles.operatorBadgeText}>Detected</ThemedText>
-              </View>
-            </View>
-
-            <ThemedText type="defaultSemiBold" style={styles.serviceLabel}>
-              Select Service Type
-            </ThemedText>
-
+            <ThemedText type="defaultSemiBold" style={[styles.label, { marginTop: 16 }]}>Select Operator</ThemedText>
             <View style={styles.servicesGrid}>
-              {operatorInfo.services.map((service) => (
+              {NETWORK_TYPES.map((op) => (
                 <TouchableOpacity
-                  key={service}
+                  key={op.id}
                   style={[
                     styles.serviceButton,
-                    selectedService === service && [
+                    networkType === op.id && [
                       styles.serviceButtonActive,
                       { backgroundColor: tint },
                     ],
                   ]}
-                  onPress={() => setSelectedService(service)}
+                  onPress={() => setNetworkType(op.id)}
                 >
                   <ThemedText
                     style={[
                       styles.serviceButtonText,
-                      selectedService === service && styles.serviceButtonTextActive,
+                      networkType === op.id && styles.serviceButtonTextActive,
                     ]}
                   >
-                    {service}
+                    {op.label}
                   </ThemedText>
                 </TouchableOpacity>
               ))}
             </View>
-          </View>
-        )}
 
+          </View>
+        </View>
         <View style={styles.spacer} />
       </ScrollView>
 
@@ -148,6 +104,7 @@ export default function RechargeEnterNumber() {
     </ThemedView>
   );
 }
+  // ...existing styles...
 
 const styles = StyleSheet.create({
   container: {

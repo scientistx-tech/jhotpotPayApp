@@ -11,6 +11,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import Toast from "react-native-toast-message";
 import { Provider } from 'react-redux';
+import { PhoneProvider } from '../context/PhoneContext';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -57,13 +58,15 @@ export default function RootLayout() {
 
   return (
     <Provider store={store}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <ThemeProvider value={DefaultTheme}>
-          <Slot />
-          <StatusBar style="auto" />
-          <Toast />
-        </ThemeProvider>
-      </GestureHandlerRootView>
+      <PhoneProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <ThemeProvider value={DefaultTheme}>
+            <Slot />
+            <StatusBar style="auto" />
+            <Toast />
+          </ThemeProvider>
+        </GestureHandlerRootView>
+      </PhoneProvider>
     </Provider>
   );
 }

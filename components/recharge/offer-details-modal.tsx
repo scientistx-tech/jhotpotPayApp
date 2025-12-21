@@ -13,6 +13,7 @@ export type OfferDetailsModalProps = {
   price: string;
   onProceed?: () => void;
   availableBalance?: string;
+  headerTitle?: string;
 };
 
 export default function OfferDetailsModal({
@@ -23,6 +24,7 @@ export default function OfferDetailsModal({
   offerTitle,
   validity,
   cashback,
+  headerTitle="Offer Details",
   price,
   onProceed,
   availableBalance = '20,000 BDT',
@@ -41,7 +43,7 @@ export default function OfferDetailsModal({
         <View style={[styles.modalContent, { backgroundColor: bg }]}>
           {/* Header */}
           <View style={styles.header}>
-            <ThemedText style={styles.headerTitle}>Offer Details</ThemedText>
+            <ThemedText style={styles.headerTitle}>{headerTitle}</ThemedText>
             <TouchableOpacity onPress={onClose}>
               <ThemedText style={[styles.closeBtn, { color: '#FF6B6B' }]}>Close</ThemedText>
             </TouchableOpacity>
@@ -50,13 +52,13 @@ export default function OfferDetailsModal({
           {/* Offer Details Section */}
           <View style={styles.section}>
             <View style={styles.offerMetaRow}>
-              <View style={styles.metaItem}>
+              {/* <View style={styles.metaItem}>
                 <ThemedText style={styles.metaLabel}>30 GB</ThemedText>
               </View>
               <View style={styles.metaDivider} />
               <View style={styles.metaItem}>
                 <ThemedText style={styles.metaLabel}>30 Days</ThemedText>
-              </View>
+              </View> */}
               {cashback && (
                 <>
                   <View style={styles.metaDivider} />
