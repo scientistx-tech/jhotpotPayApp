@@ -1,10 +1,10 @@
-import { useGetProductsQuery, useDeleteProductMutation } from '@/api/productApi';
-import ConfirmModal from '@/components/ui/confirm-modal';
+import { useDeleteProductMutation, useGetProductsQuery } from '@/api/productApi';
 import CustomButton from '@/components/custom-button';
 import Pagination from '@/components/pagination';
 import { RechargeHeader } from '@/components/recharge';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import ConfirmModal from '@/components/ui/confirm-modal';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { Product } from '@/store/slices/productSlice';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
