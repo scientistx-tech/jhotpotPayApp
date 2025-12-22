@@ -1,4 +1,5 @@
-import { useGetProductsQuery } from '@/api/productApi';
+import { useGetProductsQuery, useDeleteProductMutation } from '@/api/productApi';
+import ConfirmModal from '@/components/ui/confirm-modal';
 import CustomButton from '@/components/custom-button';
 import Pagination from '@/components/pagination';
 import { RechargeHeader } from '@/components/recharge';
@@ -17,15 +18,23 @@ export default function ProductList() {
   const tint = useThemeColor({}, 'tint');
   const bg = useThemeColor({}, 'background');
 
-    // Pagination and search state
-    const [page, setPage] = useState(1);
-    const [limit] = useState(10);
-    const [search, setSearch] = useState('');
-  
-    // Fetch products from API
-    const { data, isLoading, isError, refetch } = useGetProductsQuery({ page, limit, search });
-    const products = data?.data || [];
-    const totalPages = data?.meta?.totalPages || 1;
+
+  // Pagination and search state
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [search, setSearch] = useState('');
+
+  // Delete modal state
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [confirmVisible, setConfirmVisible] = useState(false);
+
+  // Fetch products from API
+  const { data, isLoading, isError, refetch } = useGetProductsQuery({ page, limit, search });
+  const products = data?.data || [];
+  const totalPages = data?.meta?.totalPages || 1;
+
+  // Delete mutation
+  const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation();
 
   const handleBackPress = () => router.back();
 
@@ -38,7 +47,22 @@ export default function ProductList() {
   };
 
   const handleDeleteProduct = (productId: string) => {
-      refetch(); // Placeholder, should call delete mutation
+    setDeleteId(productId);
+    setConfirmVisible(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteId) return;
+    try {
+      await deleteProduct({ id: deleteId }).unwrap();
+      setConfirmVisible(false);
+      setDeleteId(null);
+      refetch();
+    } catch (e) {
+      // Optionally show error
+      setConfirmVisible(false);
+      setDeleteId(null);
+    }
   };
 
   // Image slider state for each product
@@ -158,6 +182,7 @@ export default function ProductList() {
           />
         )}
 
+
         {/* Pagination */}
         {totalPages > 1 && (
           <Pagination
@@ -168,6 +193,14 @@ export default function ProductList() {
         )}
 
         <View style={{ height: 24 }} />
+
+        {/* Confirm Delete Modal */}
+        <ConfirmModal
+          visible={confirmVisible}
+          onClose={() => { setConfirmVisible(false); setDeleteId(null); }}
+          onConfirm={handleConfirmDelete}
+          message={isDeleting ? 'Deleting product...' : 'Are you sure you want to delete this product?'}
+        />
       </ScrollView>
 {/* 
       <View style={styles.bottomAction}>
