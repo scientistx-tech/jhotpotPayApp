@@ -19,6 +19,7 @@ interface ProductListResponse {
 		total: number;
 		page: number;
 		limit: number;
+		totalPages: number;
 	};
 }
 
