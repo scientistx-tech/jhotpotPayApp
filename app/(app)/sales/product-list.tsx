@@ -53,7 +53,7 @@ export default function ProductList() {
   const handleBackPress = () => router.back();
 
   const handleAddProduct = () => {
-    router.push('/(app)/sales/product-management');
+    router.push('/(app)/sales/product-add');
   };
 
   const handleEditProduct = (product: Product) => {
