@@ -30,6 +30,7 @@ interface ProductResponse {
 }
 
 export const productApi = baseApi.injectEndpoints({
+	overrideExisting: true,
 	endpoints: (builder) => ({
 		addProduct: builder.mutation<ProductResponse, {
 			name: string;
@@ -104,7 +105,7 @@ export const productApi = baseApi.injectEndpoints({
 				if (body.tax !== undefined) formData.append("tax", String(body.tax));
 				return {
 					url: `/product/${body.id}`,
-					method: "PUT",
+					method: "PATCH",
 					body: formData,
 				};
 			},
