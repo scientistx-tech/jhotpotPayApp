@@ -58,12 +58,14 @@ export const productApi = baseApi.injectEndpoints({
 					body: formData,
 				};
 			},
+			invalidatesTags: ["Products"],
 		}),
 		deleteProduct: builder.mutation<ProductResponse, { id: string }>({
 			query: ({ id }) => ({
 				url: `/product/${id}`,
 				method: "DELETE",
 			}),
+			invalidatesTags: ["Products"],
 		}),
 		getProducts: builder.query<ProductListResponse, { page?: number; limit?: number; search?: string }>({
 			query: ({ page = 1, limit = 10, search = "" }) => ({
@@ -71,6 +73,7 @@ export const productApi = baseApi.injectEndpoints({
 				method: "GET",
 				params: { page, limit, search },
 			}),
+			providesTags: ["Products"],
 		}),
 		getProduct: builder.query<ProductResponse, { id: string }>({
 			query: ({ id }) => ({
@@ -109,6 +112,7 @@ export const productApi = baseApi.injectEndpoints({
 					body: formData,
 				};
 			},
+			invalidatesTags: ["Products"],
 		}),
 	}),
 });
