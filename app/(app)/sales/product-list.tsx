@@ -43,7 +43,10 @@ export default function ProductList() {
   };
 
   const handleEditProduct = (product: Product) => {
-    console.log('Edit product:', product.name);
+    router.push({
+      pathname: '/(app)/sales/product-edit',
+      params: { id: product.id },
+    });
   };
 
   const handleDeleteProduct = (productId: string) => {

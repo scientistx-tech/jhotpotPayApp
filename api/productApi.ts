@@ -30,6 +30,7 @@ interface ProductResponse {
 }
 
 export const productApi = baseApi.injectEndpoints({
+	tagTypes: ["Products", "Product"],
 	overrideExisting: true,
 	endpoints: (builder) => ({
 		addProduct: builder.mutation<ProductResponse, {
@@ -80,6 +81,9 @@ export const productApi = baseApi.injectEndpoints({
 				url: `/product/${id}`,
 				method: "GET",
 			}),
+		providesTags: (result, error, arg) => [
+			{ type: "Product", id: arg.id }
+		],
 		}),
 		updateProduct: builder.mutation<ProductResponse, {
 			id: string;
@@ -112,7 +116,10 @@ export const productApi = baseApi.injectEndpoints({
 					body: formData,
 				};
 			},
-			invalidatesTags: ["Products"],
+			invalidatesTags: (result, error, arg) => [
+				"Products",
+				{ type: "Product", id: arg.id }
+			],
 		}),
 	}),
 });

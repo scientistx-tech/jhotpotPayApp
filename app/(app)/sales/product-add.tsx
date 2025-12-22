@@ -35,7 +35,7 @@ export default function ProductAdd() {
         if (ext === 'png') return 'image/png';
         return 'application/octet-stream';
     };
-    console.log(images)
+
 
     const [addProduct, { isLoading }] = useAddProductMutation();
 
@@ -62,7 +62,7 @@ export default function ProductAdd() {
                 tax,
                 images: imagesWithMime.length > 0 ? imagesWithMime : undefined,
             }).unwrap();
-            console.log(result)
+        
             if (result.success) {
                 Alert.alert('Success', 'Product added successfully!', [
                     { text: 'OK', onPress: () => router.back() },
@@ -71,7 +71,7 @@ export default function ProductAdd() {
                 Alert.alert('Error', result.message || 'Failed to add product.');
             }
         } catch (error: any) {
-            console.log(error)
+     
             Alert.alert('Error', error?.data?.message || 'Failed to add product.');
         }
     };
