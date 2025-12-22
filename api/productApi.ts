@@ -4,10 +4,10 @@ interface Product {
 	id: string;
 	name: string;
 	unit: string;
-	stock: number;
-	price: number;
+	stock: string;
+	price: string;
 	note?: string;
-	tax?: number;
+	tax?: string;
 	images?: string[];
 }
 
@@ -35,11 +35,11 @@ export const productApi = baseApi.injectEndpoints({
 		addProduct: builder.mutation<ProductResponse, {
 			name: string;
 			unit: string;
-			stock: number;
-			price: number;
+			stock: string;
+			price: string;
 			note?: string;
-			tax?: number;
-			images?: File[];
+			tax?: string;
+			images?: { uri: string; name: string; type: string }[];
 		}>({
 			query: (body) => {
 				const formData = new FormData();
@@ -48,10 +48,10 @@ export const productApi = baseApi.injectEndpoints({
 				}
 				formData.append("name", body.name);
 				formData.append("unit", body.unit);
-				formData.append("stock", String(body.stock));
-				formData.append("price", String(body.price));
+				formData.append("stock", body.stock);
+				formData.append("price", body.price);
 				if (body.note) formData.append("note", body.note);
-				if (body.tax !== undefined) formData.append("tax", String(body.tax));
+				if (body.tax !== undefined && body.tax !== null) formData.append("tax", body.tax);
 				return {
 					url: "/product",
 					method: "POST",
@@ -82,10 +82,10 @@ export const productApi = baseApi.injectEndpoints({
 			id: string;
 			name: string;
 			unit: string;
-			stock: number;
-			price: number;
+			stock: string;
+			price: string;
 			note?: string;
-			tax?: number;
+			tax?: string;
 			images?: string[];
 			newImages?: File[];
 		}>({
@@ -99,10 +99,10 @@ export const productApi = baseApi.injectEndpoints({
 				}
 				formData.append("name", body.name);
 				formData.append("unit", body.unit);
-				formData.append("stock", String(body.stock));
-				formData.append("price", String(body.price));
+				formData.append("stock", body.stock);
+				formData.append("price", body.price);
 				if (body.note) formData.append("note", body.note);
-				if (body.tax !== undefined) formData.append("tax", String(body.tax));
+				if (body.tax !== undefined && body.tax !== null) formData.append("tax", body.tax);
 				return {
 					url: `/product/${body.id}`,
 					method: "PATCH",

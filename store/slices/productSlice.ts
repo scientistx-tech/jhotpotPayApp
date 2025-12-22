@@ -4,10 +4,10 @@ export interface Product {
 	id: string;
 	name: string;
 	unit: string;
-	stock: number;
-	price: number;
+	stock: string;
+	price: string;
 	note?: string;
-	tax?: number;
+	tax?: string;
 	images?: string[];
 }
 

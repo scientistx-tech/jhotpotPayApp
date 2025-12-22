@@ -1,21 +1,103 @@
-import CustomButton from '@/components/custom-button';
 import { RechargeHeader } from '@/components/recharge';
-import { SalesHeader } from '@/components/sales';
-import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+
+import * as ImagePicker from 'expo-image-picker';
+import { useState } from 'react';
+
+
+
+
+
+import { useAddProductMutation } from '@/api/productApi';
 
 export default function ProductAdd() {
     const router = useRouter();
-    const bg = useThemeColor({}, 'background');
+    // const bg = useThemeColor({}, 'background');
     const tint = useThemeColor({}, 'tint');
 
+    // Form state
+    const [name, setName] = useState('');
+    const [unit, setUnit] = useState('');
+    const [stock, setStock] = useState('');
+    const [price, setPrice] = useState('');
+    const [note, setNote] = useState('');
+    const [tax, setTax] = useState('');
+    // Images must be { uri, name, type }
+    const [images, setImages] = useState<{ uri: string; name: string; type: string }[]>([]);
+    const [imageUris, setImageUris] = useState<string[]>([]);
+    // Helper to get correct MIME type
+    const getMimeType = (filename: string) => {
+        const ext = filename.split('.').pop()?.toLowerCase();
+        if (ext === 'jpg' || ext === 'jpeg') return 'image/jpeg';
+        if (ext === 'png') return 'image/png';
+        return 'application/octet-stream';
+    };
+    console.log(images)
+
+    const [addProduct, { isLoading }] = useAddProductMutation();
+
     const handleBackPress = () => router.back();
-    const handleSubmit = () => {
-        console.log('Submit new product');
+
+    const handleSubmit = async () => {
+        if (!name || !unit || !stock || !price) {
+            Alert.alert('Validation', 'Please fill all required fields.');
+            return;
+        }
+        try {
+            // Ensure images have correct MIME type
+            const imagesWithMime = images.map((img, idx) => ({
+                uri: img.uri,
+                name: img.name || `image_${idx}.jpg`,
+                type: getMimeType(img.name || `image_${idx}.jpg`),
+            }));
+            const result = await addProduct({
+                name,
+                unit,
+                stock,
+                price,
+                note: note || undefined,
+                tax,
+                images: imagesWithMime.length > 0 ? imagesWithMime : undefined,
+            }).unwrap();
+            console.log(result)
+            if (result.success) {
+                Alert.alert('Success', 'Product added successfully!', [
+                    { text: 'OK', onPress: () => router.back() },
+                ]);
+            } else {
+                Alert.alert('Error', result.message || 'Failed to add product.');
+            }
+        } catch (error: any) {
+            console.log(error)
+            Alert.alert('Error', error?.data?.message || 'Failed to add product.');
+        }
+    };
+
+    // Image picker handler
+    const handlePickImages = async () => {
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsMultipleSelection: true,
+            quality: 0.8,
+        });
+        if (!result.canceled) {
+            const assets = result.assets || [];
+            const files: { uri: string; name: string; type: string }[] = [];
+            const uris: string[] = [];
+            for (const [idx, asset] of assets.entries()) {
+                uris.push(asset.uri);
+                files.push({
+                    uri: asset.uri,
+                    name: asset.fileName || `image_${idx}.jpg`,
+                    type: getMimeType(asset.fileName || `image_${idx}.jpg`),
+                });
+            }
+            setImages(files);
+            setImageUris(uris);
+        }
     };
 
     return (
@@ -32,73 +114,104 @@ export default function ProductAdd() {
                 showsVerticalScrollIndicator={false}
                 keyboardShouldPersistTaps="handled"
             >
-                {/* Name + Date */}
-                <View style={[styles.card, { backgroundColor: bg }]}>
-                    <View style={styles.rowBetween}>
-                        <View style={styles.inputBlock}>
-                            <ThemedText style={styles.label}>Name</ThemedText>
-                            <TextInput style={styles.input} placeholder="" />
-                        </View>
-                        <View style={styles.inputBlock}>
-                            <ThemedText style={styles.label}>Date: MM/DD/YYYY</ThemedText>
-                            <TextInput style={styles.input} placeholder="" />
-                        </View>
+                <View >
+                    <Text style={styles.label}>Product Name *</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={name}
+                        onChangeText={setName}
+                        placeholder="Enter product name"
+                    />
+                </View>
+                <View >
+                    <Text style={styles.label}>Unit *</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={unit}
+                        onChangeText={setUnit}
+                        placeholder="e.g. pcs, kg, box"
+                    />
+                </View>
+                <View style={styles.rowBetween}>
+                    <View style={[styles.inputBlock]}>
+                        <Text style={styles.label}>Stock *</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={stock}
+                            onChangeText={setStock}
+                            placeholder="0"
+                            keyboardType="numeric"
+                        />
+                    </View>
+                    <View style={[styles.inputBlock]}>
+                        <Text style={styles.label}>Price *</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={price}
+                            onChangeText={setPrice}
+                            placeholder="0.00"
+                            keyboardType="numeric"
+                        />
                     </View>
                 </View>
-
-                {/* Unit */}
-                <View style={[styles.card, { backgroundColor: bg }]}>
-                    <ThemedText style={styles.label}>Unit</ThemedText>
-                    <TouchableOpacity style={styles.dropdown} activeOpacity={0.8}>
-                        <ThemedText style={styles.dropdownText}>Pcs</ThemedText>
-                        <MaterialCommunityIcons name="chevron-down" size={22} color="#9AA3AF" />
-                    </TouchableOpacity>
-                </View>
-
-                {/* Stock */}
-                <View style={[styles.card, { backgroundColor: bg }]}>
-                    <View style={styles.rowBetween}>
-                        <View style={styles.inputBlock}>
-                            <ThemedText style={styles.label}>Unit Price</ThemedText>
-                            <TextInput style={styles.input} placeholder="" keyboardType="numeric" />
-                        </View>
-                        <View style={styles.inputBlock}>
-                            <ThemedText style={styles.label}>Tax</ThemedText>
-                            <TextInput style={styles.input} placeholder="" keyboardType="numeric" />
-                        </View>
-                    </View>
-                </View>
-
-                {/* Upload Images */}
-                <View style={[styles.card, { backgroundColor: bg }]}>
-                    <TouchableOpacity style={styles.uploadBox} activeOpacity={0.8}>
-                        <View style={[styles.uploadIcon, { borderColor: tint }]}>
-                            <MaterialCommunityIcons name="plus" size={20} color={tint} />
-                        </View>
-                        <ThemedText style={styles.uploadText}>Upload Images (upto 5)</ThemedText>
-                    </TouchableOpacity>
-                </View>
-
-                {/* Note */}
-                <View style={[styles.card, { backgroundColor: bg }]}>
-                    <ThemedText style={styles.label}>Note (Optional)</ThemedText>
+                <View >
+                    <Text style={styles.label}>Note</Text>
                     <TextInput
                         style={[styles.input, styles.multiline]}
-                        placeholder=""
+                        value={note}
+                        onChangeText={setNote}
+                        placeholder="Additional notes"
                         multiline
                         numberOfLines={3}
                     />
                 </View>
-
+                <View >
+                    <Text style={styles.label}>Tax (%)</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={tax}
+                        onChangeText={setTax}
+                        placeholder="0"
+                        keyboardType="numeric"
+                    />
+                </View>
+                {/* Image upload UI can be added here */}
+                <View >
+                    <Text style={styles.label}>Product Images</Text>
+                    <TouchableOpacity style={styles.uploadBox} onPress={handlePickImages}>
+                        <View style={[styles.uploadIcon, { borderColor: tint }]}>
+                            <Text style={{ color: tint, fontWeight: 'bold', fontSize: 18 }}>+</Text>
+                        </View>
+                        <Text style={styles.uploadText}>Upload Images (up to 5)</Text>
+                    </TouchableOpacity>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 10, gap: 8 }}>
+                        {imageUris.map((uri, idx) => (
+                            <View key={idx} style={{ width: 60, height: 60, borderRadius: 8, overflow: 'hidden', backgroundColor: '#eee' }}>
+                                <Image source={{ uri }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                            </View>
+                        ))}
+                    </View>
+                </View>
                 <View style={{ height: 16 }} />
             </ScrollView>
 
             <View style={styles.bottomAction}>
-                <CustomButton title="Add Product" onPress={handleSubmit} />
+                <TouchableOpacity
+                    style={[styles.input, { backgroundColor: tint, alignItems: 'center' }]}
+                    onPress={handleSubmit}
+                    disabled={isLoading}
+                >
+                    {isLoading ? (
+                        <ActivityIndicator color="#fff" />
+                    ) : (
+                        <Text style={{ color: '#fff', fontWeight: '600', fontSize: 16 }}>Add Product</Text>
+                    )}
+                </TouchableOpacity>
             </View>
         </ThemedView>
     );
 }
+
 
 const styles = StyleSheet.create({
     container: {
