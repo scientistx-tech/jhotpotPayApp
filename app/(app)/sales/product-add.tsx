@@ -1,8 +1,10 @@
 import { RechargeHeader } from '@/components/recharge';
+import RoundedInput from '@/components/rounded-input';
+import SelectDropdown from '@/components/SelectDropdown';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useRouter } from 'expo-router';
-import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
@@ -21,6 +23,7 @@ export default function ProductAdd() {
     // Form state
     const [name, setName] = useState('');
     const [unit, setUnit] = useState('');
+    const [openUnit, setOpenUnit] = useState(false);
     const [stock, setStock] = useState('');
     const [price, setPrice] = useState('');
     const [note, setNote] = useState('');
@@ -95,9 +98,14 @@ export default function ProductAdd() {
                     type: getMimeType(asset.fileName || `image_${idx}.jpg`),
                 });
             }
-            setImages(files);
-            setImageUris(uris);
+            setImages(prev => [...prev, ...files]);
+            setImageUris(prev => [...prev, ...uris]);
         }
+    };
+
+    const handleRemoveImage = (uri: string) => {
+        setImages(prev => prev.filter(img => img.uri !== uri));
+        setImageUris(prev => prev.filter(u => u !== uri));
     };
 
     return (
@@ -107,76 +115,71 @@ export default function ProductAdd() {
                 showBack={true}
                 onBackPress={handleBackPress}
             />
-
-            <ScrollView
-                style={styles.content}
-                contentContainerStyle={styles.contentContainer}
-                showsVerticalScrollIndicator={false}
-                keyboardShouldPersistTaps="handled"
+            <KeyboardAvoidingView
+                style={{ flex: 1 }}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                keyboardVerticalOffset={0}
             >
-                <View >
-                    <Text style={styles.label}>Product Name *</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={name}
-                        onChangeText={setName}
-                        placeholder="Enter product name"
-                    />
-                </View>
-                <View >
-                    <Text style={styles.label}>Unit *</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={unit}
-                        onChangeText={setUnit}
-                        placeholder="e.g. pcs, kg, box"
-                    />
-                </View>
+                <ScrollView
+                    style={styles.content}
+                    contentContainerStyle={{
+                        ...styles.contentContainer,
+                        // paddingBottom: 5
+                    }}
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
+                >
+                <RoundedInput
+                    label="Product Name *"
+                    placeholder="Enter product name"
+                    value={name}
+                    onChangeText={setName}
+                />
+                <SelectDropdown
+                    label="Unit *"
+                    value={unit}
+                    options={["pcs", "kg", "box", "liter", "meter", "set", "other"]}
+                    placeholder="Select unit"
+                    onSelect={setUnit}
+                    isOpen={openUnit}
+                    setOpen={setOpenUnit}
+                />
                 <View style={styles.rowBetween}>
-                    <View style={[styles.inputBlock]}>
-                        <Text style={styles.label}>Stock *</Text>
-                        <TextInput
-                            style={styles.input}
+                    <View style={styles.inputBlock}>
+                        <RoundedInput
+                            label="Stock *"
+                            placeholder="0"
                             value={stock}
                             onChangeText={setStock}
-                            placeholder="0"
                             keyboardType="numeric"
                         />
                     </View>
-                    <View style={[styles.inputBlock]}>
-                        <Text style={styles.label}>Price *</Text>
-                        <TextInput
-                            style={styles.input}
+                    <View style={styles.inputBlock}>
+                        <RoundedInput
+                            label="Price *"
+                            placeholder="0.00"
                             value={price}
                             onChangeText={setPrice}
-                            placeholder="0.00"
                             keyboardType="numeric"
                         />
                     </View>
                 </View>
-                <View >
-                    <Text style={styles.label}>Note</Text>
-                    <TextInput
-                        style={[styles.input, styles.multiline]}
-                        value={note}
-                        onChangeText={setNote}
-                        placeholder="Additional notes"
-                        multiline
-                        numberOfLines={3}
-                    />
-                </View>
-                <View >
-                    <Text style={styles.label}>Tax (%)</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={tax}
-                        onChangeText={setTax}
-                        placeholder="0"
-                        keyboardType="numeric"
-                    />
-                </View>
-                {/* Image upload UI can be added here */}
-                <View >
+                <RoundedInput
+                    label={<Text>Note <Text style={{ color: '#9AA1B0', fontWeight: '400' }}>(Optional)</Text></Text>}
+                    placeholder="Additional notes"
+                    value={note}
+                    onChangeText={setNote}
+                    multiline
+                    style={styles.multiline}
+                />
+                <RoundedInput
+                    label="Tax (%)"
+                    placeholder="0"
+                    value={tax}
+                    onChangeText={setTax}
+                    keyboardType="numeric"
+                />
+                <View>
                     <Text style={styles.label}>Product Images</Text>
                     <TouchableOpacity style={styles.uploadBox} onPress={handlePickImages}>
                         <View style={[styles.uploadIcon, { borderColor: tint }]}>
@@ -184,18 +187,22 @@ export default function ProductAdd() {
                         </View>
                         <Text style={styles.uploadText}>Upload Images (up to 5)</Text>
                     </TouchableOpacity>
-                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 10, gap: 8 }}>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap',  gap: 8 }}>
                         {imageUris.map((uri, idx) => (
-                            <View key={idx} style={{ width: 60, height: 60, borderRadius: 8, overflow: 'hidden', backgroundColor: '#eee' }}>
+                            <View key={idx} style={{ width: 60, height: 60, borderRadius: 8, overflow: 'hidden', backgroundColor: '#eee', marginTop: 10, position: 'relative' }}>
                                 <Image source={{ uri }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                                <TouchableOpacity
+                                    style={{ position: 'absolute',  right: 7, backgroundColor: '#fff', borderRadius: 10, paddingHorizontal: 4, paddingVertical: 1, borderWidth: 1, borderColor: '#ccc', zIndex: 2 }}
+                                    onPress={() => handleRemoveImage(uri)}
+                                >
+                                    <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 16 }}>×</Text>
+                                </TouchableOpacity>
                             </View>
                         ))}
                     </View>
                 </View>
-                <View style={{ height: 16 }} />
-            </ScrollView>
 
-            <View style={styles.bottomAction}>
+                 <View style={styles.bottomAction}>
                 <TouchableOpacity
                     style={[styles.input, { backgroundColor: tint, alignItems: 'center' }]}
                     onPress={handleSubmit}
@@ -204,10 +211,13 @@ export default function ProductAdd() {
                     {isLoading ? (
                         <ActivityIndicator color="#fff" />
                     ) : (
-                        <Text style={{ color: '#fff', fontWeight: '600', fontSize: 16 }}>Add Product</Text>
+                        <Text style={{ color: '#fff', fontWeight: '600', fontSize: 16, marginTop: 8 }}>Add Product</Text>
                     )}
                 </TouchableOpacity>
             </View>
+                {/* <View style={{ height: 16 }} /> */}
+                </ScrollView>
+            </KeyboardAvoidingView>
         </ThemedView>
     );
 }
@@ -223,8 +233,8 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         paddingHorizontal: 16,
-        paddingVertical: 16,
-        paddingBottom: 32,
+        paddingTop: 16,
+        // paddingBottom: 3,
         gap: 14,
     },
     card: {
@@ -301,7 +311,7 @@ const styles = StyleSheet.create({
     },
     bottomAction: {
         paddingHorizontal: 16,
-        paddingBottom: 40,
+        paddingBottom: 10,
         paddingTop: 12,
     },
 });

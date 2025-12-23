@@ -2,11 +2,12 @@ import { useLoginMutation } from '@/api/authApi';
 import CustomButton from '@/components/custom-button';
 import FormInput from '@/components/form-input';
 import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
 import { loginSchema } from '@/schemas/authSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'expo-router';
 import { useForm } from 'react-hook-form';
-import { StyleSheet, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import Toast from 'react-native-toast-message';
 
@@ -39,15 +40,22 @@ export default function Login() {
         }
     };
     return (
-        <View style={{ flex: 1 }}>
+        <ThemedView style={{ flex: 1 }}>
             {/* <AuthBanner showBack={false} /> */}
-
-            <ScrollView
+            <KeyboardAvoidingView
                 style={{ flex: 1 }}
-                contentContainerStyle={[styles.screen, { flexGrow: 1, paddingTop: 80 }]}
-                keyboardShouldPersistTaps="handled"
-                showsVerticalScrollIndicator={false}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                keyboardVerticalOffset={0}
             >
+                <ScrollView
+                    style={{ flex: 1 }}
+                    contentContainerStyle={[
+                        styles.screen,
+                        { flexGrow: 1, paddingTop: 50, paddingBottom: 160 } 
+                    ]}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                >
                 <ThemedText style={{ textAlign: "center", marginTop: 10 }} type='title'>
                     লগইন করুন
                 </ThemedText>
@@ -72,8 +80,9 @@ export default function Login() {
                         অ্যাকাউন্ট নেই? রেজিস্ট্রেশন করুন
                     </ThemedText>
                 </View>
-            </ScrollView>
-        </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </ThemedView>
     )
 }
 
@@ -98,6 +107,12 @@ const styles = StyleSheet.create({
         zIndex: 1,
         justifyContent: "center",
         alignItems: "center"
+    },
+     contentContainer: {
+        paddingHorizontal: 16,
+        paddingTop: 16,
+        // paddingBottom: 3,
+        gap: 14,
     },
     header: {
         height: 150,

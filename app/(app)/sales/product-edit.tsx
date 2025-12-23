@@ -1,11 +1,13 @@
 import { useGetProductQuery, useUpdateProductMutation } from '@/api/productApi';
 import { RechargeHeader } from '@/components/recharge';
+import RoundedInput from '@/components/rounded-input';
+import SelectDropdown from '@/components/SelectDropdown';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ProductEdit() {
   const router = useRouter();
@@ -19,6 +21,7 @@ export default function ProductEdit() {
   // Form state
   const [name, setName] = useState('');
   const [unit, setUnit] = useState('');
+  const [openUnit, setOpenUnit] = useState(false);
   const [stock, setStock] = useState('');
   const [price, setPrice] = useState('');
   const [note, setNote] = useState('');
@@ -63,7 +66,7 @@ export default function ProductEdit() {
         name: img.name || `image_${idx}.jpg`,
         type: getMimeType(img.name || `image_${idx}.jpg`),
       }));
-    const resualt =  await updateProduct({
+      const resualt = await updateProduct({
         id,
         name,
         unit,
@@ -130,64 +133,86 @@ export default function ProductEdit() {
         showBack={true}
         onBackPress={handleBackPress}
       />
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.contentContainer}>
-        <Text style={styles.label}>Name</Text>
-        <TextInput style={styles.input} value={name} onChangeText={setName} />
-        <Text style={styles.label}>Unit</Text>
-        <TextInput style={styles.input} value={unit} onChangeText={setUnit} />
-        <Text style={styles.label}>Stock</Text>
-        <TextInput style={styles.input} value={stock} onChangeText={setStock} keyboardType="numeric" />
-        <Text style={styles.label}>Price</Text>
-        <TextInput style={styles.input} value={price} onChangeText={setPrice} keyboardType="numeric" />
-        <Text style={styles.label}>Note</Text>
-        <TextInput style={styles.input} value={note} onChangeText={setNote} multiline />
-        <Text style={styles.label}>Tax</Text>
-        <TextInput style={styles.input} value={tax} onChangeText={setTax} keyboardType="numeric" />
-        {/* Previous Images */}
-        <Text style={styles.label}>Previous Images</Text>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
-          {images.length === 0 && <Text style={{ color: '#888' }}>No previous images</Text>}
-          {images.map((img, idx) => (
-            <View key={img} style={{ position: 'relative', marginRight: 8, marginBottom: 8 }}>
-              <Image source={{ uri: img }} style={{ width: 60, height: 60, borderRadius: 8, backgroundColor: '#eee' }} />
-              <TouchableOpacity
-                style={{ position: 'absolute', top: -8, right: -8, backgroundColor: '#fff', borderRadius: 10, padding: 2, borderWidth: 1, borderColor: '#ccc' }}
-                onPress={() => handleRemovePrevImage(img)}
-              >
-                <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 16 }}>×</Text>
-              </TouchableOpacity>
-            </View>
-          ))}
-        </View>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
+      >
+        <ScrollView style={{ flex: 1 }}
+          contentContainerStyle={{
+            ...styles.contentContainer,
+            // paddingBottom: 5
+          }}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled">
+          <RoundedInput label="Name" value={name} onChangeText={setName} />
+          <SelectDropdown
+            label="Unit"
+            value={unit}
+            options={["pcs", "kg", "box", "liter", "meter", "set", "other"]}
+            placeholder="Select unit"
+            onSelect={setUnit}
+            isOpen={openUnit}
+            setOpen={setOpenUnit}
+          />
+          <RoundedInput label="Stock" value={stock} onChangeText={setStock} keyboardType="numeric" />
+          <RoundedInput label="Price" value={price} onChangeText={setPrice} keyboardType="numeric" />
+          {/* <RoundedInput label="Note" value={note} onChangeText={setNote} multiline style={styles.input} /> */}
+          <RoundedInput
+            label={"Note"}
+            placeholder="Additional notes"
+            value={note}
+            onChangeText={setNote}
+            multiline
+            style={styles.multiline}
+          />
+          <RoundedInput label="Tax" value={tax} onChangeText={setTax} keyboardType="numeric" />
+          {/* Previous Images */}
+          <Text style={styles.label}>Previous Images</Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
+            {images.length === 0 && <Text style={{ color: '#888' }}>No previous images</Text>}
+            {images.map((img, idx) => (
+              <View key={img} style={{ position: 'relative', marginRight: 8, marginBottom: 8 }}>
+                <Image source={{ uri: img }} style={{ width: 60, height: 60, borderRadius: 8, backgroundColor: '#eee' }} />
+                <TouchableOpacity
+                  style={{ position: 'absolute', top: -8, right: -8, backgroundColor: '#fff', borderRadius: 10, padding: 2, borderWidth: 1, borderColor: '#ccc' }}
+                  onPress={() => handleRemovePrevImage(img)}
+                >
+                  <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 16 }}>×</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
 
-        {/* New Images */}
-        <Text style={styles.label}>Add New Images</Text>
-        <TouchableOpacity style={[styles.uploadBox, { marginBottom: 10 }]} onPress={handlePickImages}>
-          <Text style={styles.uploadText}>Pick Images</Text>
-        </TouchableOpacity>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
-          {newImages.length === 0 && <Text style={{ color: '#888' }}>No new images</Text>}
-          {newImages.map((img, idx) => (
-            <View key={img.uri} style={{ position: 'relative', marginRight: 8, marginBottom: 8 }}>
-              <Image source={{ uri: img.uri }} style={{ width: 60, height: 60, borderRadius: 8, backgroundColor: '#eee' }} />
-              <TouchableOpacity
-                style={{ position: 'absolute', top: -8, right: -8, backgroundColor: '#fff', borderRadius: 10, padding: 2, borderWidth: 1, borderColor: '#ccc' }}
-                onPress={() => handleRemoveNewImage(img.uri)}
-              >
-                <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 16 }}>×</Text>
-              </TouchableOpacity>
-            </View>
-          ))}
-        </View>
-        <View style={styles.buttonRow}>
-          <TouchableOpacity style={[styles.button, { backgroundColor: '#E3E7ED' }]} onPress={handleBackPress}>
-            <Text style={[styles.buttonText, { color: '#11181C' }]}>Cancel</Text>
+          {/* New Images */}
+          <Text style={styles.label}>Add New Images</Text>
+          <TouchableOpacity style={[styles.uploadBox, { marginBottom: 10 }]} onPress={handlePickImages}>
+            <Text style={styles.uploadText}>Pick Images</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, { backgroundColor: tint }]} onPress={handleSubmit} disabled={isLoading}>
-            <Text style={styles.buttonText}>{isLoading ? 'Saving...' : 'Save'}</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            {newImages.length === 0 && <Text style={{ color: '#888' }}>No new images</Text>}
+            {newImages.map((img, idx) => (
+              <View key={idx} style={{ width: 60, height: 60, borderRadius: 8, overflow: 'hidden', backgroundColor: '#eee', marginTop: 10, position: 'relative' }}>
+                <Image source={{ uri: img.uri }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                <TouchableOpacity
+                  style={{ position: 'absolute', right: 7, backgroundColor: '#fff', borderRadius: 10, paddingHorizontal: 4, paddingVertical: 1, borderWidth: 1, borderColor: '#ccc', zIndex: 2 }}
+                  onPress={() => handleRemoveNewImage(img.uri)}
+                >
+                  <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 16 }}>×</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
+          <View style={styles.buttonRow}>
+            <TouchableOpacity style={[styles.button, { backgroundColor: '#E3E7ED' }]} onPress={handleBackPress}>
+              <Text style={[styles.buttonText, { color: '#11181C' }]}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.button, { backgroundColor: tint }]} onPress={handleSubmit} disabled={isLoading}>
+              <Text style={styles.buttonText}>{isLoading ? 'Saving...' : 'Save'}</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </ThemedView>
   );
 }
@@ -208,6 +233,10 @@ const styles = StyleSheet.create({
     opacity: 0.7,
     marginBottom: 6,
   },
+    multiline: {
+        height: 90,
+        textAlignVertical: 'top',
+    },
   input: {
     height: 44,
     borderRadius: 10,
@@ -238,7 +267,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
     marginTop: 20,
-    marginBottom: 35,
+    // marginBottom: 35,
   },
   button: {
     flex: 1,

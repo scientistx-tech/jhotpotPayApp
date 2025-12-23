@@ -6,7 +6,7 @@ import { phoneSchema } from '@/schemas/authSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'expo-router'
 import { useForm } from 'react-hook-form'
-import { StyleSheet, View } from 'react-native'
+import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import Toast from 'react-native-toast-message'
 
@@ -35,26 +35,37 @@ export default function RegistrationPhone() {
 
   return (
     <View style={{ flex: 1 }}>
-
-      <ScrollView
+      <KeyboardAvoidingView
         style={{ flex: 1 }}
-        contentContainerStyle={[styles.container, { flexGrow: 1, paddingTop: 80 }]}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
       >
-        <ThemedText type='title' style={{ textAlign: 'center' }}>রেজিস্ট্রেশন করুন</ThemedText>
-        <ThemedText type='subtitle' style={{ textAlign: 'center', marginTop: 6 }}>আপনার নম্বর দিন</ThemedText>
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={[
+            styles.screen,
+            { flexGrow: 1, paddingTop: 50, paddingBottom: 160 }
+          ]}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <ThemedText type='title' style={{ textAlign: 'center' }}>রেজিস্ট্রেশন করুন</ThemedText>
+          <ThemedText type='subtitle' style={{ textAlign: 'center', marginTop: 6 }}>আপনার নম্বর দিন</ThemedText>
 
-        <View style={{ height: 20 }} />
-        <FormInput name='phone' control={control} label='মোবাইল নম্বর' placeholder='মোবাইল নম্বর দিন' keyboardType='phone-pad' />
+          <View style={{ height: 20 }} />
+          <FormInput name='phone' control={control} label='মোবাইল নম্বর' placeholder='মোবাইল নম্বর দিন' keyboardType='phone-pad' />
 
-        <View style={{ height: 12 }} />
-        <CustomButton isLoading={isLoading} title="পরবর্তী" onPress={handleSubmit(onSubmit)} />
-      </ScrollView>
+          <View style={{ height: 12 }} />
+          <CustomButton isLoading={isLoading} title="পরবর্তী" onPress={handleSubmit(onSubmit)} />
+        </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-  container: { paddingHorizontal: 20, paddingTop: 40 }
+  container: { paddingHorizontal: 20, paddingTop: 40 },
+  screen: {
+    paddingHorizontal: 20
+  }
 })

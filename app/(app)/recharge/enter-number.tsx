@@ -1,13 +1,13 @@
 import SelectDropdown from '@/components/SelectDropdown';
 import { ActionButton, RechargeHeader } from '@/components/recharge';
+import RoundedInput from '@/components/rounded-input';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { usePhone } from '../../../context/PhoneContext';
-import RoundedInput from '@/components/rounded-input';
 
 const NETWORK_TYPES = [
   { id: 'GRAMEENPHONE', label: 'Grameenphone' },
@@ -50,45 +50,49 @@ export default function RechargeEnterNumber() {
         rightIcon="wallet-plus"
         onBackPress={handleBackPress}
       />
-
-      <ScrollView
-        style={styles.content}
-        contentContainerStyle={styles.contentContainer}
-        showsVerticalScrollIndicator={false}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
       >
-        <View style={styles.card}>
-          <View style={styles.formSection}>
-            <ThemedText type="defaultSemiBold" style={styles.label}>
-              Recipient
-            </ThemedText>
-            {/* Use RoundedInput for phone number */}
-            <RoundedInput
-              label=""
-              placeholder="Enter phone number..."
-              value={phone}
-              onChangeText={setPhone}
-              keyboardType="phone-pad"
-            />
-            <SelectDropdown
-              label="Select Operator"
-              value={networkType}
-              options={NETWORK_TYPES.map((op) => op.label)}
-              placeholder="Choose operator"
-              onSelect={setNetworkType}
-              isOpen={openOperator}
-              setOpen={setOpenOperator}
-              style={{ marginTop: 8 }}
-            />
+        <ScrollView
+          style={styles.content}
+          contentContainerStyle={{ paddingHorizontal: 16 }}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.card}>
+            <View style={styles.formSection}>
+              <ThemedText type="defaultSemiBold" style={styles.label}>
+                Recipient
+              </ThemedText>
+              {/* Use RoundedInput for phone number */}
+              <RoundedInput
+                label=""
+                placeholder="Enter phone number..."
+                value={phone}
+                onChangeText={setPhone}
+                keyboardType="phone-pad"
+              />
+              <SelectDropdown
+                label="Select Operator"
+                value={networkType}
+                options={NETWORK_TYPES.map((op) => op.label)}
+                placeholder="Choose operator"
+                onSelect={setNetworkType}
+                isOpen={openOperator}
+                setOpen={setOpenOperator}
+                style={{ marginTop: 8 }}
+              />
+            </View>
+          </View>
+          <View style={styles.spacer} />
+        </ScrollView>
+        <View style={styles.bottomSection}>
+          <View style={{ flex: 1 }}>
+            <ActionButton label="Continue" onPress={handleNextPress} disabled={!canProceed} />
           </View>
         </View>
-        <View style={styles.spacer} />
-      </ScrollView>
-
-      <View style={styles.bottomSection}>
-        <View style={{ flex: 1 }}>
-          <ActionButton label="Continue" onPress={handleNextPress} disabled={!canProceed} />
-        </View>
-      </View>
+      </KeyboardAvoidingView>
     </ThemedView>
   );
 }
