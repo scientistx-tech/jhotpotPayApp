@@ -1,7 +1,7 @@
 import { RechargeHeader } from '@/components/recharge';
 import RoundedInput from '@/components/rounded-input';
-import SelectDropdown from '@/components/SelectDropdown';
 import { ThemedView } from '@/components/themed-view';
+import { units } from '@/constants/units';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useRouter } from 'expo-router';
 import { ActivityIndicator, Alert, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -14,6 +14,7 @@ import { useState } from 'react';
 
 
 import { useAddProductMutation } from '@/api/productApi';
+import ProductUnitDropdown from '@/components/ProductUnitDropdown';
 
 export default function ProductAdd() {
     const router = useRouter();
@@ -135,10 +136,10 @@ export default function ProductAdd() {
                     value={name}
                     onChangeText={setName}
                 />
-                <SelectDropdown
+                <ProductUnitDropdown
                     label="Unit *"
                     value={unit}
-                    options={["pcs", "kg", "box", "liter", "meter", "set", "other"]}
+                    options={units.map(u => ({ label: u.name, value: u.code }))}
                     placeholder="Select unit"
                     onSelect={setUnit}
                     isOpen={openUnit}
@@ -311,7 +312,7 @@ const styles = StyleSheet.create({
     },
     bottomAction: {
         paddingHorizontal: 16,
-        paddingBottom: 10,
+        paddingBottom: 35,
         paddingTop: 12,
     },
 });

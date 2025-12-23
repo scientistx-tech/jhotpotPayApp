@@ -1,8 +1,9 @@
 import { useGetProductQuery, useUpdateProductMutation } from '@/api/productApi';
+import ProductUnitDropdown from '@/components/ProductUnitDropdown';
 import { RechargeHeader } from '@/components/recharge';
 import RoundedInput from '@/components/rounded-input';
-import SelectDropdown from '@/components/SelectDropdown';
 import { ThemedView } from '@/components/themed-view';
+import { units } from '@/constants/units';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -146,10 +147,10 @@ export default function ProductEdit() {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled">
           <RoundedInput label="Name" value={name} onChangeText={setName} />
-          <SelectDropdown
+          <ProductUnitDropdown
             label="Unit"
             value={unit}
-            options={["pcs", "kg", "box", "liter", "meter", "set", "other"]}
+            options={units.map(u => ({ label: u.name, value: u.code }))}
             placeholder="Select unit"
             onSelect={setUnit}
             isOpen={openUnit}
@@ -267,7 +268,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
     marginTop: 20,
-    // marginBottom: 35,
+    marginBottom: 30,
   },
   button: {
     flex: 1,
