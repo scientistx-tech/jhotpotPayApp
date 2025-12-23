@@ -25,6 +25,14 @@ export default function AppStackLayout() {
         options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
       />
       <Stack.Screen
+        name="recharge/minute"
+        options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+      />
+      <Stack.Screen
+        name="recharge/bundle"
+        options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+      />
+      <Stack.Screen
         name="sales/order"
         options={{ presentation: 'card', animation: 'slide_from_right' }}
       />

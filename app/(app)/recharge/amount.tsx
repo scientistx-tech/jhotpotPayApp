@@ -11,7 +11,7 @@ import { usePhone } from '../../../context/PhoneContext';
 import { useRechargeMutation } from '@/api/rechargeApi';
 import OfferDetailsModal from '@/components/recharge/offer-details-modal';
 import { z } from 'zod';
-import { set } from 'react-hook-form';
+
 
 const sim_type = z.enum(["PRE_PAID", "POST_PAID"]);
 type SimType = z.infer<typeof sim_type>;
@@ -53,7 +53,6 @@ export default function RechargeAmount() {
   const [rechargeResult, setRechargeResult] = useState<any>(null);
 
   const networkType = initialNetworkType;
-  const { data, isLoading } = { data: { data: [] }, isLoading: false }; // Mocking the query for offers
 
   const finalAmount = useMemo(() => customAmount || null, [customAmount]);
   const finalPrice = useMemo(() => customAmount ? `BDT: ${customAmount}` : null, [customAmount]);
