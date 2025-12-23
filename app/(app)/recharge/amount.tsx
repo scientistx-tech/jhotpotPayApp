@@ -99,13 +99,12 @@ export default function RechargeAmount() {
     try {
       const result = await recharge(payload).unwrap();
       setRechargeResult(result);
-
       if (result?.success) {
-        alert('Recharge successful!');
         setShowDetailsModal(false);
+        alert(result?.message || 'Recharge successful!');
+        router.replace('/(tabs)'); // Navigate to home page
       }
-      console.log(result)
-
+      console.log(result);
       // Do not close modal or show alert here; let modal show success/error
     } catch (e: any) {
       // Error handled by isRechargeError
