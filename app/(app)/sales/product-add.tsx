@@ -46,7 +46,7 @@ export default function ProductAdd() {
     const handleBackPress = () => router.back();
 
     const handleSubmit = async () => {
-        if (!name || !unit || !stock || !price) {
+        if (!name || !unit ||  !price) {
             Alert.alert('Validation', 'Please fill all required fields.');
             return;
         }
@@ -60,10 +60,10 @@ export default function ProductAdd() {
             const result = await addProduct({
                 name,
                 unit,
-                stock,
+                stock: stock || undefined,
                 price,
                 note: note || undefined,
-                tax,
+                tax: tax || undefined,
                 images: imagesWithMime.length > 0 ? imagesWithMime : undefined,
             }).unwrap();
         
@@ -148,7 +148,7 @@ export default function ProductAdd() {
                 <View style={styles.rowBetween}>
                     <View style={styles.inputBlock}>
                         <RoundedInput
-                            label="Stock *"
+                            label="Stock "
                             placeholder="0"
                             value={stock}
                             onChangeText={setStock}

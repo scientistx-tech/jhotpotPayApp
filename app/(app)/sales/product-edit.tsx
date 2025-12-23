@@ -71,11 +71,11 @@ export default function ProductEdit() {
         id,
         name,
         unit,
-        stock,
+        stock: stock || undefined,
         price,
-        note,
-        tax,
-        images, // previous images (URLs)
+        note: note || undefined,
+        tax: tax || undefined,
+        images: images.length > 0 ? images : [], // previous images (URLs)
         newImages: imagesWithMime.length > 0 ? imagesWithMime : undefined,
       }).unwrap();
       console.log('Update result:', resualt);
