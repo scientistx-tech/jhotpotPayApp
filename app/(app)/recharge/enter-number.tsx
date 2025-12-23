@@ -1,12 +1,13 @@
+import SelectDropdown from '@/components/SelectDropdown';
 import { ActionButton, RechargeHeader } from '@/components/recharge';
-import RoundedInput from '@/components/rounded-input';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { usePhone } from '../../../context/PhoneContext';
+import RoundedInput from '@/components/rounded-input';
 
 const NETWORK_TYPES = [
   { id: 'GRAMEENPHONE', label: 'Grameenphone' },
@@ -21,7 +22,8 @@ export default function RechargeEnterNumber() {
   const router = useRouter();
   const tint = useThemeColor({}, 'tint');
   const [phone, setPhone] = useState('');
-  const [networkType, setNetworkType] = useState('GRAMEENPHONE');
+  const [networkType, setNetworkType] = useState('Grameenphone');
+  const [openOperator, setOpenOperator] = useState(false);
 
   const { setPhone: setPhoneContext } = usePhone();
   const canProceed = useMemo(() => phone.trim().length >= 11 && networkType, [phone, networkType]);
@@ -59,38 +61,24 @@ export default function RechargeEnterNumber() {
             <ThemedText type="defaultSemiBold" style={styles.label}>
               Recipient
             </ThemedText>
+            {/* Use RoundedInput for phone number */}
             <RoundedInput
+              label=""
               placeholder="Enter phone number..."
               value={phone}
               onChangeText={setPhone}
               keyboardType="phone-pad"
             />
-            <ThemedText type="defaultSemiBold" style={[styles.label, { marginTop: 16 }]}>Select Operator</ThemedText>
-            <View style={styles.servicesGrid}>
-              {NETWORK_TYPES.map((op) => (
-                <TouchableOpacity
-                  key={op.id}
-                  style={[
-                    styles.serviceButton,
-                    networkType === op.id && [
-                      styles.serviceButtonActive,
-                      { backgroundColor: tint },
-                    ],
-                  ]}
-                  onPress={() => setNetworkType(op.id)}
-                >
-                  <ThemedText
-                    style={[
-                      styles.serviceButtonText,
-                      networkType === op.id && styles.serviceButtonTextActive,
-                    ]}
-                  >
-                    {op.label}
-                  </ThemedText>
-                </TouchableOpacity>
-              ))}
-            </View>
-
+            <SelectDropdown
+              label="Select Operator"
+              value={networkType}
+              options={NETWORK_TYPES.map((op) => op.label)}
+              placeholder="Choose operator"
+              onSelect={setNetworkType}
+              isOpen={openOperator}
+              setOpen={setOpenOperator}
+              style={{ marginTop: 8 }}
+            />
           </View>
         </View>
         <View style={styles.spacer} />
@@ -172,33 +160,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 12,
   },
-  servicesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-  },
-  serviceButton: {
-    flex: 1,
-    minWidth: '30%',
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E3E7ED',
-    backgroundColor: '#F8FAFD',
-    alignItems: 'center',
-  },
-  serviceButtonActive: {
-    borderColor: 'transparent',
-  },
-  serviceButtonText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#11181C',
-  },
-  serviceButtonTextActive: {
-    color: '#fff',
-  },
+  // ...removed picker/dropdownWrapper styles, handled in SelectDropdown
   spacer: {
     height: 20,
   },
