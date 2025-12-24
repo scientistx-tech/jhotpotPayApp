@@ -77,16 +77,7 @@ export const customerApi = baseApi.injectEndpoints({
 				params: { page, limit, search },
 			}),
 			providesTags: ["Customers"],
-		}),
-		getCustomer: builder.query<CustomerResponse, { id: string }>({
-			query: ({ id }) => ({
-				url: `/product/customers/${id}`,
-				method: "GET",
-			}),
-			providesTags: (result, error, arg) => [
-				{ type: "Customer", id: arg.id },
-			],
-		}),
+		})
 	}),
 });
 
@@ -95,5 +86,4 @@ export const {
 	useUpdateCustomerMutation,
 	useDeleteCustomerMutation,
 	useGetCustomersQuery,
-	useGetCustomerQuery,
 } = customerApi;
