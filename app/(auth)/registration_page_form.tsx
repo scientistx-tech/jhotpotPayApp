@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { StyleSheet, TouchableOpacity, View } from 'react-native'
+import { KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import Toast from 'react-native-toast-message'
 
@@ -15,20 +15,20 @@ export default function RegistrationForm() {
   const router = useRouter()
   const params = useLocalSearchParams()
   const [registerApi, { isLoading }] = useRegisterMutation()
-  
-  const { control, handleSubmit, watch, setValue } = useForm({ 
-    resolver: zodResolver(profileSchema), 
-    defaultValues: { 
-      name: '', 
-      password: '', 
-      nid: '', 
-      email: '', 
-      occupation: '', 
-      income: '', 
-      division: '', 
-      address: '', 
-      referralCode: '' 
-    } 
+
+  const { control, handleSubmit, watch, setValue } = useForm({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      name: '',
+      password: '',
+      nid: '',
+      email: '',
+      occupation: '',
+      income: '',
+      division: '',
+      address: '',
+      referralCode: ''
+    }
   })
 
   const [openSelect, setOpenSelect] = useState<'occupation' | 'division' | null>(null)
@@ -114,34 +114,43 @@ export default function RegistrationForm() {
   return (
     <View style={{ flex: 1 }}>
       {/* <AuthBanner iconName='circle-user' /> */}
-      <ScrollView
+      <KeyboardAvoidingView
         style={{ flex: 1 }}
-        contentContainerStyle={[styles.container, { flexGrow: 1, paddingTop: 80 }]}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
       >
-        <ThemedText type='title' style={{ textAlign: 'center' }}>মাস্টার রেজিস্ট্রেশন প্রফাইল</ThemedText>
-        <View style={{ height: 8 }} />
-        <FormInput name='name' control={control} label='Name' placeholder='Name' />
-        <FormInput name='password' control={control} label='Password' placeholder='Password' secureTextEntry />
-        {/* <FormInput name='phone' control={control} label='Phone Number' placeholder='Phone Number' /> */}
-        <FormInput name='nid' control={control} label='NID Number' placeholder='NID Number' />
-        <FormInput name='email' control={control} label='Email (Optional)' placeholder='Email' />
-        {renderSelect('Occupation', 'occupation', occupationOptions, 'Select Occupation')}
-        <FormInput name='income' control={control} label='Monthly Income' placeholder='Monthly Income' keyboardType='decimal-pad' />
-        {renderSelect('Division', 'division', divisionOptions, 'Select Division')}
-        <FormInput name='address' control={control} label='Address' placeholder='Address' />
-        <FormInput name='referralCode' control={control} label='Referral Code (Optional)' placeholder='referralCode Code' />
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={[
+            styles.screen,
+            { flexGrow: 1, paddingTop: 50, paddingBottom: 170 }
+          ]}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <ThemedText type='title' style={{ textAlign: 'center' }}>মাস্টার রেজিস্ট্রেশন প্রফাইল</ThemedText>
+          <View style={{ height: 8 }} />
+          <FormInput name='name' control={control} label='Name' placeholder='Name' />
+          <FormInput name='password' control={control} label='Password' placeholder='Password' secureTextEntry />
+          {/* <FormInput name='phone' control={control} label='Phone Number' placeholder='Phone Number' /> */}
+          <FormInput name='nid' control={control} label='NID Number' placeholder='NID Number' />
+          <FormInput name='email' control={control} label='Email (Optional)' placeholder='Email' />
+          {renderSelect('Occupation', 'occupation', occupationOptions, 'Select Occupation')}
+          <FormInput name='income' control={control} label='Monthly Income' placeholder='Monthly Income' keyboardType='decimal-pad' />
+          {renderSelect('Division', 'division', divisionOptions, 'Select Division')}
+          <FormInput name='address' control={control} label='Address' placeholder='Address' />
+          <FormInput name='referralCode' control={control} label='Referral Code (Optional)' placeholder='referralCode Code' />
 
-        <View style={{ height: 12 }} />
-        <CustomButton
-          isLoading={isLoading}
-          title='পরবর্তী'
-          onPress={async () => {
-            handleSubmit(onSubmit)();
-          }}
-        />
-      </ScrollView>
+          <View style={{ height: 12 }} />
+          <CustomButton
+            isLoading={isLoading}
+            title='পরবর্তী'
+            onPress={async () => {
+              handleSubmit(onSubmit)();
+            }}
+          />
+        </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   )
 }
@@ -194,4 +203,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#11181C',
   },
+  screen: {
+        paddingHorizontal: 20
+    }
 })

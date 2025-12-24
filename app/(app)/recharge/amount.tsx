@@ -4,14 +4,14 @@ import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { usePhone } from '../../../context/PhoneContext';
 
 
 import { useRechargeMutation } from '@/api/rechargeApi';
 import OfferDetailsModal from '@/components/recharge/offer-details-modal';
 import { z } from 'zod';
-import { set } from 'react-hook-form';
+
 
 const sim_type = z.enum(["PRE_PAID", "POST_PAID"]);
 type SimType = z.infer<typeof sim_type>;
@@ -24,7 +24,9 @@ type Offer = {
   isNew?: boolean;
 };
 
-const AMOUNT_OFFERS: Offer[] = [];
+const AMOUNT_OFFERS: Offer[] = [
+
+];
 
 const CATEGORIES: { id: AmountCategory; label: string }[] = [
   { id: 'amount', label: 'Amount' },
@@ -53,7 +55,6 @@ export default function RechargeAmount() {
   const [rechargeResult, setRechargeResult] = useState<any>(null);
 
   const networkType = initialNetworkType;
-  const { data, isLoading } = { data: { data: [] }, isLoading: false }; // Mocking the query for offers
 
   const finalAmount = useMemo(() => customAmount || null, [customAmount]);
   const finalPrice = useMemo(() => customAmount ? `BDT: ${customAmount}` : null, [customAmount]);
@@ -100,13 +101,12 @@ export default function RechargeAmount() {
     try {
       const result = await recharge(payload).unwrap();
       setRechargeResult(result);
-
       if (result?.success) {
-        alert('Recharge successful!');
         setShowDetailsModal(false);
+        alert(result?.message || 'Recharge successful!');
+        router.replace('/(tabs)'); // Navigate to home page
       }
-      console.log(result)
-
+      console.log(result);
       // Do not close modal or show alert here; let modal show success/error
     } catch (e: any) {
       // Error handled by isRechargeError
@@ -127,122 +127,140 @@ export default function RechargeAmount() {
         onBackPress={handleBackPress}
       />
 
-      <ScrollView
-        style={styles.content}
-        contentContainerStyle={styles.contentContainer}
-        showsVerticalScrollIndicator={false}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
       >
-        <View style={styles.card}>
-          <RecipientCard name="MD. Mystogan Islam" phone={phone} />
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={[
+            styles.screen,
+            { flexGrow: 1}
+          ]}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.card}>
+            <RecipientCard name="MD. Mystogan Islam" phone={phone} />
 
-          {/* TypeSelector replaced with simType selector */}
-          <View style={{ marginVertical: 12, marginHorizontal: 16 }}>
-            <View style={{ flexDirection: 'row', gap: 20 }}>
-              {["PRE_PAID", "POST_PAID"].map((type) => (
-                <TouchableOpacity
-                  key={type}
-                  style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
-                  onPress={() => setSimType(type as SimType)}
-                >
-                  <View style={{
-                    width: 20,
-                    height: 20,
-                    borderRadius: 10,
-                    borderWidth: 2,
-                    borderColor: tint,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}>
-                    {simType === type && (
-                      <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: tint }} />
-                    )}
-                  </View>
-                  <ThemedText style={{ fontSize: 14, fontWeight: '500' }}>{type === 'PRE_PAID' ? 'Prepaid' : 'Postpaid'}</ThemedText>
-                </TouchableOpacity>
-              ))}
+            {/* TypeSelector replaced with simType selector */}
+            <View style={{ marginVertical: 12, marginHorizontal: 16 }}>
+              <View style={{ flexDirection: 'row', gap: 20 }}>
+                {["PRE_PAID", "POST_PAID"].map((type) => (
+                  <TouchableOpacity
+                    key={type}
+                    style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
+                    onPress={() => setSimType(type as SimType)}
+                  >
+                    <View style={{
+                      width: 20,
+                      height: 20,
+                      borderRadius: 10,
+                      borderWidth: 2,
+                      borderColor: tint,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}>
+                      {simType === type && (
+                        <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: tint }} />
+                      )}
+                    </View>
+                    <ThemedText style={{ fontSize: 14, fontWeight: '500' }}>{type === 'PRE_PAID' ? 'Prepaid' : 'Postpaid'}</ThemedText>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
-          </View>
 
-          <View style={styles.categoryRow}>
-            {CATEGORIES.map((cat) => {
-              const isActive = activeCategory === cat.id;
-              return (
-                <TouchableOpacity
-                  key={cat.id}
-                  onPress={() => handleCategoryPress(cat.id)}
-                  style={styles.categoryBtn}
-                >
-                  <ThemedText style={[styles.categoryLabel, isActive && styles.categoryLabelActive]}>
-                    {cat.label}
-                  </ThemedText>
-                  {isActive && <View style={[styles.activeBar, { backgroundColor: tint }]} />}
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </View>
-
-        {/* Amount Tab */}
-        {activeCategory === 'amount' && (
-          <View style={styles.amountSelectionContainer}>
-            <View style={styles.amountButtonsColumn}>
-              {AMOUNT_OFFERS.map((offer) => {
-                const isSelected = selectedOfferId === offer.id && !customAmount;
+            <View style={styles.categoryRow}>
+              {CATEGORIES.map((cat) => {
+                const isActive = activeCategory === cat.id;
                 return (
                   <TouchableOpacity
-                    key={offer.id}
-                    style={[styles.amountButton, isSelected && styles.amountButtonActive]}
-                    onPress={() => {
-                      setSelectedOfferId(offer.id);
-                      setCustomAmount('');
-                    }}
+                    key={cat.id}
+                    onPress={() => handleCategoryPress(cat.id)}
+                    style={styles.categoryBtn}
                   >
-                    <ThemedText style={[styles.amountButtonText, isSelected && styles.amountButtonTextActive]}>
-                      {offer.amount}
+                    <ThemedText style={[styles.categoryLabel, isActive && styles.categoryLabelActive]}>
+                      {cat.label}
                     </ThemedText>
+                    {isActive && <View style={[styles.activeBar, { backgroundColor: tint }]} />}
                   </TouchableOpacity>
                 );
               })}
             </View>
+          </View>
 
-            <View style={styles.typeAmountSection}>
-              <TextInput
-                placeholder="Type Amount..."
-                value={customAmount}
-                onChangeText={(text) => {
-                  setCustomAmount(text);
-                  if (text !== '') setSelectedOfferId(null);
-                }}
-                keyboardType="numeric"
-                placeholderTextColor="#248AEF"
-                style={styles.customAmountInput}
-              />
+          <View style={{ flex: 1, justifyContent: 'space-between', gap: 5 }}>
+            <View >
+              {/* Amount Tab */}
+              {activeCategory === 'amount' && (
+                <View style={styles.amountSelectionContainer}>
+                  <View style={styles.amountButtonsColumn}>
+                    {AMOUNT_OFFERS.map((offer) => {
+                      const isSelected = selectedOfferId === offer.id && !customAmount;
+                      return (
+                        <TouchableOpacity
+                          key={offer.id}
+                          style={[styles.amountButton, isSelected && styles.amountButtonActive]}
+                          onPress={() => {
+                            setSelectedOfferId(offer.id);
+                            setCustomAmount('');
+                          }}
+                        >
+                          <ThemedText style={[styles.amountButtonText, isSelected && styles.amountButtonTextActive]}>
+                            {offer.amount}
+                          </ThemedText>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+
+                  <View style={styles.typeAmountSection}>
+                    <TextInput
+                      placeholder="Type Amount..."
+                      value={customAmount}
+                      onChangeText={(text) => {
+                        setCustomAmount(text);
+                        if (text !== '') setSelectedOfferId(null);
+                      }}
+                      keyboardType="numeric"
+                      placeholderTextColor="#248AEF"
+                      style={styles.customAmountInput}
+                    />
+                  </View>
+                </View>
+              )}
+
+              {/*  */}
+              <View style={styles.availableBalanceContainer}>
+                <ThemedText style={styles.availableBalanceText}>Available Balance: 20,000 BDT</ThemedText>
+              </View>
+
+            </View>
+            {/* <View style={styles.spacer} /> */}
+            <View style={{ marginTop: 90 }}>
+              {
+                !showDetailsModal && <View style={styles.bottomSection}>
+                  <View style={{ flex: 1 }}>
+                    <ActionButton
+                      label="Back"
+                      onPress={handleBackPress}
+                      variant="secondary"
+                    />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <ActionButton label="Next" onPress={handleProceedPress} disabled={!canProceed} />
+                  </View>
+                </View>
+              }
             </View>
           </View>
-        )}
+        </ScrollView>
 
-        {/*  */}
-        <View style={styles.availableBalanceContainer}>
-          <ThemedText style={styles.availableBalanceText}>Available Balance: 20,000 BDT</ThemedText>
-        </View>
 
-        <View style={styles.spacer} />
-      </ScrollView>
 
-      {
-        !showDetailsModal && <View style={styles.bottomSection}>
-          <View style={{ flex: 1 }}>
-            <ActionButton
-              label="Back"
-              onPress={handleBackPress}
-              variant="secondary"
-            />
-          </View>
-          <View style={{ flex: 1 }}>
-            <ActionButton label="Next" onPress={handleProceedPress} disabled={!canProceed} />
-          </View>
-        </View>
-      }
+      </KeyboardAvoidingView>
 
       <OfferDetailsModal
         visible={showDetailsModal}
@@ -369,7 +387,7 @@ const styles = StyleSheet.create({
     color: '#248AEF',
   },
   spacer: {
-    height: 20,
+    height: 1050,
   },
   bottomSection: {
     paddingHorizontal: 16,
@@ -379,6 +397,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
   },
+    screen: {
+        paddingHorizontal: 20
+    }
 });
 
 

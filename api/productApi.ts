@@ -36,7 +36,7 @@ export const productApi = baseApi.injectEndpoints({
 		addProduct: builder.mutation<ProductResponse, {
 			name: string;
 			unit: string;
-			stock: string;
+			stock?: string;
 			price: string;
 			note?: string;
 			tax?: string;
@@ -49,7 +49,7 @@ export const productApi = baseApi.injectEndpoints({
 				}
 				formData.append("name", body.name);
 				formData.append("unit", body.unit);
-				formData.append("stock", body.stock);
+				if (body?.stock) formData.append("stock", body.stock);
 				formData.append("price", body.price);
 				if (body.note) formData.append("note", body.note);
 				if (body.tax !== undefined && body.tax !== null) formData.append("tax", body.tax);
@@ -89,7 +89,7 @@ export const productApi = baseApi.injectEndpoints({
 			id: string;
 			name: string;
 			unit: string;
-			stock: string;
+			stock?: string;
 			price: string;
 			note?: string;
 			tax?: string;
@@ -106,7 +106,7 @@ export const productApi = baseApi.injectEndpoints({
 				}
 				formData.append("name", body.name);
 				formData.append("unit", body.unit);
-				formData.append("stock", body.stock);
+				if (body?.stock) formData.append("stock", body.stock);
 				formData.append("price", body.price);
 				if (body.note) formData.append("note", body.note);
 				if (body.tax !== undefined && body.tax !== null) formData.append("tax", body.tax);

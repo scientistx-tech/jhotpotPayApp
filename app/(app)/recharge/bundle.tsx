@@ -76,10 +76,10 @@ export default function RechargeBundle() {
     };
     try {
       const result = await recharge(payload).unwrap();
-
       if (result.success) {
-        alert('Recharge request created successfully!');
         setShowDetailsModal(false);
+         alert(result?.message || 'Recharge successful!');
+        router.replace('/(tabs)'); // Navigate to home page
       }
     } catch {
       // Error handled by isRechargeError

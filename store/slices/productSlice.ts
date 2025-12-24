@@ -4,7 +4,7 @@ export interface Product {
 	id: string;
 	name: string;
 	unit: string;
-	stock: string;
+	stock?: string;
 	price: string;
 	note?: string;
 	tax?: string;
