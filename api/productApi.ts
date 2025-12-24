@@ -30,8 +30,7 @@ interface ProductResponse {
 }
 
 export const productApi = baseApi.injectEndpoints({
-	tagTypes: ["Products", "Product"],
-	overrideExisting: true,
+  overrideExisting: true,
 	endpoints: (builder) => ({
 		addProduct: builder.mutation<ProductResponse, {
 			name: string;
