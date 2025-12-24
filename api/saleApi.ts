@@ -68,8 +68,8 @@ export const saleApi = baseApi.injectEndpoints({
 				body,
 			}),
 			invalidatesTags: (result, error, arg) => [
-				"Sales",
-				{ type: "Sale", id: arg.id },
+				{ type: "Sales", id: arg.id },
+				{ type: "Sales", id: "LIST" },
 			],
 		}),
 		getSales: builder.query<SaleListResponse, { page?: number; limit?: number }>({
