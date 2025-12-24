@@ -1,10 +1,20 @@
+
 import { configureStore } from "@reduxjs/toolkit";
 import { baseApi } from "../api/baseApi";
 import authReducer from "./slices/authSlice";
+import customerReducer from "./slices/customerSlice";
+import productReducer from "./slices/productSlice";
+import rechargeReducer from "./slices/rechargeSlice";
+import saleReducer from "./slices/saleSlice";
+
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
+    customer: customerReducer,
+    product: productReducer,
+    recharge: rechargeReducer,
+    sale: saleReducer,
     [baseApi.reducerPath]: baseApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
