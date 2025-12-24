@@ -10,7 +10,7 @@ import { Product } from '@/store/slices/productSlice';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 
 export default function ProductList() {
@@ -19,17 +19,20 @@ export default function ProductList() {
   const bg = useThemeColor({}, 'background');
 
 
+
   // Pagination and search state
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [search, setSearch] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
 
   // Delete modal state
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [confirmVisible, setConfirmVisible] = useState(false);
 
+
   // Fetch products from API
-  const { data, isLoading, isError, refetch } = useGetProductsQuery({ page, limit, search });
+  const { data, isLoading, isError, refetch, isFetching } = useGetProductsQuery({ page, limit, search });
   const products = data?.data || [];
   const totalPages = data?.meta?.totalPages || 1;
 
@@ -75,6 +78,7 @@ export default function ProductList() {
     }
   };
 
+
   // Image slider state for each product
   const imageIndexes = useRef<{ [id: string]: number }>({});
   const [, forceUpdate] = useState(0); // to trigger re-render
@@ -96,6 +100,20 @@ export default function ProductList() {
     }, 2000);
     return () => clearInterval(interval);
   }, [products]);
+
+  // Swipe-to-refresh handler
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  };
+
+  // Pagination handler for FlatList
+  const handleEndReached = () => {
+    if (!isLoading && page < totalPages) {
+      setPage((prev) => prev + 1);
+    }
+  };
 
   const renderItem = ({ item }: { item: any }) => {
     const images = item.images && item.images.length > 0 ? item.images : [
@@ -152,6 +170,7 @@ export default function ProductList() {
     );
   };
 
+
   return (
     <ThemedView style={styles.container}>
       <RechargeHeader
@@ -160,12 +179,7 @@ export default function ProductList() {
         onBackPress={handleBackPress}
       />
 
-
-      <ScrollView
-        style={styles.content}
-        contentContainerStyle={styles.contentContainer}
-        showsVerticalScrollIndicator={false}
-      >
+      <View style={styles.content}>
         <CustomButton title="নতুন পণ্য যোগ করুন" onPress={handleAddProduct} />
 
         {/* Search Input */}
@@ -182,24 +196,24 @@ export default function ProductList() {
           />
         </View>
 
-        {/* Loading/Error State */}
-        {isLoading ? (
-          <ActivityIndicator size="large" color={tint} style={{ marginVertical: 24 }} />
-        ) : isError ? (
-          <Text style={{ color: 'red', marginVertical: 24 }}>পণ্য লোড করতে ব্যর্থ হয়েছে।</Text>
-        ) : (
-          <FlatList
-            data={products}
-            keyExtractor={(item) => item.id}
-            renderItem={renderItem}
-            scrollEnabled={false}
-            contentContainerStyle={{ gap: 12, marginTop: 14 }}
-            ListEmptyComponent={<Text style={{ textAlign: 'center', marginVertical: 24 }}>কোনো পণ্য পাওয়া যায়নি।</Text>}
-          />
-        )}
+        {/* Product List with FlatList */}
+        <FlatList
+          data={products}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          contentContainerStyle={{ gap: 12, marginTop: 14, paddingBottom: 40 }}
+          ListEmptyComponent={<Text style={{ textAlign: 'center', marginVertical: 29 }}>কোনো পণ্য পাওয়া যায়নি।</Text>}
+          ListFooterComponent={isLoading ? <ActivityIndicator size="large" color={tint} style={{ marginVertical: 24 }} /> : null}
+          refreshing={refreshing || isFetching}
+          onRefresh={handleRefresh}
+          onEndReached={handleEndReached}
+          onEndReachedThreshold={0.2}
+          onScrollEndDrag={handleEndReached}
+          onMomentumScrollEnd={handleEndReached}
+          showsVerticalScrollIndicator={false}
+        />
 
-
-        {/* Pagination */}
+        {/* Pagination (optional, if you want manual page control) */}
         {totalPages > 1 && (
           <Pagination
             page={page}
@@ -217,11 +231,7 @@ export default function ProductList() {
           onConfirm={handleConfirmDelete}
           message={isDeleting ? 'পণ্য মুছে ফেলা হচ্ছে...' : 'আপনি কি নিশ্চিতভাবে এই পণ্যটি মুছে ফেলতে চান?'}
         />
-      </ScrollView>
-{/* 
-      <View style={styles.bottomAction}>
-        <CustomButton title="Done" onPress={() => router.back()} />
-      </View> */}
+      </View>
     </ThemedView>
   );
 }
@@ -233,6 +243,8 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
   },
   contentContainer: {
     paddingHorizontal: 16,
@@ -242,22 +254,27 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     marginTop: 16,
-    marginBottom: 4,
+    marginBottom: 10,
   },
   searchInput: {
     backgroundColor: '#fff',
-    borderRadius: 8,
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#E3E7ED',
+    borderColor: '#248AEF',
     paddingHorizontal: 14,
     paddingVertical: 10,
     fontSize: 15,
+    height: 55,
   },
   card: {
     borderRadius: 12,
-    padding: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 20,
     shadowColor: '#000',
     shadowOpacity: 0.05,
+    borderWidth: 1,
+    marginBottom: 8,
+    borderColor: '#E3E7ED',
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
     elevation: 2,
