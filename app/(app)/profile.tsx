@@ -1,3 +1,4 @@
+import LogoutButton from '@/components/logout-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -222,7 +223,12 @@ export default function ProfilePage() {
             <ThemedText style={styles.linkText}>About Jhotpot Pay</ThemedText>
             <Ionicons name="chevron-forward" size={20} color={tint} />
           </TouchableOpacity>
+
+          <View style={{ marginTop: 10 , borderTopWidth: 1, borderTopColor: '#E5E8ED', paddingTop: 10 }}>
+            <LogoutButton />
+          </View>
         </View>
+        
 
         <View style={{ height: 30 }} />
       </ScrollView>
