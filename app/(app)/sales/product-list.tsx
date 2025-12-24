@@ -49,6 +49,13 @@ export default function ProductList() {
     });
   };
 
+  const handleViewProduct = (product: Product) => {
+    router.push({
+      pathname: '/(app)/sales/product-detail',
+      params: { id: product.id },
+    });
+  };
+
   const handleDeleteProduct = (productId: string) => {
     setDeleteId(productId);
     setConfirmVisible(true);
@@ -121,6 +128,12 @@ export default function ProductList() {
             <ThemedText style={styles.metaText}>মূল্য: {item.price} টাকা</ThemedText>
           </View>
           <View style={styles.actions}>
+            <TouchableOpacity
+              style={[styles.iconBtn, { backgroundColor: '#E3F6FF' }]}
+              onPress={() => handleViewProduct(item)}
+            >
+              <MaterialCommunityIcons name="eye-outline" size={18} color={tint} />
+            </TouchableOpacity>
             <TouchableOpacity
               style={[styles.iconBtn, { backgroundColor: `${tint}15` }]}
               onPress={() => handleEditProduct(item)}
