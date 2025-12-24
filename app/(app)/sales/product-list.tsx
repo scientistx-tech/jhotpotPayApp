@@ -116,9 +116,9 @@ export default function ProductList() {
           </View>
           <View style={{ flex: 1 }}>
             <ThemedText style={styles.nameText}>{item.name}</ThemedText>
-            <ThemedText style={styles.metaText}>Unit: {item.unit}</ThemedText>
-            <ThemedText style={styles.metaText}>Stock: {item.stock}</ThemedText>
-            <ThemedText style={styles.metaText}>Price: {item.price} BDT</ThemedText>
+            <ThemedText style={styles.metaText}>একক: {item.unit}</ThemedText>
+            <ThemedText style={styles.metaText}>স্টক: {item.stock}</ThemedText>
+            <ThemedText style={styles.metaText}>মূল্য: {item.price} টাকা</ThemedText>
           </View>
           <View style={styles.actions}>
             <TouchableOpacity
@@ -142,7 +142,7 @@ export default function ProductList() {
   return (
     <ThemedView style={styles.container}>
       <RechargeHeader
-        title="Product List"
+        title="পণ্যের তালিকা"
         showBack={true}
         onBackPress={handleBackPress}
       />
@@ -153,13 +153,13 @@ export default function ProductList() {
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
-        <CustomButton title="Add New Product" onPress={handleAddProduct} />
+        <CustomButton title="নতুন পণ্য যোগ করুন" onPress={handleAddProduct} />
 
         {/* Search Input */}
         <View style={styles.searchContainer}>
           <TextInput
             style={styles.searchInput}
-            placeholder="Search products..."
+            placeholder="পণ্য অনুসন্ধান করুন..."
             value={search}
             onChangeText={text => {
               setSearch(text);
@@ -173,7 +173,7 @@ export default function ProductList() {
         {isLoading ? (
           <ActivityIndicator size="large" color={tint} style={{ marginVertical: 24 }} />
         ) : isError ? (
-          <Text style={{ color: 'red', marginVertical: 24 }}>Failed to load products.</Text>
+          <Text style={{ color: 'red', marginVertical: 24 }}>পণ্য লোড করতে ব্যর্থ হয়েছে।</Text>
         ) : (
           <FlatList
             data={products}
@@ -181,7 +181,7 @@ export default function ProductList() {
             renderItem={renderItem}
             scrollEnabled={false}
             contentContainerStyle={{ gap: 12, marginTop: 14 }}
-            ListEmptyComponent={<Text style={{ textAlign: 'center', marginVertical: 24 }}>No products found.</Text>}
+            ListEmptyComponent={<Text style={{ textAlign: 'center', marginVertical: 24 }}>কোনো পণ্য পাওয়া যায়নি।</Text>}
           />
         )}
 
@@ -202,7 +202,7 @@ export default function ProductList() {
           visible={confirmVisible}
           onClose={() => { setConfirmVisible(false); setDeleteId(null); }}
           onConfirm={handleConfirmDelete}
-          message={isDeleting ? 'Deleting product...' : 'Are you sure you want to delete this product?'}
+          message={isDeleting ? 'পণ্য মুছে ফেলা হচ্ছে...' : 'আপনি কি নিশ্চিতভাবে এই পণ্যটি মুছে ফেলতে চান?'}
         />
       </ScrollView>
 {/* 

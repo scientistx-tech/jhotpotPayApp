@@ -112,7 +112,7 @@ export default function ProductAdd() {
     return (
         <ThemedView style={styles.container}>
             <RechargeHeader
-                title="Product Details"
+                title="পণ্যের বিবরণ"
                 showBack={true}
                 onBackPress={handleBackPress}
             />
@@ -131,16 +131,16 @@ export default function ProductAdd() {
                     keyboardShouldPersistTaps="handled"
                 >
                 <RoundedInput
-                    label="Product Name *"
-                    placeholder="Enter product name"
+                    label="পণ্যের নাম *"
+                    placeholder="পণ্যের নাম লিখুন"
                     value={name}
                     onChangeText={setName}
                 />
                 <ProductUnitDropdown
-                    label="Unit *"
+                    label="একক *"
                     value={unit}
                     options={units.map(u => ({ label: u.name, value: u.code }))}
-                    placeholder="Select unit"
+                    placeholder="একক নির্বাচন করুন"
                     onSelect={setUnit}
                     isOpen={openUnit}
                     setOpen={setOpenUnit}
@@ -148,8 +148,8 @@ export default function ProductAdd() {
                 <View style={styles.rowBetween}>
                     <View style={styles.inputBlock}>
                         <RoundedInput
-                            label="Stock "
-                            placeholder="0"
+                            label="স্টক"
+                            placeholder="০"
                             value={stock}
                             onChangeText={setStock}
                             keyboardType="numeric"
@@ -157,8 +157,8 @@ export default function ProductAdd() {
                     </View>
                     <View style={styles.inputBlock}>
                         <RoundedInput
-                            label="Price *"
-                            placeholder="0.00"
+                            label="মূল্য *"
+                            placeholder="০.০০"
                             value={price}
                             onChangeText={setPrice}
                             keyboardType="numeric"
@@ -166,27 +166,27 @@ export default function ProductAdd() {
                     </View>
                 </View>
                 <RoundedInput
-                    label={<Text>Note <Text style={{ color: '#9AA1B0', fontWeight: '400' }}>(Optional)</Text></Text>}
-                    placeholder="Additional notes"
+                    label={<Text>নোট <Text style={{ color: '#9AA1B0', fontWeight: '400' }}>(ঐচ্ছিক)</Text></Text>}
+                    placeholder="অতিরিক্ত নোট"
                     value={note}
                     onChangeText={setNote}
                     multiline
                     style={styles.multiline}
                 />
                 <RoundedInput
-                    label="Tax (%)"
-                    placeholder="0"
+                    label="ট্যাক্স"
+                    placeholder="০"
                     value={tax}
                     onChangeText={setTax}
                     keyboardType="numeric"
                 />
                 <View>
-                    <Text style={styles.label}>Product Images</Text>
+                    <Text style={styles.label}>পণ্যের ছবি</Text>
                     <TouchableOpacity style={styles.uploadBox} onPress={handlePickImages}>
-                        <View style={[styles.uploadIcon, { borderColor: tint }]}>
+                        <View style={[styles.uploadIcon, { borderColor: tint }]}> 
                             <Text style={{ color: tint, fontWeight: 'bold', fontSize: 18 }}>+</Text>
                         </View>
-                        <Text style={styles.uploadText}>Upload Images (up to 5)</Text>
+                        <Text style={styles.uploadText}>ছবি আপলোড করুন (সর্বোচ্চ ৫টি)</Text>
                     </TouchableOpacity>
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap',  gap: 8 }}>
                         {imageUris.map((uri, idx) => (
@@ -212,7 +212,7 @@ export default function ProductAdd() {
                     {isLoading ? (
                         <ActivityIndicator color="#fff" />
                     ) : (
-                        <Text style={{ color: '#fff', fontWeight: '600', fontSize: 16, marginTop: 8 }}>Add Product</Text>
+                        <Text style={{ color: '#fff', fontWeight: '600', fontSize: 16, marginTop: 8 }}>পণ্য যোগ করুন</Text>
                     )}
                 </TouchableOpacity>
             </View>

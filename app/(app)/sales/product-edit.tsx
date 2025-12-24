@@ -130,7 +130,7 @@ export default function ProductEdit() {
   return (
     <ThemedView style={styles.container}>
       <RechargeHeader
-        title="Edit Product"
+        title="পণ্য সম্পাদনা"
         showBack={true}
         onBackPress={handleBackPress}
       />
@@ -146,32 +146,32 @@ export default function ProductEdit() {
           }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled">
-          <RoundedInput label="Name" value={name} onChangeText={setName} />
+          <RoundedInput label="পণ্যের নাম" value={name} onChangeText={setName} />
           <ProductUnitDropdown
-            label="Unit"
+            label="একক"
             value={unit}
             options={units.map(u => ({ label: u.name, value: u.code }))}
-            placeholder="Select unit"
+            placeholder="একক নির্বাচন করুন"
             onSelect={setUnit}
             isOpen={openUnit}
             setOpen={setOpenUnit}
           />
-          <RoundedInput label="Stock" value={stock} onChangeText={setStock} keyboardType="numeric" />
-          <RoundedInput label="Price" value={price} onChangeText={setPrice} keyboardType="numeric" />
+          <RoundedInput label="স্টক" value={stock} onChangeText={setStock} keyboardType="numeric" />
+          <RoundedInput label="মূল্য" value={price} onChangeText={setPrice} keyboardType="numeric" />
           {/* <RoundedInput label="Note" value={note} onChangeText={setNote} multiline style={styles.input} /> */}
           <RoundedInput
-            label={"Note"}
-            placeholder="Additional notes"
+            label={"নোট"}
+            placeholder="অতিরিক্ত নোট"
             value={note}
             onChangeText={setNote}
             multiline
             style={styles.multiline}
           />
-          <RoundedInput label="Tax" value={tax} onChangeText={setTax} keyboardType="numeric" />
+          <RoundedInput label="ট্যাক্স" value={tax} onChangeText={setTax} keyboardType="numeric" />
           {/* Previous Images */}
-          <Text style={styles.label}>Previous Images</Text>
+          <Text style={styles.label}>পূর্বের ছবি</Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
-            {images.length === 0 && <Text style={{ color: '#888' }}>No previous images</Text>}
+            {images.length === 0 && <Text style={{ color: '#888' }}>কোনো পূর্বের ছবি নেই</Text>}
             {images.map((img, idx) => (
               <View key={img} style={{ position: 'relative', marginRight: 8, marginBottom: 8 }}>
                 <Image source={{ uri: img }} style={{ width: 60, height: 60, borderRadius: 8, backgroundColor: '#eee' }} />
@@ -186,12 +186,12 @@ export default function ProductEdit() {
           </View>
 
           {/* New Images */}
-          <Text style={styles.label}>Add New Images</Text>
+          <Text style={styles.label}>নতুন ছবি যোগ করুন</Text>
           <TouchableOpacity style={[styles.uploadBox, { marginBottom: 10 }]} onPress={handlePickImages}>
-            <Text style={styles.uploadText}>Pick Images</Text>
+            <Text style={styles.uploadText}>ছবি নির্বাচন করুন</Text>
           </TouchableOpacity>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-            {newImages.length === 0 && <Text style={{ color: '#888' }}>No new images</Text>}
+            {newImages.length === 0 && <Text style={{ color: '#888' }}>কোনো নতুন ছবি নেই</Text>}
             {newImages.map((img, idx) => (
               <View key={idx} style={{ width: 60, height: 60, borderRadius: 8, overflow: 'hidden', backgroundColor: '#eee', marginTop: 10, position: 'relative' }}>
                 <Image source={{ uri: img.uri }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
@@ -206,10 +206,10 @@ export default function ProductEdit() {
           </View>
           <View style={styles.buttonRow}>
             <TouchableOpacity style={[styles.button, { backgroundColor: '#E3E7ED' }]} onPress={handleBackPress}>
-              <Text style={[styles.buttonText, { color: '#11181C' }]}>Cancel</Text>
+              <Text style={[styles.buttonText, { color: '#11181C' }]}>বাতিল</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.button, { backgroundColor: tint }]} onPress={handleSubmit} disabled={isLoading}>
-              <Text style={styles.buttonText}>{isLoading ? 'Saving...' : 'Save'}</Text>
+              <Text style={styles.buttonText}>{isLoading ? 'সংরক্ষণ হচ্ছে...' : 'সংরক্ষণ করুন'}</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
