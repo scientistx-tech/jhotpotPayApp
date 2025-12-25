@@ -1,4 +1,3 @@
-
 import { useGetSalesQuery } from '@/api/saleApi';
 import Pagination from '@/components/pagination';
 import { RechargeHeader } from '@/components/recharge';
