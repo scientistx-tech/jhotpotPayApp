@@ -1,10 +1,11 @@
+import { useGetCustomersQuery } from '@/api/customerApi';
+import { useGetProductsQuery } from '@/api/productApi';
+import { useCreateSaleMutation } from '@/api/saleApi';
 import { ActionButton, RechargeHeader } from '@/components/recharge';
 import {
-    AddCustomerModal,
     CustomerInfoCard,
     OrderItemRow,
     ProductCard,
-    SalesHeader,
 } from '@/components/sales';
 import SelectInput from '@/components/select-input';
 import { ThemedText } from '@/components/themed-text';
@@ -12,100 +13,140 @@ import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
-
-type Customer = {
-    name: string;
-    email: string;
-    phone: string;
-    address: string;
-};
-
-type OrderItem = {
-    id: string;
-    name: string;
-    quantity: number;
-    price: number;
-};
-
-type Product = {
-    id: string;
-    name: string;
-    price: string;
-    imageUrl?: string;
-};
-
-const PRODUCTS: Product[] = [
-    { id: '1', name: 'Product Name', price: 'BDT' },
-    { id: '2', name: 'Product Name', price: 'BDT' },
-    { id: '3', name: 'Product Name', price: 'BDT' },
-];
+import { ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 export default function SalesOrder() {
     const router = useRouter();
     const tint = useThemeColor({}, 'tint');
-    const [showCustomerModal, setShowCustomerModal] = useState(false);
-    const [customer, setCustomer] = useState<Customer | null>(null);
+    const [customer, setCustomer] = useState<any | null>(null);
     const [selectedCustomerId, setSelectedCustomerId] = useState<string>('');
-    const [customers, setCustomers] = useState<(Customer & { id: string })[]>([
-        { id: '1', name: 'সায়েম আহমেদ', email: 'sayem@example.com', phone: '01712345678', address: 'ঢাকা' },
-        { id: '2', name: 'ফাতিমা খান', email: 'fatima@example.com', phone: '01798765432', address: 'চট্টগ্রাম' },
-        { id: '3', name: 'করিম আলী', email: 'karim@example.com', phone: '01654321987', address: 'সিলেট' },
-    ]);
-    const [orderItems, setOrderItems] = useState<OrderItem[]>([
-        { id: '1', name: 'Item - 1', quantity: 1, price: 100 },
-        { id: '2', name: 'Item - 1', quantity: 1, price: 100 },
-        { id: '3', name: 'Item - 1', quantity: 1, price: 100 },
-    ]);
 
-    const [paymentStatus, setPaymentStatus] = useState<'paid' | 'due'>('paid');
-    const [paidAmount, setPaidAmount] = useState<string>('');
-    const [dueAmount, setDueAmount] = useState<string>('');
+    // Fetch customers and products from API
+    const { data: customersData } = useGetCustomersQuery({ page: 1, limit: 100 });
+    const { data: productsData } = useGetProductsQuery({ page: 1, limit: 100 });
+
+    const customers = customersData?.data || [];
+    const products = productsData?.data || [];
+    // Order items: [{ productId, name, quantity, price }]
+    const [orderItems, setOrderItems] = useState<any[]>([]);
+
+
+    // Discount, paid, due state
+    const [discount, setDiscount] = useState<number>(0);
+    const [paidAmount, setPaidAmount] = useState<number>(0);
+    const [dueAmount, setDueAmount] = useState<number>(0);
 
     const subTotal = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const discount = 3000;
-    const tax = 0;
-    const total = subTotal - discount + tax;
+    // Calculate total tax from selected products
+    const tax = orderItems.reduce((sum, item) => {
+        const product = products.find((p) => p.id === item.productId);
+        const itemTax = product && product.tax ? Number(product.tax) : 0;
+        return sum + itemTax * item.quantity;
+    }, 0);
+    const total = Math.max(0, subTotal - discount + tax);
+
+    // Keep paid + due = total
+    const handlePaidChange = (val: string) => {
+        const paid = Math.max(0, parseInt(val.replace(/[^0-9]/g, '')) || 0);
+        setPaidAmount(paid);
+        setDueAmount(Math.max(0, total - paid));
+    };
+    const handleDueChange = (val: string) => {
+        const due = Math.max(0, parseInt(val.replace(/[^0-9]/g, '')) || 0);
+        setDueAmount(due);
+        setPaidAmount(Math.max(0, total - due));
+    };
+    const handleDiscountChange = (val: string) => {
+        const d = Math.max(0, parseInt(val.replace(/[^0-9]/g, '')) || 0);
+        setDiscount(d);
+        // Adjust paid/due if needed
+        setDueAmount(Math.max(0, total - paidAmount));
+    };
 
     const handleBackPress = () => {
         router.back();
     };
 
-    const handleAddCustomer = () => {
-        setShowCustomerModal(true);
-    };
 
-    const handleSaveCustomer = (newCustomer: Customer) => {
-        const customerId = Date.now().toString();
-        const customerWithId = { ...newCustomer, id: customerId };
-        setCustomers([...customers, customerWithId]);
-        setSelectedCustomerId(customerId);
-        setCustomer(newCustomer);
-        setShowCustomerModal(false);
+    // Add product to order
+    const handleAddProductToOrder = (product: any) => {
+        setOrderItems((prev) => {
+            const exists = prev.find((item) => item.productId === product.id);
+            if (exists) {
+                // If already in order, increase quantity
+                return prev.map((item) =>
+                    item.productId === product.id
+                        ? { ...item, quantity: item.quantity + 1 }
+                        : item
+                );
+            }
+            // Add new product to order
+            return [
+                ...prev,
+                {
+                    productId: product.id,
+                    name: product.name,
+                    quantity: 1,
+                    price: Number(product.price),
+                },
+            ];
+        });
     };
 
     const handleSelectCustomer = (customerId: string) => {
         setSelectedCustomerId(customerId);
         const selected = customers.find((c) => c.id === customerId);
         if (selected) {
-            const { id, ...customerData } = selected;
-            setCustomer(customerData);
+            setCustomer(selected);
         }
     };
 
-    const handleDeleteItem = (id: string) => {
-        setOrderItems(orderItems.filter((item) => item.id !== id));
+    // Sale mutation
+    const [createSale] = useCreateSaleMutation();
+
+    const handleProceed = async () => {
+        if (!selectedCustomerId || orderItems.length === 0) {
+            alert('Select customer and at least one product');
+            return;
+        }
+        try {
+            const body = {
+                customerId: selectedCustomerId,
+                discount,
+                paid: paidAmount,
+                due: dueAmount,
+                products: orderItems.map((item) => ({
+                    productId: item.productId,
+                    quantity: item.quantity,
+                })),
+            };
+            const res = await createSale(body).unwrap();
+            if (res.success) {
+                alert('Sale created successfully!');
+                // Optionally reset form or navigate
+                setOrderItems([]);
+                setDiscount(0);
+                setPaidAmount(0);
+                setDueAmount(0);
+                // Redirect to sale history page
+                router.replace('/(app)/sales/history');
+            } else {
+                alert(res.message || 'Failed to create sale');
+            }
+        } catch (e: any) {
+            alert(e?.data?.message || 'Failed to create sale');
+        }
+    };
+
+    const handleAddCustomer = () => {
+        router.push('/(app)/sales/customer-add');
     };
 
     const handleCancelOrder = () => {
         router.back();
     };
 
-    const handleProceed = () => {
-        console.log('Order placed');
-    };
-
-    const customerOptions = customers.map((cust) => ({
+    const customerOptions = customers.map((cust: any) => ({
         label: cust.name,
         value: cust.id,
     }));
@@ -127,11 +168,11 @@ export default function SalesOrder() {
             >
                 {/* Customer Selector */}
                 <View style={styles.customerSelectorSection}>
-                    <View style={{ width: '55%'}}>
+                    <View style={{ width: '55%' }}>
                         <SelectInput
                             // label="গ্রাহক নির্বাচন করুন"
                             placeholder="Select Customer"
-                            
+
                             value={selectedCustomerId}
                             onChange={(customerId) => handleSelectCustomer(customerId)}
                             options={customerOptions}
@@ -164,12 +205,12 @@ export default function SalesOrder() {
                         showsHorizontalScrollIndicator={false}
                         contentContainerStyle={styles.productList}
                     >
-                        {PRODUCTS.map((product) => (
+                        {products.map((product: any) => (
                             <ProductCard
                                 key={product.id}
                                 productName={product.name}
                                 price={product.price}
-                                onFavoritePress={() => console.log('Favorite', product.id)}
+                                onFavoritePress={() => handleAddProductToOrder(product)}
                             />
                         ))}
                     </ScrollView>
@@ -190,11 +231,12 @@ export default function SalesOrder() {
 
                     {orderItems.map((item) => (
                         <OrderItemRow
-                            key={item.id}
+                            key={item.productId}
                             itemName={item.name}
                             quantity={item.quantity}
                             price={`BDT ${item.price}`}
-                            onDelete={() => handleDeleteItem(item.id)}
+                            onDelete={() => setOrderItems(orderItems.filter((i) => i.productId !== item.productId))}
+                            onQuantityChange={(qty) => setOrderItems(orderItems.map((i) => i.productId === item.productId ? { ...i, quantity: Math.max(1, qty) } : i))}
                         />
                     ))}
                 </View>
@@ -209,12 +251,19 @@ export default function SalesOrder() {
 
                         <View style={styles.summaryRow}>
                             <ThemedText style={styles.summaryLabel}>Discount:</ThemedText>
-                            <ThemedText style={styles.summaryValue}>BDT {discount.toLocaleString()}</ThemedText>
+                            <TextInput
+                                style={[styles.paymentInput, { width: 80 }]}
+                                placeholder="0"
+                                placeholderTextColor="#9AA8B2"
+                                keyboardType="numeric"
+                                value={discount.toString()}
+                                onChangeText={handleDiscountChange}
+                            />
                         </View>
 
                         <View style={styles.summaryRow}>
                             <ThemedText style={styles.summaryLabel}>Tax:</ThemedText>
-                            <ThemedText style={styles.summaryValue}>{tax}</ThemedText>
+                            <ThemedText style={styles.summaryValue}>BDT {tax.toLocaleString()}</ThemedText>
                         </View>
 
                         <View style={[styles.summaryRow, styles.totalRow]}>
@@ -231,31 +280,31 @@ export default function SalesOrder() {
                             Payment Status:
                         </ThemedText>
 
-                        <View style={styles.paymentInputsContainer}>
-                            <View style={styles.paymentInputWrapper}>
-                                <ThemedText style={styles.paymentLabel}>PAID:</ThemedText>
-                                <TextInput
-                                    style={[styles.paymentInput, { borderColor: tint }]}
-                                    placeholder="0"
-                                    placeholderTextColor="#9AA8B2"
-                                    keyboardType="numeric"
-                                    value={paidAmount}
-                                    onChangeText={setPaidAmount}
-                                />
-                            </View>
+                         <View style={styles.paymentInputsContainer}>
+                             <View style={styles.paymentInputWrapper}>
+                                 <ThemedText style={styles.paymentLabel}>PAID:</ThemedText>
+                                 <TextInput
+                                     style={[styles.paymentInput, { borderColor: tint }]}
+                                     placeholder="0"
+                                     placeholderTextColor="#9AA8B2"
+                                     keyboardType="numeric"
+                                     value={paidAmount.toString()}
+                                     onChangeText={handlePaidChange}
+                                 />
+                             </View>
 
-                            <View style={styles.paymentInputWrapper}>
-                                <ThemedText style={styles.paymentLabel}>DUE:</ThemedText>
-                                <TextInput
-                                    style={[styles.paymentInput, { borderColor: tint }]}
-                                    placeholder="0"
-                                    placeholderTextColor="#9AA8B2"
-                                    keyboardType="numeric"
-                                    value={dueAmount}
-                                    onChangeText={setDueAmount}
-                                />
-                            </View>
-                        </View>
+                             <View style={styles.paymentInputWrapper}>
+                                 <ThemedText style={styles.paymentLabel}>DUE:</ThemedText>
+                                 <TextInput
+                                     style={[styles.paymentInput, { borderColor: tint }]}
+                                     placeholder="0"
+                                     placeholderTextColor="#9AA8B2"
+                                     keyboardType="numeric"
+                                     value={dueAmount.toString()}
+                                     onChangeText={handleDueChange}
+                                 />
+                             </View>
+                         </View>
                     </View>
 
 
@@ -263,24 +312,18 @@ export default function SalesOrder() {
                 <View style={styles.spacer} />
             </ScrollView>
 
-            {/* Bottom Actions */}
-            {
-              
-              !showCustomerModal && <View style={styles.bottomSection}>
-                <View style={{ flex: 1 }}>
-                    <ActionButton label="Cancel Order" onPress={handleCancelOrder} />
-                </View>
-                <View style={{ flex: 1 }}>
-                    <ActionButton label="Proceed" onPress={handleProceed} />
-                </View>
-            </View>
-            }
 
-            <AddCustomerModal
-                visible={showCustomerModal}
-                onClose={() => setShowCustomerModal(false)}
-                onSave={handleSaveCustomer}
-            />
+
+                <View style={styles.bottomSection}>
+                    <View style={{ flex: 1 }}>
+                        <ActionButton label="Cancel Order" onPress={handleCancelOrder} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <ActionButton label="Proceed" onPress={handleProceed} />
+                    </View>
+                </View>
+ 
+
         </ThemedView>
     );
 }
@@ -452,4 +495,5 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         gap: 12,
     },
-});
+})
+
