@@ -1,4 +1,4 @@
-import { useGetSalesQuery } from '@/api/saleApi';
+import { useGetSalesQuery, useUpdateSaleMutation } from '@/api/saleApi';
 import Pagination from '@/components/pagination';
 import { RechargeHeader } from '@/components/recharge';
 import { ThemedText } from '@/components/themed-text';
@@ -6,7 +6,8 @@ import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, FlatList, Modal, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 export default function SaleHistory() {
   const router = useRouter();
@@ -17,6 +18,13 @@ export default function SaleHistory() {
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Edit modal state
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editSale, setEditSale] = useState<any>(null);
+  const [editPaid, setEditPaid] = useState('');
+  const [editDue, setEditDue] = useState('');
+  const [updateSale, { isLoading: isUpdating }] = useUpdateSaleMutation();
 
   // Fetch sales from API
   const { data, isLoading, isError, refetch, isFetching } = useGetSalesQuery({ page, limit });
@@ -39,6 +47,32 @@ export default function SaleHistory() {
     }
   };
 
+  // Edit modal handlers
+  const openEditModal = (sale: any) => {
+    setEditSale(sale);
+    setEditPaid(sale.paid.toString());
+    setEditDue(sale.due.toString());
+    setEditModalVisible(true);
+  };
+  const closeEditModal = () => {
+    setEditModalVisible(false);
+    setEditSale(null);
+  };
+  const handleEditSave = async () => {
+    if (!editSale) return;
+    try {
+      await updateSale({
+        id: editSale.id,
+        paid: Number(editPaid),
+        due: Number(editDue),
+      }).unwrap();
+      closeEditModal();
+      refetch();
+    } catch (e) {
+      alert('Failed to update sale');
+    }
+  };
+
   // Sale card renderer
   const renderItem = ({ item }: { item: any }) => {
     return (
@@ -54,6 +88,9 @@ export default function SaleHistory() {
             <ThemedText style={styles.metaText}>বাকি: {item.due} টাকা</ThemedText>
             <ThemedText style={styles.metaText}>পণ্য সংখ্যা: {item.salesItems?.length || 0}</ThemedText>
           </View>
+          <TouchableOpacity onPress={() => openEditModal(item)} style={{ marginLeft: 8 }}>
+            <Icon name="edit" size={22} color={tint} />
+          </TouchableOpacity>
         </View>
       </View>
     );
@@ -96,6 +133,46 @@ export default function SaleHistory() {
 
         <View style={{ height: 24 }} />
       </View>
+
+      {/* Edit Sale Modal */}
+      <Modal
+        visible={editModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={closeEditModal}
+      >
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.3)' }}>
+          <View style={{ backgroundColor: '#fff', borderRadius: 12, padding: 24, width: 320 }}>
+            <ThemedText style={{ fontSize: 16, fontWeight: '700', marginBottom: 12 }}>Edit Sale Payment</ThemedText>
+            <View style={{ marginBottom: 12 }}>
+              <ThemedText style={{ marginBottom: 4 }}>Paid Amount</ThemedText>
+              <TextInput
+                style={{ borderWidth: 1, borderColor: '#E5E8ED', borderRadius: 8, padding: 10, fontSize: 15 }}
+                keyboardType="numeric"
+                value={editPaid}
+                onChangeText={setEditPaid}
+              />
+            </View>
+            <View style={{ marginBottom: 12 }}>
+              <ThemedText style={{ marginBottom: 4 }}>Due Amount</ThemedText>
+              <TextInput
+                style={{ borderWidth: 1, borderColor: '#E5E8ED', borderRadius: 8, padding: 10, fontSize: 15 }}
+                keyboardType="numeric"
+                value={editDue}
+                onChangeText={setEditDue}
+              />
+            </View>
+            <View style={{ flexDirection: 'row', gap: 12, justifyContent: 'flex-end' }}>
+              <TouchableOpacity onPress={closeEditModal} style={{ padding: 10 }}>
+                <ThemedText style={{ color: '#666' }}>Cancel</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleEditSave} style={{ backgroundColor: tint, borderRadius: 8, padding: 10 }}>
+                <ThemedText style={{ color: '#fff', fontWeight: '600' }}>{isUpdating ? 'Saving...' : 'Save'}</ThemedText>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ThemedView>
   );
 }
