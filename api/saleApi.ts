@@ -79,16 +79,7 @@ export const saleApi = baseApi.injectEndpoints({
 				params: { page, limit },
 			}),
 			providesTags: ["Sales"],
-		}),
-		getSale: builder.query<SaleResponse, { id: string }>({
-			query: ({ id }) => ({
-				url: `/product/sales/${id}`,
-				method: "GET",
-			}),
-			providesTags: (result, error, arg) => [
-				{ type: "Sale", id: arg.id },
-			],
-		}),
+		})
 	}),
 });
 
@@ -96,5 +87,4 @@ export const {
 	useCreateSaleMutation,
 	useUpdateSaleMutation,
 	useGetSalesQuery,
-	useGetSaleQuery,
 } = saleApi;

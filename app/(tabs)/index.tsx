@@ -74,7 +74,7 @@ export default function HomeScreen() {
     } else if (item.label === 'গ্রাহক তালিকা') {
       router.push('/(app)/sales/customer-list');
     } else if (item.label === 'History') {
-      router.push('/(app)/wallet/history');
+      router.push('/(app)/sales/history');
     }else {
       console.log('Menu item pressed:', item.label);
     }
