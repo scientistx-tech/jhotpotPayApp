@@ -56,16 +56,16 @@ export default function WalletHistory() {
   return (
     <ThemedView style={styles.container}>
       <RechargeHeader
-        title="Transaction History"
+          title="লেনদেনের ইতিহাস"
         showBack={true}
         onBackPress={handleBackPress}
       />
 
       {/* Search Fields */}
       <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search by Transaction ID"
+          <TextInput
+            style={styles.searchInput}
+            placeholder="লেনদেন আইডি দিয়ে অনুসন্ধান করুন"
           value={transactionId}
           onChangeText={text => {
             setTransactionId(text);
@@ -73,9 +73,9 @@ export default function WalletHistory() {
           }}
           returnKeyType="search"
         />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search by User ID"
+          <TextInput
+            style={styles.searchInput}
+            placeholder="ইউজার আইডি দিয়ে অনুসন্ধান করুন"
           value={userId}
           onChangeText={text => {
             setUserId(text);
@@ -117,7 +117,7 @@ export default function WalletHistory() {
             <View style={{ marginVertical: 24 }}><ThemedText>Loading...</ThemedText></View>
           ) : (
             <ThemedText style={{ textAlign: 'center', marginVertical: 29 }}>
-              No wallet credit history found.
+                কোনো ওয়ালেট ক্রেডিট ইতিহাস পাওয়া যায়নি।
             </ThemedText>
           )
         }
@@ -148,6 +148,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     
     paddingTop: 16,
+    marginTop: 8,
     paddingBottom: 8,
     backgroundColor: '#f5f7fb',
     gap: 8,
