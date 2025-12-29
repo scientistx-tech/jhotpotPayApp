@@ -59,10 +59,20 @@ export const balanceApi = baseApi.injectEndpoints({
 			}),
 			providesTags: ["BalanceCredits"],
 		}),
+		getUserCredit: builder.query<
+			{ success: boolean; message: string; data: any },
+			{ bank_name: string; account_type: string }
+		>({
+			query: ({ bank_name, account_type }) => ({
+				url: `/balance/account/${bank_name}/${account_type}`,
+				method: "GET",
+			}),
+		}),
 	}),
 });
 
 export const {
 	useCreditBalanceMutation,
 	useGetCreditsQuery,
+	useGetUserCreditQuery,
 } = balanceApi;
