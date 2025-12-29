@@ -7,7 +7,7 @@ import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, View, type ImageSourcePropType } from 'react-native';
+import { Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View, type ImageSourcePropType } from 'react-native';
 
 import bkashLogo from '@/assets/online_payment/bkash.png';
 import nagadLogo from '@/assets/online_payment/nagad.png';
@@ -88,24 +88,25 @@ export default function AddBalance() {
     try {
       const payload = method === 'manual'
         ? {
-            bank_name: accountData.data.bank_name,
-            account_number: accountData.data.account_number,
-            amount: form.amount,
-            transaction_id: form.trnxId,
-            online_pay: false,
-            password: form.pin,
-          }
+          bank_name: accountData?.data.bank_name,
+          account_number: accountData?.data.account_number,
+          amount: form.amount,
+          transaction_id: form.trnxId,
+          online_pay: false,
+          password: form.pin,
+        }
         : {
-            bank_name: selectedProvider,
-            account_number: '',
-            amount: form.amount,
-            transaction_id: form.trnxId,
-            online_pay: true,
-            password: form.pin,
-          };
+          bank_name: selectedProvider,
+          account_number: '',
+          amount: form.amount,
+          transaction_id: form.trnxId,
+          online_pay: true,
+          password: form.pin,
+        };
       const res = await creditBalance(payload).unwrap();
       if (res.success) {
         alert('ব্যালেন্স সফলভাবে যোগ হয়েছে!');
+         router.replace('/(app)/wallet/history');
         setForm({ trnxId: '', amount: '', pin: '' });
       } else {
         alert(res.message || 'কিছু ভুল হয়েছে');
@@ -136,7 +137,7 @@ export default function AddBalance() {
   };
 
   const renderManualForm = () => (
-    <View style={[styles.card, { backgroundColor: bg }]}> 
+    <View style={[styles.card, { backgroundColor: bg }]}>
       <View className="noteBox">
         <ThemedText style={styles.noteText}>
           ব্যালেন্স যোগ করতে ব্যাংক, অ্যাকাউন্ট টাইপ, লেনদেন রেফারেন্স ও পরিমাণ দিন।
@@ -234,28 +235,35 @@ export default function AddBalance() {
         onBackPress={handleBackPress}
       />
 
-      <ScrollView
-        style={styles.content}
-        contentContainerStyle={styles.contentContainer}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
       >
-        <View style={[styles.selectorCard, { backgroundColor: bg }]}> 
-          <ThemedText style={styles.sectionLabel}>পদ্ধতি</ThemedText>
-          <View style={styles.radioRow}>
-            {renderRadio('manual', 'ম্যানুয়াল')}
-            {renderRadio('online', 'অনলাইন পেমেন্ট')}
+        <ScrollView
+          style={styles.content}
+          contentContainerStyle={styles.contentContainer}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={[styles.selectorCard, { backgroundColor: bg }]}>
+            <ThemedText style={styles.sectionLabel}>পদ্ধতি</ThemedText>
+            <View style={styles.radioRow}>
+              {renderRadio('manual', 'ম্যানুয়াল')}
+              {renderRadio('online', 'অনলাইন পেমেন্ট')}
+            </View>
           </View>
-        </View>
 
-        {method === 'manual' ? renderManualForm() : renderOnlineOptions()}
+          {method === 'manual' ? renderManualForm() : renderOnlineOptions()}
 
-        <View style={{ height: 12 }} />
-      </ScrollView>
-
-      <View style={styles.bottomAction}>
-        <CustomButton title="ব্যালেন্স যোগ করুন" onPress={handleSubmit} loading={isCrediting} />
+          <View style={{ height: 12 }} />
+           <View style={styles.bottomAction}>
+        <CustomButton title="ব্যালেন্স যোগ করুন" onPress={handleSubmit} isLoading={isCrediting} />
       </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+
+     
     </ThemedView>
   );
 }
@@ -370,7 +378,7 @@ const styles = StyleSheet.create({
   },
   bottomAction: {
     paddingHorizontal: 16,
-    paddingBottom: 40,
+    paddingBottom: 30,
     paddingTop: 12,
   },
 });

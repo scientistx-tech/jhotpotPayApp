@@ -5,7 +5,8 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useRouter } from 'expo-router';
-
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store/store';
 import { FlatList, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
 import { useGetCreditsQuery } from '@/api/balanceApi';
@@ -13,11 +14,13 @@ import Pagination from '@/components/pagination';
 
 export default function WalletHistory() {
   const [page, setPage] = useState(1);
+  const user = useSelector((state: RootState) => state.auth.user);
+console.log(user)
   const [limit] = useState(10);
   const [refreshing, setRefreshing] = useState(false);
   const [transactionId, setTransactionId] = useState('');
-  const [userId, setUserId] = useState('');
-  const { data, isLoading, isError, refetch, isFetching } = useGetCreditsQuery({ page, limit, transactionId, userId });
+
+  const { data, isLoading, isError, refetch, isFetching } = useGetCreditsQuery({ page, limit, transactionId, userId: user?.id || '' });
   const credits = data?.data || [];
   const totalPages = data?.meta?.totalPages || 1;
 
@@ -73,26 +76,16 @@ export default function WalletHistory() {
           }}
           returnKeyType="search"
         />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="ইউজার আইডি দিয়ে অনুসন্ধান করুন"
-          value={userId}
-          onChangeText={text => {
-            setUserId(text);
-            setPage(1);
-          }}
-          returnKeyType="search"
-        />
-        <TouchableOpacity
+
+        {/* <TouchableOpacity
           style={styles.clearBtn}
           onPress={() => {
             setTransactionId('');
-            setUserId('');
             setPage(1);
           }}
         >
           <ThemedText style={styles.clearBtnText}>Clear</ThemedText>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       <FlatList
