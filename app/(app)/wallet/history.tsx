@@ -1,155 +1,56 @@
+import { useState } from 'react';
+
 import RechargeHeader from '@/components/recharge/recharge-header';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useRouter } from 'expo-router';
-import { FlatList, StyleSheet, View } from 'react-native';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store/store';
+import { FlatList, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
-type Transaction = {
-  id: string;
-  type: 'cashout' | 'recharge' | 'commission' | 'bill';
-  title: string;
-  description: string;
-  amount: number;
-  time: string;
-  date: string;
-  avatar: string;
-};
+import { useGetCreditsQuery } from '@/api/balanceApi';
+import Pagination from '@/components/pagination';
 
-const TRANSACTIONS: Transaction[] = [
-  {
-    id: '1',
-    type: 'cashout',
-    title: 'Cashout',
-    description: 'CHARGE ENTERPRISE\nTIME IS 20:30:07 AM',
-    amount: 650,
-    time: '7:00 PM',
-    date: '11/21/2025',
-    avatar: 'A',
-  },
-  {
-    id: '2',
-    type: 'cashout',
-    title: 'Cashout',
-    description: 'CHARGE ENTERPRISE\nTIME IS 20:30:07 AM',
-    amount: 550,
-    time: '7:00 PM',
-    date: '11/21/2025',
-    avatar: 'A',
-  },
-  {
-    id: '3',
-    type: 'cashout',
-    title: 'Cashout',
-    description: 'CHARGE ENTERPRISE\nTIME IS 20:30:07 AM',
-    amount: 650,
-    time: '7:00 PM',
-    date: '11/21/2025',
-    avatar: 'A',
-  },
-  {
-    id: '4',
-    type: 'recharge',
-    title: 'Recharge',
-    description: 'MOBILE RECHARGE\nTIME IS 18:45:30 AM',
-    amount: 500,
-    time: '6:45 PM',
-    date: '11/20/2025',
-    avatar: 'R',
-  },
-  {
-    id: '5',
-    type: 'commission',
-    title: 'Commission',
-    description: 'EARNING RECEIVED\nTIME IS 10:15:42 AM',
-    amount: 1200,
-    time: '10:15 AM',
-    date: '11/20/2025',
-    avatar: 'C',
-  },
-  {
-    id: '6',
-    type: 'bill',
-    title: 'Bill Payment',
-    description: 'UTILITY BILL PAID\nTIME IS 14:20:15 PM',
-    amount: 850,
-    time: '2:20 PM',
-    date: '11/19/2025',
-    avatar: 'B',
-  },
-];
+export default function WalletHistory() {
+  const [page, setPage] = useState(1);
+  const user = useSelector((state: RootState) => state.auth.user);
+console.log(user)
+  const [limit] = useState(10);
+  const [refreshing, setRefreshing] = useState(false);
+  const [transactionId, setTransactionId] = useState('');
 
-export default function History() {
+  const { data, isLoading, isError, refetch, isFetching } = useGetCreditsQuery({ page, limit, transactionId, userId: user?.id || '' });
+  const credits = data?.data || [];
+  const totalPages = data?.meta?.totalPages || 1;
+
   const router = useRouter();
   const tint = useThemeColor({}, 'tint');
   const bg = useThemeColor({}, 'background');
 
   const handleBackPress = () => router.back();
 
-  const getAvatarColor = (type: string) => {
-    switch (type) {
-      case 'cashout':
-        return '#E8F4F8';
-      case 'recharge':
-        return '#FFF3E0';
-      case 'commission':
-        return '#E8F5E9';
-      case 'bill':
-        return '#F3E5F5';
-      default:
-        return '#F0F2F5';
-    }
-  };
-
-  const getAvatarTextColor = (type: string) => {
-    switch (type) {
-      case 'cashout':
-        return '#248AEF';
-      case 'recharge':
-        return '#FF9800';
-      case 'commission':
-        return '#4CAF50';
-      case 'bill':
-        return '#9C27B0';
-      default:
-        return '#666';
-    }
-  };
-
-  const renderItem = ({ item }: { item: Transaction }) => (
-    <View style={[styles.card, { backgroundColor: bg }]}>
+  // Render each credit item
+  const renderItem = ({ item }: { item: any }) => (
+    <View style={[styles.card, { backgroundColor: bg }]}> 
       <View style={styles.cardContent}>
-        {/* Avatar */}
-        <View
-          style={[
-            styles.avatar,
-            { backgroundColor: getAvatarColor(item.type) },
-          ]}
-        >
-          <ThemedText
-            style={[
-              styles.avatarText,
-              { color: getAvatarTextColor(item.type) },
-            ]}
-          >
-            {item.avatar}
+        {/* Avatar: Use first letter of bank_name */}
+        <View style={[styles.avatar, { backgroundColor: '#E8F4F8' }]}> 
+          <ThemedText style={[styles.avatarText, { color: '#248AEF' }]}> 
+            {item.bank_name?.[0] || 'B'}
           </ThemedText>
         </View>
-
-        {/* Transaction Details */}
+        {/* Details */}
         <View style={styles.details}>
-          <ThemedText style={styles.title}>{item.title}</ThemedText>
-          <ThemedText style={styles.description}>{item.description}</ThemedText>
+          <ThemedText style={styles.title}>{item.bank_name} ({item.status})</ThemedText>
+          <ThemedText style={styles.description}>
+            Account: {item.account_number}{"\n"}Txn: {item.transaction_id}
+          </ThemedText>
         </View>
-
-        {/* Amount and Time */}
+        {/* Amount and Date */}
         <View style={styles.rightSection}>
-          <ThemedText style={[styles.amount, { color: tint }]}>
-            BDT {item.amount}
-          </ThemedText>
-          <ThemedText style={styles.dateTime}>
-            {item.time} {item.date}
-          </ThemedText>
+          <ThemedText style={[styles.amount, { color: tint }]}>BDT {item.amount}</ThemedText>
+          <ThemedText style={styles.dateTime}>{new Date(item.createdAt).toLocaleString()}</ThemedText>
         </View>
       </View>
     </View>
@@ -158,19 +59,75 @@ export default function History() {
   return (
     <ThemedView style={styles.container}>
       <RechargeHeader
-        title="Transaction History"
+          title="লেনদেনের ইতিহাস"
         showBack={true}
         onBackPress={handleBackPress}
       />
 
+      {/* Search Fields */}
+      <View style={styles.searchContainer}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="লেনদেন আইডি দিয়ে অনুসন্ধান করুন"
+          value={transactionId}
+          onChangeText={text => {
+            setTransactionId(text);
+            setPage(1);
+          }}
+          returnKeyType="search"
+        />
+
+        {/* <TouchableOpacity
+          style={styles.clearBtn}
+          onPress={() => {
+            setTransactionId('');
+            setPage(1);
+          }}
+        >
+          <ThemedText style={styles.clearBtnText}>Clear</ThemedText>
+        </TouchableOpacity> */}
+      </View>
+
       <FlatList
-        data={TRANSACTIONS}
+        data={credits}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         contentContainerStyle={styles.contentContainer}
         scrollEnabled={true}
         showsVerticalScrollIndicator={false}
+        refreshing={refreshing || isFetching}
+        onRefresh={async () => {
+          setRefreshing(true);
+          await refetch();
+          setRefreshing(false);
+        }}
+        onEndReached={() => {
+          if (!isLoading && page < totalPages) setPage((prev) => prev + 1);
+        }}
+        onEndReachedThreshold={0.2}
+        ListEmptyComponent={
+          isLoading ? (
+            <View style={{ marginVertical: 24 }}><ThemedText>Loading...</ThemedText></View>
+          ) : (
+            <ThemedText style={{ textAlign: 'center', marginVertical: 29 }}>
+                কোনো ওয়ালেট ক্রেডিট ইতিহাস পাওয়া যায়নি।
+            </ThemedText>
+          )
+        }
       />
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <View style={styles.paginationContainer}>
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+          />
+        </View>
+      )}
+
+      <View style={{ height: 24 }} />
     </ThemedView>
   );
 }
@@ -179,6 +136,43 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f7fb',
+  },
+  searchContainer: {
+    paddingHorizontal: 16,
+    
+    paddingTop: 16,
+    marginTop: 8,
+    paddingBottom: 8,
+    backgroundColor: '#f5f7fb',
+    gap: 8,
+  },
+  searchInput: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#248AEF',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    fontSize: 15,
+    height: 48,
+  },
+  clearBtn: {
+    alignSelf: 'flex-end',
+    marginTop: 2,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: '#E3E7ED',
+    borderRadius: 8,
+  },
+  clearBtnText: {
+    color: '#248AEF',
+    fontWeight: '600',
+    fontSize: 13,
+  },
+  paginationContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 8,
   },
   contentContainer: {
     paddingHorizontal: 16,

@@ -51,12 +51,7 @@ export default function CustomerList() {
     });
   };
 
-  const handleViewCustomer = (customer: Customer) => {
-    router.push({
-      pathname: '/(app)/sales/customer-detail',
-      params: { id: customer.id },
-    });
-  };
+
 
   const handleDeleteCustomer = (customerId: string) => {
     setDeleteId(customerId);
@@ -99,19 +94,13 @@ export default function CustomerList() {
         <View style={styles.cardRow}>
           <View style={styles.sliderContainer} />
           <View style={{ flex: 1, gap: 6 }}>
-            <ThemedText style={styles.nameText}>{item.name}</ThemedText>
+            <ThemedText style={styles.nameText}>কাস্টমার নাম: {item.name}</ThemedText>
             <ThemedText style={styles.metaText}>ইমেইল: {item.email}</ThemedText>
             <ThemedText style={styles.metaText}>ফোন: {item.phone}</ThemedText>
             <ThemedText style={styles.metaText}>ঠিকানা: {item.address}</ThemedText>
            
           </View>
           <View style={styles.actions}>
-            <TouchableOpacity
-              style={[styles.iconBtn, { backgroundColor: '#E3F6FF' }]}
-              onPress={() => handleViewCustomer(item)}
-            >
-              <MaterialCommunityIcons name="eye-outline" size={18} color={tint} />
-            </TouchableOpacity>
             <TouchableOpacity
               style={[styles.iconBtn, { backgroundColor: `${tint}15` }]}
               onPress={() => handleEditCustomer(item)}
@@ -275,8 +264,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#E5E8ED',
   },
   nameText: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 12,
+    // fontWeight: '600',
     marginBottom: 4,
   },
   metaText: {
