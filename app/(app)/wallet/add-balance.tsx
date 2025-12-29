@@ -78,26 +78,26 @@ export default function AddBalance() {
   };
 
   const renderManualForm = () => (
-    <View style={[styles.card, { backgroundColor: bg }]}>
+    <View style={[styles.card, { backgroundColor: bg }]}> 
       <View style={styles.noteBox}>
         <ThemedText style={styles.noteText}>
-          Provide your transaction reference and amount to add balance manually.
+          ব্যালেন্স যোগ করতে আপনার লেনদেন রেফারেন্স ও পরিমাণ দিন।
         </ThemedText>
       </View>
       <RoundedInput
-        placeholder="Enter Trnx ID"
+        placeholder="লেনদেন আইডি লিখুন"
         value={form.trnxId}
         onChangeText={(text) => handleChange('trnxId', text)}
         autoCapitalize="none"
       />
       <RoundedInput
-        placeholder="Amount"
+        placeholder="পরিমাণ"
         value={form.amount}
         onChangeText={(text) => handleChange('amount', text)}
         keyboardType="numeric"
       />
       <RoundedInput
-        placeholder="PIN"
+        placeholder="পিন"
         value={form.pin}
         onChangeText={(text) => handleChange('pin', text)}
         secureTextEntry
@@ -129,7 +129,7 @@ export default function AddBalance() {
   return (
     <ThemedView style={styles.container}>
       <RechargeHeader
-        title="Add Balance"
+        title="ব্যালেন্স যোগ করুন"
         showBack={true}
         onBackPress={handleBackPress}
       />
@@ -140,11 +140,11 @@ export default function AddBalance() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={[styles.selectorCard, { backgroundColor: bg }]}>
-          <ThemedText style={styles.sectionLabel}>System</ThemedText>
+        <View style={[styles.selectorCard, { backgroundColor: bg }]}> 
+          <ThemedText style={styles.sectionLabel}>পদ্ধতি</ThemedText>
           <View style={styles.radioRow}>
-            {renderRadio('manual', 'Manual')}
-            {renderRadio('online', 'Online Payment')}
+            {renderRadio('manual', 'ম্যানুয়াল')}
+            {renderRadio('online', 'অনলাইন পেমেন্ট')}
           </View>
         </View>
 
@@ -154,7 +154,7 @@ export default function AddBalance() {
       </ScrollView>
 
       <View style={styles.bottomAction}>
-        <CustomButton title="Add Balance" onPress={() => {}} />
+        <CustomButton title="ব্যালেন্স যোগ করুন" onPress={() => {}} />
       </View>
     </ThemedView>
   );
