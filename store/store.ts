@@ -1,7 +1,9 @@
 
 import { configureStore } from "@reduxjs/toolkit";
 import { baseApi } from "../api/baseApi";
+
 import authReducer from "./slices/authSlice";
+import balanceReducer from "./slices/balanceSlice";
 import customerReducer from "./slices/customerSlice";
 import productReducer from "./slices/productSlice";
 import rechargeReducer from "./slices/rechargeSlice";
@@ -15,6 +17,7 @@ export const store = configureStore({
     product: productReducer,
     recharge: rechargeReducer,
     sale: saleReducer,
+    balance: balanceReducer,
     [baseApi.reducerPath]: baseApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
