@@ -13,12 +13,25 @@ interface BalanceCredit {
 }
 
 interface CreditRequest {
+ bank_name: string;
+ account_number: string;
+ amount: string;
+ transaction_id: string;
+ online_pay: boolean;
+ password: string;
+}
+
+interface DebitRequest {
 	bank_name: string;
 	account_number: string;
 	amount: string;
-	transaction_id: string;
-	online_pay: boolean;
-	password: string;
+}
+
+interface DebitResponse {
+	success: boolean;
+	message: string;
+	meta: any;
+	data: any;
 }
 
 interface CreditResponse {
@@ -59,6 +72,14 @@ export const balanceApi = baseApi.injectEndpoints({
 			}),
 			providesTags: ["BalanceCredits"],
 		}),
+		debitBalance: builder.mutation<DebitResponse, DebitRequest>({
+			query: (body) => ({
+				url: "/balance/debit",
+				method: "POST",
+				body,
+			}),
+			invalidatesTags: ["BalanceCredits"],
+		}),
 		getUserCredit: builder.query<
 			{ success: boolean; message: string; data: any },
 			{ bank_name: string; account_type: string }
@@ -73,6 +94,7 @@ export const balanceApi = baseApi.injectEndpoints({
 
 export const {
 	useCreditBalanceMutation,
+	useDebitBalanceMutation,
 	useGetCreditsQuery,
 	useGetUserCreditQuery,
 } = balanceApi;
