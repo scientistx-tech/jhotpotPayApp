@@ -2,27 +2,35 @@ import LogoutButton from '@/components/logout-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { RootState } from '@/store/store';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Image, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { useSelector } from 'react-redux';
 
 export default function ProfilePage() {
   const router = useRouter();
   const tint = useThemeColor({}, 'tint');
   const bg = useThemeColor({}, 'background');
+  const user = useSelector((state: RootState) => state.auth.user);
+  // user is likely { data: { ...user fields... }, ... }
+  const userData = user?.data || {};
+  console.log("user profile:", userData);
 
   const [profileData, setProfileData] = useState({
-    name: 'Omul Ahmed',
-    email: 'omul@jhotpotpay.com',
-    dateOfBirth: '01/01/1990',
-    presentAddress: 'Dhaka, Bangladesh',
-    permanentAddress: 'Chattogram, Bangladesh',
-    occupation: 'Business',
-    mobileNo: '+880 123 456 789',
-    nidNo: '123456789012',
+    name: userData.name || '',
+    email: userData.email || '',
+    dateOfBirth: '', // Not available in user data
+    presentAddress: userData.address || '',
+    permanentAddress: userData.division || '',
+    occupation: userData.occupation || '',
+    mobileNo: userData.phone || '',
+    nidNo: userData.nid || '',
   });
+
+  console.log("profile data:", profileData);
 
   const [isEditing, setIsEditing] = useState(false);
 
@@ -333,6 +341,9 @@ const styles = StyleSheet.create({
   },
   fieldSection: {
     paddingVertical: 12,
+    display: 'flex',
+    flexDirection: 'row',
+    gap: 4,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E8ED',
   },
