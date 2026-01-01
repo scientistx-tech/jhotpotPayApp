@@ -125,7 +125,18 @@ export const authApi = baseApi.injectEndpoints({
         }
       },
     }),
+    updateProfile: builder.mutation<UserResponse, Partial<RegisterRequest>>({
+      query: (body) => ({ url: '/user', method: 'PATCH', body }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setAuth(data));
+        } catch (error) {
+          console.log('Update profile error:', error);
+        }
+      },
+    }),
   }),
 });
 
-export const { useSendOtpMutation, useVerifyOtpMutation, useRegisterMutation, useLoginMutation, useCheckAuthQuery } = authApi;
+export const { useSendOtpMutation, useVerifyOtpMutation, useRegisterMutation, useLoginMutation, useCheckAuthQuery, useUpdateProfileMutation } = authApi;

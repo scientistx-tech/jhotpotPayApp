@@ -1,3 +1,4 @@
+import { useUpdateProfileMutation } from '@/api/authApi';
 import LogoutButton from '@/components/logout-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -21,23 +22,23 @@ export default function ProfilePage() {
 
   const [profileData, setProfileData] = useState({
     name: userData.name || '',
+    nid: userData.nid || '',
     email: userData.email || '',
-    presentAddress: userData.address || '',
-    permanentAddress: userData.division || '',
     occupation: userData.occupation || '',
-    mobileNo: userData.phone || '',
-    nidNo: userData.nid || '',
-    balance: userData.balance || '',
     income: userData.income || '',
+    division: userData.division || '',
+    address: userData.address || '',
     referralCode: userData.referralCode || '',
+    // Non-editable fields
+    mobileNo: userData.phone || '',
+    balance: userData.balance || '',
     status: userData.status || '',
-
-    // Add more fields as needed
   });
 
   console.log("profile data:", profileData);
 
   const [isEditing, setIsEditing] = useState(false);
+  const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
 
   const handleInputChange = (field: string, value: string) => {
     setProfileData((prev) => ({
@@ -46,9 +47,23 @@ export default function ProfilePage() {
     }));
   };
 
-  const handleSave = () => {
-    setIsEditing(false);
-    console.log('Profile saved:', profileData);
+  const handleSave = async () => {
+    try {
+      await updateProfile({
+        name: profileData.name,
+        nid: profileData.nid,
+        email: profileData.email,
+        occupation: profileData.occupation,
+        income: Number(profileData.income) || 0,
+        division: profileData.division,
+        address: profileData.address,
+        referralCode: profileData.referralCode,
+      }).unwrap();
+      setIsEditing(false);
+      console.log('Profile updated:', profileData);
+    } catch (error) {
+      console.log('Profile update error:', error);
+    }
   };
 
   return (
@@ -97,29 +112,42 @@ export default function ProfilePage() {
           </TouchableOpacity>
         </View>
 
-        {/* Profile Fields - Show all userData properties */}
+        {/* Profile Fields - Only editable for allowed fields */}
         <View style={[styles.card, { backgroundColor: bg }]}> 
-          {Object.entries(profileData).map(([key, value], idx, arr) => (
-            <View
-              key={key}
-              style={[
-                styles.fieldSection,
-                idx === arr.length - 1 ? { borderBottomWidth: 0 } : null,
-              ]}
-            >
-              <ThemedText style={styles.fieldLabel}>{key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).replace('No', 'No')}:</ThemedText>
-              {isEditing ? (
-                <TextInput
-                  style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
-                  value={value?.toString() || ''}
-                  onChangeText={(val) => handleInputChange(key, val)}
-                  editable={isEditing}
-                />
-              ) : (
-                <ThemedText style={styles.fieldValue}>{value?.toString() || ''}</ThemedText>
-              )}
-            </View>
-          ))}
+          {Object.entries(profileData).map(([key, value], idx, arr) => {
+            const editableFields = [
+              'name',
+              'nid',
+              'email',
+              'occupation',
+              'income',
+              'division',
+              'address',
+              'referralCode',
+            ];
+            const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).replace('No', 'No');
+            return (
+              <View
+                key={key}
+                style={[
+                  styles.fieldSection,
+                  idx === arr.length - 1 ? { borderBottomWidth: 0 } : null,
+                ]}
+              >
+                <ThemedText style={styles.fieldLabel}>{label}:</ThemedText>
+                {isEditing && editableFields.includes(key) ? (
+                  <TextInput
+                    style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
+                    value={value?.toString() || ''}
+                    onChangeText={(val) => handleInputChange(key, val)}
+                    editable={true}
+                  />
+                ) : (
+                  <ThemedText style={styles.fieldValue}>{value?.toString() || ''}</ThemedText>
+                )}
+              </View>
+            );
+          })}
         </View>
 
         {/* Footer Links */}
@@ -152,10 +180,11 @@ export default function ProfilePage() {
       {isEditing && (
         <View style={styles.bottomAction}>
           <TouchableOpacity
-            style={[styles.saveButton, { backgroundColor: tint }]}
+            style={[styles.saveButton, { backgroundColor: tint, opacity: isUpdating ? 0.6 : 1 }]}
             onPress={handleSave}
+            disabled={isUpdating}
           >
-            <ThemedText style={styles.saveButtonText}>Save Changes</ThemedText>
+            <ThemedText style={styles.saveButtonText}>{isUpdating ? 'Saving...' : 'Save Changes'}</ThemedText>
           </TouchableOpacity>
         </View>
       )}
