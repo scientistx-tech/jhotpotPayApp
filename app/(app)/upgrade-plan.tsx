@@ -1,302 +1,184 @@
+
+// import { useBuyPackageMutation, useGetPackagesQuery } from '@/api/packageApi';
+// import { useThemeColor } from '@/hooks/use-theme-color';
+// import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+// const UpgradePlan = () => {
+//   const tint = useThemeColor({}, 'tint');
+//   const bg = useThemeColor({}, 'background');
+//   const { data, isLoading, isError, refetch } = useGetPackagesQuery();
+//   const [buyPackage, { isLoading: isBuying }] = useBuyPackageMutation();
+
+//   const handleBuy = async (packageId: string) => {
+//     try {
+//       const res = await buyPackage({ packageId }).unwrap();
+//       if (res.success) {
+//         Alert.alert('Success', res.message || 'Package purchased successfully');
+//         refetch();
+//       } else {
+//         Alert.alert('Error', res.message || 'Could not buy package');
+//       }
+//     } catch (err: any) {
+//       Alert.alert('Error', err?.message || 'Could not buy package');
+//     }
+//   };
+
+//   const packages = data?.data || [];
+
+//   return (
+//     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+//       <Text style={styles.header}>Upgrade Plan</Text>
+//       {isLoading ? (
+//         <ActivityIndicator size="large" color={tint} style={{ marginTop: 32 }} />
+//       ) : isError ? (
+//         <Text style={styles.error}>Could not load plans.</Text>
+//       ) : packages.length === 0 ? (
+//         <Text style={styles.empty}>No plans found.</Text>
+//       ) : (
+//         packages.map(pkg => (
+//           <View key={pkg.id} style={[styles.card, { backgroundColor: bg }]}> 
+//             <Text style={styles.title}>{pkg.name}</Text>
+//             <Text style={styles.details}>{pkg.details}</Text>
+//             <View style={styles.infoRow}>
+//               <Text style={styles.info}>Product Limit: {pkg.product_limit}</Text>
+//               <Text style={styles.info}>Recharge Commission: {pkg.recharge_commission}%</Text>
+//             </View>
+//             <Text style={styles.price}>Price: BDT {pkg.price}</Text>
+// <TouchableOpacity
+//   style={[styles.buyButton, { backgroundColor: tint, opacity: isBuying ? 0.6 : 1 }]}
+//   onPress={() => handleBuy(pkg.id)}
+//   disabled={isBuying}
+// >
+//   <Text style={styles.buyButtonText}>{isBuying ? 'Processing...' : 'Buy'}</Text>
+// </TouchableOpacity>
+//           </View>
+//         ))
+//       )}
+//       <View style={{ height: 32 }} />
+//     </ScrollView>
+//   );
+// };
+
+
+import { useBuyPackageMutation, useGetPackagesQuery } from '@/api/packageApi';
+import { RechargeHeader } from '@/components/recharge';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-export default function UpgradePlanPage() {
+
+export default function UpgradePlan() {
   const router = useRouter();
   const tint = useThemeColor({}, 'tint');
   const bg = useThemeColor({}, 'background');
 
-  const [formData, setFormData] = useState({
-    selectedPackage: '',
-    selectedAgent: '',
-    amountField: '',
-    transactionId: '',
-    name: '',
-    phoneNumber: '',
-    email: '',
-    description: '',
-  });
 
-  const [expandedDropdown, setExpandedDropdown] = useState<string | null>(null);
 
-  const packages = ['Basic Plan', 'Premium Plan', 'Enterprise Plan'];
-  const agents = ['Agent 1', 'Agent 2', 'Agent 3'];
+  const handleBackPress = () => router.back();
+  const [refreshing, setRefreshing] = useState(false);
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+
+
+
+
+
+  const { data, isLoading, isError, refetch } = useGetPackagesQuery();
+  const [buyPackage, { isLoading: isBuying }] = useBuyPackageMutation();
+
+  const handleBuyPackage = async (packageId: string) => {
+    try {
+      const res = await buyPackage({ packageId }).unwrap();
+      if (res.success) {
+        Alert.alert('Success', res.message || 'Package purchased successfully');
+        refetch();
+      } else {
+        Alert.alert('Error', res.message || 'Could not buy package');
+      }
+    } catch (err: any) {
+      Alert.alert('Error', err?.message || 'Could not buy package');
+    }
   };
 
-  const toggleDropdown = (field: string) => {
-    setExpandedDropdown(expandedDropdown === field ? null : field);
+  const packages = data?.data || [];
+
+
+
+
+
+
+  // Swipe-to-refresh handler
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
   };
 
-  const selectOption = (field: string, value: string) => {
-    handleInputChange(field, value);
-    setExpandedDropdown(null);
+
+  const renderItem = ({ item }: { item: any }) => {
+
+    return (
+      <View style={[styles.card, { backgroundColor: bg }]}>
+        <View style={styles.cardRow}>
+
+          <View style={{ flex: 1 }}>
+            <ThemedText style={styles.nameText}>{item.name}</ThemedText>
+            <ThemedText style={styles.nameText}>{item.details}</ThemedText>
+            <ThemedText style={styles.metaText}>Product Limit: {item.product_limit}</ThemedText>
+            <ThemedText style={styles.metaText}>Recharge Commission: {item.recharge_commission}</ThemedText>
+            <ThemedText style={styles.metaText}>Price: BDT {item.price}</ThemedText>
+          </View>
+          <View style={styles.actions}>
+
+            <TouchableOpacity
+              style={[{ backgroundColor: tint, opacity: isBuying ? 0.6 : 1 }]}
+              onPress={() => handleBuyPackage(item.id)}
+              disabled={isBuying}
+            >
+              <ThemedText style={styles.nameText}>{isBuying ? 'Processing...' : 'Buy'}</ThemedText>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    );
   };
 
-  const handleConfirm = () => {
-    console.log('Upgrade plan submitted:', formData);
-  };
+
 
   return (
     <ThemedView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.backButton}
-        >
-          <Ionicons name="arrow-back" size={24} color={tint} />
-        </TouchableOpacity>
-        <ThemedText style={styles.headerTitle}>Upgrade Plan</ThemedText>
-        <View style={{ width: 40 }} />
-      </View>
+      <RechargeHeader
+        title="Upgrade Plan"
+        showBack={true}
+        onBackPress={handleBackPress}
+      />
 
-      <ScrollView
-        style={styles.content}
-        contentContainerStyle={styles.contentContainer}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Select Package */}
-        <View style={{ marginBottom: 16 }}>
-          <ThemedText style={styles.fieldLabel}>Select Package</ThemedText>
-          <TouchableOpacity
-            style={styles.dropdown}
-            onPress={() => toggleDropdown('selectedPackage')}
-          >
-            <ThemedText style={styles.dropdownText}>
-              {formData.selectedPackage || 'Select a package'}
-            </ThemedText>
-            <Ionicons
-              name={expandedDropdown === 'selectedPackage' ? 'chevron-up' : 'chevron-down'}
-              size={20}
-              color={tint}
-            />
-          </TouchableOpacity>
-          {expandedDropdown === 'selectedPackage' && (
-            <View style={styles.dropdownMenu}>
-              {packages.map((pkg) => (
-                <TouchableOpacity
-                  key={pkg}
-                  style={styles.dropdownOption}
-                  onPress={() => selectOption('selectedPackage', pkg)}
-                >
-                  <ThemedText style={styles.dropdownOptionText}>{pkg}</ThemedText>
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
-        </View>
+      <View style={styles.content}>
 
-        {/* Select Agent */}
-        <View style={{ marginBottom: 16 }}>
-          <ThemedText style={styles.fieldLabel}>Select Agent</ThemedText>
-          <TouchableOpacity
-            style={styles.dropdown}
-            onPress={() => toggleDropdown('selectedAgent')}
-          >
-            <ThemedText style={styles.dropdownText}>
-              {formData.selectedAgent || 'Select an agent'}
-            </ThemedText>
-            <Ionicons
-              name={expandedDropdown === 'selectedAgent' ? 'chevron-up' : 'chevron-down'}
-              size={20}
-              color={tint}
-            />
-          </TouchableOpacity>
-          {expandedDropdown === 'selectedAgent' && (
-            <View style={styles.dropdownMenu}>
-              {agents.map((agent) => (
-                <TouchableOpacity
-                  key={agent}
-                  style={styles.dropdownOption}
-                  onPress={() => selectOption('selectedAgent', agent)}
-                >
-                  <ThemedText style={styles.dropdownOptionText}>{agent}</ThemedText>
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
-        </View>
 
-        {/* Amount Field */}
-        <View style={{ marginBottom: 16 }}>
-          <ThemedText style={styles.fieldLabel}>Amount Field</ThemedText>
-          <TextInput
-            style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
-            placeholder="Enter amount"
-            value={formData.amountField}
-            onChangeText={(value) => handleInputChange('amountField', value)}
-            keyboardType="decimal-pad"
-          />
-        </View>
+        {/* Product List with FlatList */}
+        <FlatList
+          data={packages}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          contentContainerStyle={{ gap: 12, marginTop: 14, paddingBottom: 40 }}
+          ListEmptyComponent={<Text style={{ textAlign: 'center', marginVertical: 29 }}>No Upgrade Plan.</Text>}
+          ListFooterComponent={isLoading ? <ActivityIndicator size="large" color={tint} style={{ marginVertical: 24 }} /> : null}
+          refreshing={refreshing || isLoading}
+          onRefresh={handleRefresh}
 
-        {/* Transaction ID */}
-        <View style={{ marginBottom: 16 }}>
-          <ThemedText style={styles.fieldLabel}>Transaction ID</ThemedText>
-          <TextInput
-            style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
-            placeholder="Enter transaction ID"
-            value={formData.transactionId}
-            onChangeText={(value) => handleInputChange('transactionId', value)}
-          />
-        </View>
+          onEndReachedThreshold={0.2}
 
-        {/* Name */}
-        <View style={{ marginBottom: 16 }}>
-          <ThemedText style={styles.fieldLabel}>Name</ThemedText>
-          <TextInput
-            style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
-            placeholder="Enter your name"
-            value={formData.name}
-            onChangeText={(value) => handleInputChange('name', value)}
-          />
-        </View>
+          showsVerticalScrollIndicator={false}
+        />
 
-        {/* Phone Number */}
-        <View style={{ marginBottom: 16 }}>
-          <ThemedText style={styles.fieldLabel}>Phone Number</ThemedText>
-          <TextInput
-            style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
-            placeholder="Enter phone number"
-            value={formData.phoneNumber}
-            onChangeText={(value) => handleInputChange('phoneNumber', value)}
-            keyboardType="phone-pad"
-          />
-        </View>
 
-        {/* Email (Optional) */}
-        <View style={{ marginBottom: 16 }}>
-          <ThemedText style={styles.fieldLabel}>Email (Optional)</ThemedText>
-          <TextInput
-            style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
-            placeholder="Enter email address"
-            value={formData.email}
-            onChangeText={(value) => handleInputChange('email', value)}
-            keyboardType="email-address"
-          />
-        </View>
 
-        {/* Description */}
-        <View style={{ marginBottom: 16 }}>
-          <ThemedText style={styles.fieldLabel}>Description</ThemedText>
-          <TextInput
-            style={[styles.descriptionInput, { color: '#11181C', borderColor: tint }]}
-            placeholder="Enter description"
-            value={formData.description}
-            onChangeText={(value) => handleInputChange('description', value)}
-            multiline
-            numberOfLines={3}
-          />
-        </View>
+        <View style={{ height: 24 }} />
 
-        {/* Plan & Coverage */}
-        <View style={{ marginBottom: 16 }}>
-          <ThemedText style={styles.fieldLabel}>Plan & Coverage</ThemedText>
-          <TouchableOpacity
-            style={styles.dropdown}
-            onPress={() => toggleDropdown('planCoverage')}
-          >
-            <ThemedText style={styles.dropdownText}>Select coverage type</ThemedText>
-            <Ionicons
-              name={expandedDropdown === 'planCoverage' ? 'chevron-up' : 'chevron-down'}
-              size={20}
-              color={tint}
-            />
-          </TouchableOpacity>
-          {expandedDropdown === 'planCoverage' && (
-            <View style={styles.dropdownMenu}>
-              <TouchableOpacity style={styles.dropdownOption}>
-                <ThemedText style={styles.dropdownOptionText}>Comprehensive Coverage</ThemedText>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.dropdownOption}>
-                <ThemedText style={styles.dropdownOptionText}>Basic Coverage</ThemedText>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.dropdownOption}>
-                <ThemedText style={styles.dropdownOptionText}>Extended Coverage</ThemedText>
-              </TouchableOpacity>
-            </View>
-          )}
-        </View>
 
-        {/* Charges */}
-        <View style={{ marginBottom: 16 }} >
-          <ThemedText style={styles.fieldLabel}>Charges</ThemedText>
-          <TouchableOpacity
-            style={styles.dropdown}
-            onPress={() => toggleDropdown('charges')}
-          >
-            <ThemedText style={styles.dropdownText}>View charges</ThemedText>
-            <Ionicons
-              name={expandedDropdown === 'charges' ? 'chevron-up' : 'chevron-down'}
-              size={20}
-              color={tint}
-            />
-          </TouchableOpacity>
-          {expandedDropdown === 'charges' && (
-            <View style={styles.dropdownMenu}>
-              <TouchableOpacity style={styles.dropdownOption}>
-                <ThemedText style={styles.dropdownOptionText}>Standard Charges</ThemedText>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.dropdownOption}>
-                <ThemedText style={styles.dropdownOptionText}>Premium Charges</ThemedText>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.dropdownOption}>
-                <ThemedText style={styles.dropdownOptionText}>Discount Available</ThemedText>
-              </TouchableOpacity>
-            </View>
-          )}
-        </View>
-
-        {/* Payout */}
-        <View style={{ marginBottom: 16 }}>
-          <ThemedText style={styles.fieldLabel}>Payout</ThemedText>
-          <TouchableOpacity
-            style={styles.dropdown}
-            onPress={() => toggleDropdown('payout')}
-          >
-            <ThemedText style={styles.dropdownText}>Select payout option</ThemedText>
-            <Ionicons
-              name={expandedDropdown === 'payout' ? 'chevron-up' : 'chevron-down'}
-              size={20}
-              color={tint}
-            />
-          </TouchableOpacity>
-          {expandedDropdown === 'payout' && (
-            <View style={styles.dropdownMenu}>
-              <TouchableOpacity style={styles.dropdownOption}>
-                <ThemedText style={styles.dropdownOptionText}>Bank Transfer</ThemedText>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.dropdownOption}>
-                <ThemedText style={styles.dropdownOptionText}>Mobile Money</ThemedText>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.dropdownOption}>
-                <ThemedText style={styles.dropdownOptionText}>Wallet Credit</ThemedText>
-              </TouchableOpacity>
-            </View>
-          )}
-        </View>
-
-        <View style={{ height: 30 }} />
-      </ScrollView>
-
-      {/* Confirm Button */}
-      <View style={styles.bottomAction}>
-        <TouchableOpacity
-          style={[styles.confirmButton, { backgroundColor: tint }]}
-          onPress={handleConfirm}
-        >
-          <ThemedText style={styles.confirmButtonText}>Confirm</ThemedText>
-        </TouchableOpacity>
       </View>
     </ThemedView>
   );
@@ -307,122 +189,102 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f7fb',
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 50,
-    paddingBottom: 16,
-    backgroundColor: '#fff',
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    flex: 1,
-    textAlign: 'center',
-  },
   content: {
     flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
   },
   contentContainer: {
     paddingHorizontal: 16,
-    paddingVertical: 20,
+    paddingVertical: 16,
     paddingBottom: 40,
+    gap: 12,
   },
-//   card: {
-//     borderRadius: 12,
-//     padding: 16,
-//     marginBottom: 12,
-//     shadowColor: '#000',
-//     shadowOpacity: 0.05,
-//     shadowRadius: 4,
-//     shadowOffset: { width: 0, height: 2 },
-//     elevation: 2,
-//   },
-  fieldLabel: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: '#4B5563',
-    marginBottom: 8,
+  searchContainer: {
+    marginTop: 16,
+    marginBottom: 10,
   },
-  fieldInput: {
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    fontSize: 14,
-    backgroundColor: '#F8FAFD',
-  },
-  descriptionInput: {
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    fontSize: 14,
-    backgroundColor: '#F8FAFD',
-    textAlignVertical: 'top',
-    height: 90,
-  },
-  dropdown: {
-    borderWidth: 1,
-    borderRadius: 8,
-    borderColor: '#E3E7ED',
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#F8FAFD',
-  },
-  dropdownText: {
-    fontSize: 14,
-    color: '#11181C',
-  },
-  dropdownMenu: {
-    marginTop: 8,
-    borderWidth: 1,
-    borderColor: '#E3E7ED',
-    borderRadius: 8,
+  searchInput: {
     backgroundColor: '#fff',
-    overflow: 'hidden',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#248AEF',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    fontSize: 15,
+    height: 55,
   },
-  dropdownOption: {
+  card: {
+    borderRadius: 12,
     paddingHorizontal: 12,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E3E7ED',
+    paddingVertical: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    borderWidth: 1,
+    marginBottom: 8,
+    borderColor: '#E3E7ED',
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
-  dropdownOptionText: {
-    fontSize: 13,
-    color: '#11181C',
+  sliderContainer: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sliderDots: {
+    flexDirection: 'row',
+    position: 'absolute',
+    bottom: 2,
+    left: 0,
+    right: 0,
+    justifyContent: 'center',
+    gap: 3,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#E3E7ED',
+    marginHorizontal: 1,
+  },
+  activeDot: {
+    backgroundColor: '#248AEF',
+  },
+  cardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  productImage: {
+    width: 52,
+    height: 52,
+    borderRadius: 8,
+    backgroundColor: '#E5E8ED',
+  },
+  nameText: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  metaText: {
+    fontSize: 12,
+    color: '#4B5563',
+  },
+  actions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  iconBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   bottomAction: {
     paddingHorizontal: 16,
-    paddingVertical: 16,
     paddingBottom: 40,
-  },
-  confirmButton: {
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  confirmButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
+    paddingTop: 12,
   },
 });
