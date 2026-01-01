@@ -22,12 +22,17 @@ export default function ProfilePage() {
   const [profileData, setProfileData] = useState({
     name: userData.name || '',
     email: userData.email || '',
-    dateOfBirth: '', // Not available in user data
     presentAddress: userData.address || '',
     permanentAddress: userData.division || '',
     occupation: userData.occupation || '',
     mobileNo: userData.phone || '',
     nidNo: userData.nid || '',
+    balance: userData.balance || '',
+    income: userData.income || '',
+    referralCode: userData.referralCode || '',
+    status: userData.status || '',
+
+    // Add more fields as needed
   });
 
   console.log("profile data:", profileData);
@@ -92,127 +97,29 @@ export default function ProfilePage() {
           </TouchableOpacity>
         </View>
 
-        {/* Profile Fields */}
-        <View style={[styles.card, { backgroundColor: bg }]}>
-          {/* Name */}
-          <View style={styles.fieldSection}>
-            <ThemedText style={styles.fieldLabel}>Name:</ThemedText>
-            {isEditing ? (
-              <TextInput
-                style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
-                value={profileData.name}
-                onChangeText={(value) => handleInputChange('name', value)}
-                editable={isEditing}
-              />
-            ) : (
-              <ThemedText style={styles.fieldValue}>{profileData.name}</ThemedText>
-            )}
-          </View>
-
-          {/* Email */}
-          <View style={styles.fieldSection}>
-            <ThemedText style={styles.fieldLabel}>Email:</ThemedText>
-            {isEditing ? (
-              <TextInput
-                style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
-                value={profileData.email}
-                onChangeText={(value) => handleInputChange('email', value)}
-                editable={isEditing}
-              />
-            ) : (
-              <ThemedText style={styles.fieldValue}>{profileData.email}</ThemedText>
-            )}
-          </View>
-
-          {/* Date of Birth */}
-          <View style={styles.fieldSection}>
-            <ThemedText style={styles.fieldLabel}>Date of Birth:</ThemedText>
-            {isEditing ? (
-              <TextInput
-                style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
-                value={profileData.dateOfBirth}
-                onChangeText={(value) => handleInputChange('dateOfBirth', value)}
-                editable={isEditing}
-              />
-            ) : (
-              <ThemedText style={styles.fieldValue}>{profileData.dateOfBirth}</ThemedText>
-            )}
-          </View>
-
-          {/* Present Address */}
-          <View style={styles.fieldSection}>
-            <ThemedText style={styles.fieldLabel}>Present Address:</ThemedText>
-            {isEditing ? (
-              <TextInput
-                style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
-                value={profileData.presentAddress}
-                onChangeText={(value) => handleInputChange('presentAddress', value)}
-                editable={isEditing}
-              />
-            ) : (
-              <ThemedText style={styles.fieldValue}>{profileData.presentAddress}</ThemedText>
-            )}
-          </View>
-
-          {/* Permanent Address */}
-          <View style={styles.fieldSection}>
-            <ThemedText style={styles.fieldLabel}>Permanent Address:</ThemedText>
-            {isEditing ? (
-              <TextInput
-                style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
-                value={profileData.permanentAddress}
-                onChangeText={(value) => handleInputChange('permanentAddress', value)}
-                editable={isEditing}
-              />
-            ) : (
-              <ThemedText style={styles.fieldValue}>{profileData.permanentAddress}</ThemedText>
-            )}
-          </View>
-
-          {/* Occupation */}
-          <View style={styles.fieldSection}>
-            <ThemedText style={styles.fieldLabel}>Occupation:</ThemedText>
-            {isEditing ? (
-              <TextInput
-                style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
-                value={profileData.occupation}
-                onChangeText={(value) => handleInputChange('occupation', value)}
-                editable={isEditing}
-              />
-            ) : (
-              <ThemedText style={styles.fieldValue}>{profileData.occupation}</ThemedText>
-            )}
-          </View>
-
-          {/* Mobile NO. */}
-          <View style={styles.fieldSection}>
-            <ThemedText style={styles.fieldLabel}>Mobile NO.:</ThemedText>
-            {isEditing ? (
-              <TextInput
-                style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
-                value={profileData.mobileNo}
-                onChangeText={(value) => handleInputChange('mobileNo', value)}
-                editable={isEditing}
-              />
-            ) : (
-              <ThemedText style={styles.fieldValue}>{profileData.mobileNo}</ThemedText>
-            )}
-          </View>
-
-          {/* NID NO. */}
-          <View style={[styles.fieldSection, { borderBottomWidth: 0 }]}>
-            <ThemedText style={styles.fieldLabel}>NID NO.:</ThemedText>
-            {isEditing ? (
-              <TextInput
-                style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
-                value={profileData.nidNo}
-                onChangeText={(value) => handleInputChange('nidNo', value)}
-                editable={isEditing}
-              />
-            ) : (
-              <ThemedText style={styles.fieldValue}>{profileData.nidNo}</ThemedText>
-            )}
-          </View>
+        {/* Profile Fields - Show all userData properties */}
+        <View style={[styles.card, { backgroundColor: bg }]}> 
+          {Object.entries(profileData).map(([key, value], idx, arr) => (
+            <View
+              key={key}
+              style={[
+                styles.fieldSection,
+                idx === arr.length - 1 ? { borderBottomWidth: 0 } : null,
+              ]}
+            >
+              <ThemedText style={styles.fieldLabel}>{key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).replace('No', 'No')}:</ThemedText>
+              {isEditing ? (
+                <TextInput
+                  style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
+                  value={value?.toString() || ''}
+                  onChangeText={(val) => handleInputChange(key, val)}
+                  editable={isEditing}
+                />
+              ) : (
+                <ThemedText style={styles.fieldValue}>{value?.toString() || ''}</ThemedText>
+              )}
+            </View>
+          ))}
         </View>
 
         {/* Footer Links */}
