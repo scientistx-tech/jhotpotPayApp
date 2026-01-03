@@ -76,8 +76,15 @@ interface RegisterResponseWrapped {
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    sendOtp: builder.mutation<SendOtpResponse, SendOtpRequest>({
-      query: (body) => ({ url: "/auth/send-otp", method: "POST", body }),
+    sendOtp: builder.mutation<SendOtpResponse, SendOtpRequest & { key?: string }>({
+      query: (body) => {
+        const isReset = body.key === 'reset';
+        return {
+          url: isReset ? '/auth/send-otp?key=reset' : '/auth/send-otp',
+          method: 'POST',
+          body: { phone: body.phone },
+        };
+      },
     }),
 
     verifyOtp: builder.mutation<VerifyOtpResponse, VerifyOtpRequest>({
@@ -136,7 +143,26 @@ export const authApi = baseApi.injectEndpoints({
         }
       },
     }),
+
+      // Forgot password
+      forgotPassword: builder.mutation<{ success: boolean; message: string; meta: any; data: any }, { otpId: string; password: string }>({
+        query: (body) => ({ url: '/auth/forgot-password', method: 'POST', body }),
+      }),
+
+      // Change password
+      changePassword: builder.mutation<{ success: boolean; message: string; meta: any; data: any }, { oldPassword: string; newPassword: string }>({
+        query: (body) => ({ url: '/auth/change-password', method: 'POST', body }),
+      }),
   }),
 });
 
-export const { useSendOtpMutation, useVerifyOtpMutation, useRegisterMutation, useLoginMutation, useCheckAuthQuery, useUpdateProfileMutation } = authApi;
+export const {
+  useSendOtpMutation,
+  useVerifyOtpMutation,
+  useRegisterMutation,
+  useLoginMutation,
+  useCheckAuthQuery,
+  useUpdateProfileMutation,
+  useForgotPasswordMutation,
+  useChangePasswordMutation,
+} = authApi;
