@@ -64,6 +64,15 @@ export const balanceApi = baseApi.injectEndpoints({
 			}),
 			invalidatesTags: ["BalanceCredits"],
 		}),
+
+		// Online pay via bKash
+		bkashOnlinePay: builder.mutation<{ success: boolean; message: string; data: any }, { amount: string }>({
+			query: (body) => ({
+				url: "/balance/bkash/create",
+				method: "POST",
+				body,
+			}),
+		}),
 		getCredits: builder.query<CreditListResponse, { page?: number; limit?: number; transactionId?: string; userId?: string }>({
 			query: ({ page = 1, limit = 10, transactionId = "", userId = "" }) => ({
 				url: "/balance/credits",
@@ -97,4 +106,5 @@ export const {
 	useDebitBalanceMutation,
 	useGetCreditsQuery,
 	useGetUserCreditQuery,
+ 	useBkashOnlinePayMutation,
 } = balanceApi;
