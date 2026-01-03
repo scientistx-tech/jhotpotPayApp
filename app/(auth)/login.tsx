@@ -71,6 +71,8 @@ export default function Login() {
 
                 <View style={{ height: 8 }} />
 
+                <ThemedText type="link" style={{ textAlign: 'right', marginBottom: 8, marginRight: 4 }} onPress={() => router.push('/(auth)/forgot-password')}>পাসওয়ার্ড ভুলে গেছেন?</ThemedText>
+
                 <View style={{ marginTop: 20, width: '100%' }}>
                     <CustomButton isLoading={isLoading} title='পরবর্তী' onPress={handleSubmit(handleLogin)} />
                 </View>

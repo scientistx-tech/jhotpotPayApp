@@ -1,30 +1,44 @@
+import { useUpdateProfileMutation } from '@/api/authApi';
 import LogoutButton from '@/components/logout-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { RootState } from '@/store/store';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Image, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { useSelector } from 'react-redux';
 
 export default function ProfilePage() {
   const router = useRouter();
   const tint = useThemeColor({}, 'tint');
   const bg = useThemeColor({}, 'background');
+  const user = useSelector((state: RootState) => state.auth.user);
+  // user is likely { data: { ...user fields... }, ... }
+  const userData = user?.data || {};
+  console.log("user profile:", userData);
 
   const [profileData, setProfileData] = useState({
-    name: 'Omul Ahmed',
-    email: 'omul@jhotpotpay.com',
-    dateOfBirth: '01/01/1990',
-    presentAddress: 'Dhaka, Bangladesh',
-    permanentAddress: 'Chattogram, Bangladesh',
-    occupation: 'Business',
-    mobileNo: '+880 123 456 789',
-    nidNo: '123456789012',
+    name: userData.name || '',
+    nid: userData.nid || '',
+    email: userData.email || '',
+    occupation: userData.occupation || '',
+    income: userData.income || '',
+    division: userData.division || '',
+    address: userData.address || '',
+    referralCode: userData.referralCode || '',
+    // Non-editable fields
+    mobileNo: userData.phone || '',
+    balance: userData.balance || '',
+    status: userData.status || '',
   });
 
+  console.log("profile data:", profileData);
+
   const [isEditing, setIsEditing] = useState(false);
+  const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
 
   const handleInputChange = (field: string, value: string) => {
     setProfileData((prev) => ({
@@ -33,9 +47,23 @@ export default function ProfilePage() {
     }));
   };
 
-  const handleSave = () => {
-    setIsEditing(false);
-    console.log('Profile saved:', profileData);
+  const handleSave = async () => {
+    try {
+      await updateProfile({
+        name: profileData.name,
+        nid: profileData.nid,
+        email: profileData.email,
+        occupation: profileData.occupation,
+        income: Number(profileData.income) || 0,
+        division: profileData.division,
+        address: profileData.address,
+        referralCode: profileData.referralCode,
+      }).unwrap();
+      setIsEditing(false);
+      console.log('Profile updated:', profileData);
+    } catch (error) {
+      console.log('Profile update error:', error);
+    }
   };
 
   return (
@@ -84,127 +112,42 @@ export default function ProfilePage() {
           </TouchableOpacity>
         </View>
 
-        {/* Profile Fields */}
-        <View style={[styles.card, { backgroundColor: bg }]}>
-          {/* Name */}
-          <View style={styles.fieldSection}>
-            <ThemedText style={styles.fieldLabel}>Name:</ThemedText>
-            {isEditing ? (
-              <TextInput
-                style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
-                value={profileData.name}
-                onChangeText={(value) => handleInputChange('name', value)}
-                editable={isEditing}
-              />
-            ) : (
-              <ThemedText style={styles.fieldValue}>{profileData.name}</ThemedText>
-            )}
-          </View>
-
-          {/* Email */}
-          <View style={styles.fieldSection}>
-            <ThemedText style={styles.fieldLabel}>Email:</ThemedText>
-            {isEditing ? (
-              <TextInput
-                style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
-                value={profileData.email}
-                onChangeText={(value) => handleInputChange('email', value)}
-                editable={isEditing}
-              />
-            ) : (
-              <ThemedText style={styles.fieldValue}>{profileData.email}</ThemedText>
-            )}
-          </View>
-
-          {/* Date of Birth */}
-          <View style={styles.fieldSection}>
-            <ThemedText style={styles.fieldLabel}>Date of Birth:</ThemedText>
-            {isEditing ? (
-              <TextInput
-                style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
-                value={profileData.dateOfBirth}
-                onChangeText={(value) => handleInputChange('dateOfBirth', value)}
-                editable={isEditing}
-              />
-            ) : (
-              <ThemedText style={styles.fieldValue}>{profileData.dateOfBirth}</ThemedText>
-            )}
-          </View>
-
-          {/* Present Address */}
-          <View style={styles.fieldSection}>
-            <ThemedText style={styles.fieldLabel}>Present Address:</ThemedText>
-            {isEditing ? (
-              <TextInput
-                style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
-                value={profileData.presentAddress}
-                onChangeText={(value) => handleInputChange('presentAddress', value)}
-                editable={isEditing}
-              />
-            ) : (
-              <ThemedText style={styles.fieldValue}>{profileData.presentAddress}</ThemedText>
-            )}
-          </View>
-
-          {/* Permanent Address */}
-          <View style={styles.fieldSection}>
-            <ThemedText style={styles.fieldLabel}>Permanent Address:</ThemedText>
-            {isEditing ? (
-              <TextInput
-                style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
-                value={profileData.permanentAddress}
-                onChangeText={(value) => handleInputChange('permanentAddress', value)}
-                editable={isEditing}
-              />
-            ) : (
-              <ThemedText style={styles.fieldValue}>{profileData.permanentAddress}</ThemedText>
-            )}
-          </View>
-
-          {/* Occupation */}
-          <View style={styles.fieldSection}>
-            <ThemedText style={styles.fieldLabel}>Occupation:</ThemedText>
-            {isEditing ? (
-              <TextInput
-                style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
-                value={profileData.occupation}
-                onChangeText={(value) => handleInputChange('occupation', value)}
-                editable={isEditing}
-              />
-            ) : (
-              <ThemedText style={styles.fieldValue}>{profileData.occupation}</ThemedText>
-            )}
-          </View>
-
-          {/* Mobile NO. */}
-          <View style={styles.fieldSection}>
-            <ThemedText style={styles.fieldLabel}>Mobile NO.:</ThemedText>
-            {isEditing ? (
-              <TextInput
-                style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
-                value={profileData.mobileNo}
-                onChangeText={(value) => handleInputChange('mobileNo', value)}
-                editable={isEditing}
-              />
-            ) : (
-              <ThemedText style={styles.fieldValue}>{profileData.mobileNo}</ThemedText>
-            )}
-          </View>
-
-          {/* NID NO. */}
-          <View style={[styles.fieldSection, { borderBottomWidth: 0 }]}>
-            <ThemedText style={styles.fieldLabel}>NID NO.:</ThemedText>
-            {isEditing ? (
-              <TextInput
-                style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
-                value={profileData.nidNo}
-                onChangeText={(value) => handleInputChange('nidNo', value)}
-                editable={isEditing}
-              />
-            ) : (
-              <ThemedText style={styles.fieldValue}>{profileData.nidNo}</ThemedText>
-            )}
-          </View>
+        {/* Profile Fields - Only editable for allowed fields */}
+        <View style={[styles.card, { backgroundColor: bg }]}> 
+          {Object.entries(profileData).map(([key, value], idx, arr) => {
+            const editableFields = [
+              'name',
+              'nid',
+              'email',
+              'occupation',
+              'income',
+              'division',
+              'address',
+              'referralCode',
+            ];
+            const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).replace('No', 'No');
+            return (
+              <View
+                key={key}
+                style={[
+                  styles.fieldSection,
+                  idx === arr.length - 1 ? { borderBottomWidth: 0 } : null,
+                ]}
+              >
+                <ThemedText style={styles.fieldLabel}>{label}:</ThemedText>
+                {isEditing && editableFields.includes(key) ? (
+                  <TextInput
+                    style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
+                    value={value?.toString() || ''}
+                    onChangeText={(val) => handleInputChange(key, val)}
+                    editable={true}
+                  />
+                ) : (
+                  <ThemedText style={styles.fieldValue}>{value?.toString() || ''}</ThemedText>
+                )}
+              </View>
+            );
+          })}
         </View>
 
         {/* Footer Links */}
@@ -237,10 +180,11 @@ export default function ProfilePage() {
       {isEditing && (
         <View style={styles.bottomAction}>
           <TouchableOpacity
-            style={[styles.saveButton, { backgroundColor: tint }]}
+            style={[styles.saveButton, { backgroundColor: tint, opacity: isUpdating ? 0.6 : 1 }]}
             onPress={handleSave}
+            disabled={isUpdating}
           >
-            <ThemedText style={styles.saveButtonText}>Save Changes</ThemedText>
+            <ThemedText style={styles.saveButtonText}>{isUpdating ? 'Saving...' : 'Save Changes'}</ThemedText>
           </TouchableOpacity>
         </View>
       )}
@@ -333,6 +277,9 @@ const styles = StyleSheet.create({
   },
   fieldSection: {
     paddingVertical: 12,
+    display: 'flex',
+    flexDirection: 'row',
+    gap: 4,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E8ED',
   },

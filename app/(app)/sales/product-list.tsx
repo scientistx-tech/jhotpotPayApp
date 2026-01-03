@@ -39,6 +39,10 @@ export default function ProductList() {
   // Delete mutation
   const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation();
 
+  // Track toggling state for each product
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [toggleStates, setToggleStates] = useState<{ [id: string]: boolean }>({});
+
   const handleBackPress = () => router.back();
 
   const handleAddProduct = () => {
@@ -120,6 +124,30 @@ export default function ProductList() {
       'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=80&q=60',
     ];
     const currentIndex = imageIndexes.current[item.id] || 0;
+    // Use local toggle state if available, else from item
+    const isStock = typeof toggleStates[item.id] === 'boolean' ? toggleStates[item.id] : item.isStock;
+
+    const handleToggleStock = async () => {
+      setTogglingId(item.id);
+      try {
+        const res = await fetch(
+          `http://api.jhotpotpay.com/api/v1/product/toggle-stock-product/${item.id}`,
+          {
+            method: 'GET',
+            headers: {
+              'Authorization': '',
+            },
+          }
+        );
+        const data = await res.json();
+        if (data?.success && data?.data) {
+          console.log(data)
+          setToggleStates((prev) => ({ ...prev, [item.id]: data.data.isStock }));
+        }
+      } catch (e) {}
+      setTogglingId(null);
+    };
+
     return (
       <View style={[styles.card, { backgroundColor: bg }]}> 
         <View style={styles.cardRow}>
@@ -144,6 +172,47 @@ export default function ProductList() {
             <ThemedText style={styles.metaText}>একক: {item.unit}</ThemedText>
             <ThemedText style={styles.metaText}>স্টক: {item.stock}</ThemedText>
             <ThemedText style={styles.metaText}>মূল্য: {item.price} টাকা</ThemedText>
+            <View style={{ marginTop: 10, alignItems: 'flex-start' }}>
+              <TouchableOpacity
+                style={[
+                  {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    paddingVertical: 7,
+                    paddingHorizontal: 16,
+                    borderRadius: 20,
+                    backgroundColor: isStock ? '#E8F9F1' : '#FFF1F3',
+                    borderWidth: 1.5,
+                    borderColor: isStock ? '#12B76A' : '#F04438',
+                    shadowColor: isStock ? '#12B76A' : '#F04438',
+                    shadowOpacity: 0.08,
+                    shadowRadius: 6,
+                    shadowOffset: { width: 0, height: 2 },
+                    elevation: 2,
+                  },
+                ]}
+                onPress={handleToggleStock}
+                disabled={togglingId === item.id}
+                activeOpacity={0.8}
+              >
+                <MaterialCommunityIcons
+                  name={isStock ? 'check-circle' : 'close-circle'}
+                  size={22}
+                  color={isStock ? '#12B76A' : '#F04438'}
+                  style={{ marginRight: 8 }}
+                />
+                <Text
+                  style={{
+                    color: isStock ? '#12B76A' : '#F04438',
+                    fontWeight: '700',
+                    fontSize: 15,
+                    letterSpacing: 0.2,
+                  }}
+                >
+                  {togglingId === item.id ? 'Updating...' : isStock ? 'Stock In' : 'Stock Out'}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
           <View style={styles.actions}>
             <TouchableOpacity

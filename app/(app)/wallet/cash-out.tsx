@@ -1,3 +1,4 @@
+import { useDebitBalanceMutation } from '@/api/balanceApi';
 import CustomButton from '@/components/custom-button';
 import RechargeHeader from '@/components/recharge/recharge-header';
 import RoundedInput from '@/components/rounded-input';
@@ -7,7 +8,7 @@ import { useThemeColor } from '@/hooks/use-theme-color';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, View, type ImageSourcePropType } from 'react-native';
+import { Alert, Image, Pressable, ScrollView, StyleSheet, View, type ImageSourcePropType } from 'react-native';
 
 import bkashLogo from '@/assets/online_payment/bkash.png';
 import nagadLogo from '@/assets/online_payment/nagad.png';
@@ -37,8 +38,31 @@ export default function CashOut() {
   const [selectedOperator, setSelectedOperator] = useState<Operator>(OPERATORS[0]);
   const [showOperators, setShowOperators] = useState(false);
   const [form, setForm] = useState({ receiver: '', amount: '' });
+  const [debitBalance, { isLoading: isDebiting }] = useDebitBalanceMutation();
 
   const handleBackPress = () => router.back();
+
+  const handleSubmit = async () => {
+    try {
+      const res = await debitBalance({
+        bank_name: selectedOperator.id.toUpperCase(),
+        account_number: form.receiver,
+        amount: form.amount,
+      }).unwrap();
+      if (res.success) {
+        Alert.alert('Success', res.message || 'Debit Created!');
+        // Optionally, you can navigate or reset form here
+      }
+    } catch (err: any) {
+      // Check for low balance error (statusCode 400)
+      if (err?.err?.statusCode === 400 || err?.status === 400) {
+        Alert.alert('Low Balance', 'Please add balance to continue.');
+        router.replace('/(app)/wallet/add-balance');
+      } else {
+        Alert.alert('Error', err?.message || 'Could not process cash out');
+      }
+    }
+  };
 
   const handleChange = (key: keyof typeof form, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -114,7 +138,7 @@ export default function CashOut() {
       </ScrollView>
 
       <View style={styles.bottomAction}>
-        <CustomButton title="Submit" onPress={() => {}} />
+        <CustomButton title={isDebiting ? 'Processing...' : 'Submit'} onPress={handleSubmit} disabled={isDebiting} />
       </View>
     </ThemedView>
   );

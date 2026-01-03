@@ -7,7 +7,7 @@ import { useThemeColor } from '@/hooks/use-theme-color';
 import { useRouter } from 'expo-router';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
-import { FlatList, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { FlatList, StyleSheet, TextInput,  View } from 'react-native';
 
 import { useGetCreditsQuery } from '@/api/balanceApi';
 import Pagination from '@/components/pagination';
@@ -15,7 +15,7 @@ import Pagination from '@/components/pagination';
 export default function WalletHistory() {
   const [page, setPage] = useState(1);
   const user = useSelector((state: RootState) => state.auth.user);
-console.log(user)
+
   const [limit] = useState(10);
   const [refreshing, setRefreshing] = useState(false);
   const [transactionId, setTransactionId] = useState('');

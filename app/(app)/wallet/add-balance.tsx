@@ -1,4 +1,4 @@
-import { useCreditBalanceMutation, useGetUserCreditQuery } from '@/api/balanceApi';
+import { useBkashOnlinePayMutation, useCreditBalanceMutation, useGetUserCreditQuery } from '@/api/balanceApi';
 import CustomButton from '@/components/custom-button';
 import RechargeHeader from '@/components/recharge/recharge-header';
 import RoundedInput from '@/components/rounded-input';
@@ -7,16 +7,13 @@ import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View, type ImageSourcePropType } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View, type ImageSourcePropType } from 'react-native';
 
-import bkashLogo from '@/assets/online_payment/bkash.png';
-import nagadLogo from '@/assets/online_payment/nagad.png';
-import rocketLogo from '@/assets/online_payment/rocket.png';
-import upayLogo from '@/assets/online_payment/upay.png';
+// import bkashLogo from '@/assets/online_payment/bkash.png';
 
 type PaymentMethod = 'manual' | 'online';
 
-type PaymentProvider = 'bkash' | 'nagad' | 'rocket' | 'upay';
+type PaymentProvider = 'bkash';
 
 type AccountType = 'SEND_MONEY' | 'CASH_OUT' | 'PAYMENT';
 
@@ -36,22 +33,7 @@ const PROVIDERS: Provider[] = [
   {
     id: 'bkash',
     name: 'বিকাশ',
-    logo: bkashLogo,
-  },
-  {
-    id: 'nagad',
-    name: 'নগদ',
-    logo: nagadLogo,
-  },
-  {
-    id: 'rocket',
-    name: 'রকেট',
-    logo: rocketLogo,
-  },
-  {
-    id: 'upay',
-    name: 'উপায়',
-    logo: upayLogo,
+    logo: undefined, // Image removed for now
   },
 ];
 
@@ -66,6 +48,7 @@ export default function AddBalance() {
   const [selectedAccountType, setSelectedAccountType] = useState<AccountType>('SEND_MONEY');
   const [form, setForm] = useState({ trnxId: '', amount: '', pin: '' });
   const [creditBalance, { isLoading: isCrediting }] = useCreditBalanceMutation();
+  const [bkashOnlinePay, { isLoading: isBkashPaying }] = useBkashOnlinePayMutation();
 
   // Fetch account info when bank_name or account_type changes
   const { data: accountData, isLoading: isAccountLoading, error: accountError } = useGetUserCreditQuery(
@@ -77,42 +60,52 @@ export default function AddBalance() {
 
   // Handle balance credit submit
   const handleSubmit = async () => {
-    if (!form.trnxId || !form.amount || !form.pin) {
-      alert('সব তথ্য পূরণ করুন');
-      return;
-    }
-    if (method === 'manual' && (!accountData || !accountData.data)) {
-      alert('অ্যাকাউন্ট তথ্য লোড হচ্ছে বা পাওয়া যায়নি');
-      return;
-    }
-    try {
-      const payload = method === 'manual'
-        ? {
+    if (method === 'manual') {
+      if (!form.trnxId || !form.amount || !form.pin) {
+        alert('সব তথ্য পূরণ করুন');
+        return;
+      }
+      if (!accountData || !accountData.data) {
+        alert('অ্যাকাউন্ট তথ্য লোড হচ্ছে বা পাওয়া যায়নি');
+        return;
+      }
+      try {
+        const payload = {
           bank_name: accountData?.data.bank_name,
           account_number: accountData?.data.account_number,
           amount: form.amount,
           transaction_id: form.trnxId,
           online_pay: false,
           password: form.pin,
-        }
-        : {
-          bank_name: selectedProvider,
-          account_number: '',
-          amount: form.amount,
-          transaction_id: form.trnxId,
-          online_pay: true,
-          password: form.pin,
         };
-      const res = await creditBalance(payload).unwrap();
-      if (res.success) {
-        alert('ব্যালেন্স সফলভাবে যোগ হয়েছে!');
-         router.replace('/(app)/wallet/history');
-        setForm({ trnxId: '', amount: '', pin: '' });
-      } else {
-        alert(res.message || 'কিছু ভুল হয়েছে');
+        const res = await creditBalance(payload).unwrap();
+        if (res.success) {
+          alert('ব্যালেন্স সফলভাবে যোগ হয়েছে!');
+          router.replace('/(app)/wallet/history');
+          setForm({ trnxId: '', amount: '', pin: '' });
+        } else {
+          alert(res.message || 'কিছু ভুল হয়েছে');
+        }
+      } catch (e: any) {
+        alert(e?.data?.message || 'কিছু ভুল হয়েছে');
       }
-    } catch (e: any) {
-      alert(e?.data?.message || 'কিছু ভুল হয়েছে');
+    } else if (method === 'online') {
+      if (!form.amount) {
+        alert('পরিমাণ লিখুন');
+        return;
+      }
+      try {
+        const res = await bkashOnlinePay({ amount: form.amount }).unwrap();
+        console.log(res)
+        if (res?.paymentURL) {
+          // Will handle navigation to WebView in next step
+          router.push({ pathname: '/(app)/wallet/bkash-webview', params: { url: res?.paymentURL } });
+        } else {
+          alert(res?.message || 'কিছু ভুল হয়েছে');
+        }
+      } catch (e: any) {
+        alert(e?.data?.message || 'কিছু ভুল হয়েছে');
+      }
     }
   };
 
@@ -146,19 +139,14 @@ export default function AddBalance() {
       {/* Bank selection */}
       <ThemedText style={{ marginBottom: 6, fontSize: 13 }}>ব্যাংক নির্বাচন করুন</ThemedText>
       <View style={styles.providersRow}>
-        {PROVIDERS.map((provider) => {
-          const active = selectedProvider === provider.id;
-          return (
-            <Pressable
-              key={provider.id}
-              style={[styles.providerCard, active && { borderColor: tint }]}
-              onPress={() => setSelectedProvider(provider.id)}
-            >
-              <Image source={provider.logo} style={styles.providerLogo} resizeMode="contain" />
-              <ThemedText style={styles.providerName}>{provider.name}</ThemedText>
-            </Pressable>
-          );
-        })}
+        <Pressable
+          key="bkash"
+          style={[styles.providerCard, { borderColor: tint }]}
+          onPress={() => setSelectedProvider('bkash')}
+        >
+          {/* Image removed for now */}
+          <ThemedText style={styles.providerName}>বিকাশ</ThemedText>
+        </Pressable>
       </View>
       {/* Account type selection */}
       <ThemedText style={{ marginTop: 12, marginBottom: 6, fontSize: 13 }}>অ্যাকাউন্ট টাইপ</ThemedText>
@@ -208,22 +196,24 @@ export default function AddBalance() {
   );
 
   const renderOnlineOptions = () => (
-    <View style={[styles.card, { backgroundColor: bg }]}>
+    <View style={[styles.card, { backgroundColor: bg }]}> 
       <View style={styles.providersRow}>
-        {PROVIDERS.map((provider) => {
-          const active = selectedProvider === provider.id;
-          return (
-            <Pressable
-              key={provider.id}
-              style={[styles.providerCard, active && { borderColor: tint }]}
-              onPress={() => setSelectedProvider(provider.id)}
-            >
-              <Image source={provider.logo} style={styles.providerLogo} resizeMode="contain" />
-              <ThemedText style={styles.providerName}>{provider.name}</ThemedText>
-            </Pressable>
-          );
-        })}
+        <Pressable
+          key="bkash"
+          style={[styles.providerCard, { borderColor: tint }]}
+          onPress={() => setSelectedProvider('bkash')}
+        >
+          {/* Image removed for now */}
+          <ThemedText style={styles.providerName}>বিকাশ</ThemedText>
+        </Pressable>
       </View>
+      <RoundedInput
+        placeholder="পরিমাণ"
+        value={form.amount}
+        onChangeText={(text) => handleChange('amount', text)}
+        keyboardType="numeric"
+        style={{ marginTop: 16 }}
+      />
     </View>
   );
 
@@ -258,7 +248,7 @@ export default function AddBalance() {
 
           <View style={{ height: 12 }} />
            <View style={styles.bottomAction}>
-        <CustomButton title="ব্যালেন্স যোগ করুন" onPress={handleSubmit} isLoading={isCrediting} />
+        <CustomButton title="ব্যালেন্স যোগ করুন" onPress={handleSubmit} isLoading={isCrediting || isBkashPaying} />
       </View>
         </ScrollView>
       </KeyboardAvoidingView>
