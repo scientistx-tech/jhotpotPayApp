@@ -6,6 +6,7 @@ import { ThemedView } from '@/components/themed-view';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useForm } from 'react-hook-form';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import Toast from 'react-native-toast-message';
 
 export default function ResetPassword() {
@@ -45,14 +46,21 @@ export default function ResetPassword() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={0}
       >
-        <View style={styles.container}>
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={[
+            styles.screen,
+            { flexGrow: 1, paddingTop: 50, paddingBottom: 200 }
+          ]}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}>
           <ThemedText type='title' style={{ textAlign: 'center', marginTop: 40 }}>নতুন পাসওয়ার্ড সেট করুন</ThemedText>
           <View style={{ height: 24 }} />
           <FormInput name='password' control={control} label='নতুন পাসওয়ার্ড' placeholder='নতুন পাসওয়ার্ড দিন' secureTextEntry />
           <FormInput name='confirm' control={control} label='পাসওয়ার্ড নিশ্চিত করুন' placeholder='আবার দিন' secureTextEntry />
           <View style={{ height: 20 }} />
           <CustomButton isLoading={isLoading} title='রিসেট করুন' onPress={handleSubmit(handleReset)} />
-        </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </ThemedView>
   );
@@ -64,4 +72,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 40,
   },
+   screen: {
+    paddingHorizontal: 20
+  }
 });
