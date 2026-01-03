@@ -154,6 +154,13 @@ export default function ProfilePage() {
         <View style={[styles.card, { backgroundColor: bg, marginTop: 20 }]}>
           <TouchableOpacity 
             style={[styles.linkSection, { borderBottomWidth: 1, borderBottomColor: '#E5E8ED' }]}
+            onPress={() => router.push('/(app)/change-password')}
+          >
+            <ThemedText style={styles.linkText}>Change Password</ThemedText>
+            <Ionicons name="chevron-forward" size={20} color={tint} />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.linkSection, { borderBottomWidth: 1, borderBottomColor: '#E5E8ED' }]}
             onPress={() => router.push('/(app)/contact-us')}
           >
             <ThemedText style={styles.linkText}>Contact Us</ThemedText>
