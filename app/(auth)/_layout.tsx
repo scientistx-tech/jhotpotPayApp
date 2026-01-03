@@ -10,6 +10,10 @@ export default function AuthLayout() {
             <Stack.Screen options={{ header: (props) => <AuthBanner {...props} iconName='mobile'  showBack={true} /> }} name="registration_page_otp_varify" />
             <Stack.Screen options={{ header: (props) => <AuthBanner {...props} iconName='circle-user'   showBack={true} /> }} name="registration_page_form" />
             <Stack.Screen options={{ header: (props) => <AuthBanner {...props} iconName='mobile'   showBack={true} /> }} name="registration_page_pin_setup" />
+
+            <Stack.Screen options={{ header: (props) => <AuthBanner {...props} iconName='mobile'  showBack={true} /> }} name="forgot-password" />
+            <Stack.Screen options={{ header: (props) => <AuthBanner {...props} iconName='mobile'  showBack={true} /> }} name="forgot-otp" />
+            <Stack.Screen options={{ header: (props) => <AuthBanner {...props} iconName='mobile'  showBack={true} /> }} name="reset-password" />
         </Stack>
     );
 }
