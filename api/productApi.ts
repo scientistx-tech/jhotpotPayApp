@@ -84,6 +84,16 @@ export const productApi = baseApi.injectEndpoints({
 			{ type: "Product", id: arg.id }
 		],
 		}),
+		getProductToggleStock: builder.query<ProductResponse, { id: string }>({
+			query: ({ id }) => ({
+				url: `/product/toggle-stock-product/${id}`,
+				method: "GET",
+			}),
+			providesTags: (result, error, arg) => [
+				{ type: "Product", id: arg.id },
+				"Products"
+			],
+		}),
 		updateProduct: builder.mutation<ProductResponse, {
 			id: string;
 			name: string;
@@ -128,5 +138,6 @@ export const {
 	useDeleteProductMutation,
 	useGetProductsQuery,
 	useGetProductQuery,
+  useGetProductToggleStockQuery,
 	useUpdateProductMutation,
 } = productApi;

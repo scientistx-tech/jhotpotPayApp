@@ -86,9 +86,11 @@ export default function UpgradePlan() {
 
 
   const { data, isLoading, isError, refetch } = useGetPackagesQuery();
-  const [buyPackage, { isLoading: isBuying }] = useBuyPackageMutation();
+  const [buyPackage] = useBuyPackageMutation();
+  const [processingId, setProcessingId] = useState<string | null>(null);
 
   const handleBuyPackage = async (packageId: string) => {
+    setProcessingId(packageId);
     try {
       const res = await buyPackage({ packageId }).unwrap();
       if (res.success) {
@@ -98,7 +100,14 @@ export default function UpgradePlan() {
         Alert.alert('Error', res.message || 'Could not buy package');
       }
     } catch (err: any) {
-      Alert.alert('Error', err?.message || 'Could not buy package');
+      if (err?.err?.statusCode === 400 || err?.status === 400) {
+        Alert.alert('Low Balance', 'Please add balance to continue.');
+        router.replace('/(app)/wallet/add-balance');
+      } else {
+        Alert.alert('Error', err?.message || 'Could not buy package');
+      }
+    } finally {
+      setProcessingId(null);
     }
   };
 
@@ -118,11 +127,10 @@ export default function UpgradePlan() {
 
 
   const renderItem = ({ item }: { item: any }) => {
-
+    const isProcessing = processingId === item.id;
     return (
-      <View style={[styles.card, { backgroundColor: bg }]}>
+      <View style={[styles.card, { backgroundColor: bg }]}> 
         <View style={styles.cardRow}>
-
           <View style={{ flex: 1 }}>
             <ThemedText style={styles.nameText}>{item.name}</ThemedText>
             <ThemedText style={styles.nameText}>{item.details}</ThemedText>
@@ -131,13 +139,12 @@ export default function UpgradePlan() {
             <ThemedText style={styles.metaText}>Price: BDT {item.price}</ThemedText>
           </View>
           <View style={styles.actions}>
-
             <TouchableOpacity
-              style={[{ backgroundColor: tint, opacity: isBuying ? 0.6 : 1 }]}
+              style={[{ backgroundColor: tint, paddingHorizontal: 12, paddingVertical: 4, borderRadius: 2, opacity: isProcessing ? 0.6 : 1 }]}
               onPress={() => handleBuyPackage(item.id)}
-              disabled={isBuying}
+              disabled={isProcessing}
             >
-              <ThemedText style={styles.nameText}>{isBuying ? 'Processing...' : 'Buy'}</ThemedText>
+              <ThemedText style={{ color: 'white' }}>{isProcessing ? 'Processing...' : 'Buy'}</ThemedText>
             </TouchableOpacity>
           </View>
         </View>
@@ -173,7 +180,6 @@ export default function UpgradePlan() {
 
           showsVerticalScrollIndicator={false}
         />
-
 
 
         <View style={{ height: 24 }} />
