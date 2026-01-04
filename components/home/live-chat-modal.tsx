@@ -1,24 +1,25 @@
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
-type Message = {
-  id: number;
-  text: string;
-  isUser: boolean;
-  timestamp: Date;
-};
+
+import {
+  Message as ChatMessage,
+  useCreateConversationQuery,
+  useGetMessagesQuery,
+  useSendMessageMutation,
+} from '@/api/chatApi';
 
 type Props = {
   visible: boolean;
@@ -26,40 +27,47 @@ type Props = {
 };
 
 export default function LiveChatModal({ visible, onClose }: Props) {
+
   const tint = useThemeColor({}, 'tint');
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 1,
-      text: 'Hello! How can I help you today?',
-      isUser: false,
-      timestamp: new Date(),
-    },
-  ]);
   const [inputText, setInputText] = useState('');
+  const scrollViewRef = useRef<ScrollView>(null);
 
-  const handleSendMessage = () => {
-    if (inputText.trim()) {
-      const newMessage: Message = {
-        id: messages.length + 1,
-        text: inputText,
-        isUser: true,
-        timestamp: new Date(),
-      };
-      setMessages([...messages, newMessage]);
-      setInputText('');
+  // Create or fetch conversation
+  const { data: conversationData, isLoading: isConversationLoading, refetch: refetchConversation } = useCreateConversationQuery();
+  const conversationId = conversationData?.data?.id;
 
-      // Simulate agent response
-      setTimeout(() => {
-        const agentResponse: Message = {
-          id: messages.length + 2,
-          text: 'Thank you for your message. An agent will respond shortly.',
-          isUser: false,
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, agentResponse]);
-      }, 1000);
+  // Fetch messages for conversation
+  const {
+    data: messagesData,
+    isLoading: isMessagesLoading,
+    refetch: refetchMessages,
+  } = useGetMessagesQuery(conversationId!, {
+    skip: !conversationId || !visible,
+    pollingInterval: visible && conversationId ? 3000 : 0,
+  });
+
+  // Send message mutation
+  const [sendMessage, { isLoading: isSending }] = useSendMessageMutation();
+
+  // Send message handler
+  const handleSendMessage = async () => {
+    if (inputText.trim() && conversationId) {
+      try {
+        await sendMessage({ conversationId, text: inputText }).unwrap();
+        setInputText('');
+        refetchMessages();
+      } catch (e) {
+        // Optionally handle error
+      }
     }
   };
+
+  // Auto-scroll to bottom on new messages
+  useEffect(() => {
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollToEnd({ animated: true });
+    }
+  }, [messagesData]);
 
   return (
     <Modal visible={visible} animationType="slide" transparent={false}>
@@ -77,44 +85,50 @@ export default function LiveChatModal({ visible, onClose }: Props) {
         </View>
 
         {/* Messages */}
+
         <ScrollView
+          ref={scrollViewRef}
           style={styles.messagesContainer}
           contentContainerStyle={styles.messagesContent}
         >
-          {messages.map((message) => (
-            <View
-              key={message.id}
-              style={[
-                styles.messageBubble,
-                message.isUser ? styles.userMessage : styles.agentMessage,
-              ]}
-            >
+          {isConversationLoading || isMessagesLoading ? (
+            <Text>Loading chat...</Text>
+          ) : (
+            messagesData?.data?.map((message: ChatMessage) => (
               <View
+                key={message.id}
                 style={[
-                  styles.avatarCircle,
-                  {
-                    backgroundColor: message.isUser ? tint : '#E0E0E0',
-                  },
+                  styles.messageBubble,
+                  message.sender ? styles.userMessage : styles.agentMessage,
                 ]}
               >
-                <Text style={styles.avatarText}>
-                  {message.isUser ? 'U' : 'A'}
-                </Text>
-              </View>
-              <View style={styles.messageContent}>
-                <Text
+                <View
                   style={[
-                    styles.messageText,
-                    message.isUser
-                      ? styles.userMessageText
-                      : styles.agentMessageText,
+                    styles.avatarCircle,
+                    {
+                      backgroundColor: message.sender ? tint : '#E0E0E0',
+                    },
                   ]}
                 >
-                  {message.text}
-                </Text>
+                  <Text style={styles.avatarText}>
+                    {message.sender ? 'U' : 'A'}
+                  </Text>
+                </View>
+                <View style={styles.messageContent}>
+                  <Text
+                    style={[
+                      styles.messageText,
+                      message.sender
+                        ? styles.userMessageText
+                        : styles.agentMessageText,
+                    ]}
+                  >
+                    {message.text}
+                  </Text>
+                </View>
               </View>
-            </View>
-          ))}
+            ))
+          )}
         </ScrollView>
 
         {/* Input */}
@@ -128,8 +142,9 @@ export default function LiveChatModal({ visible, onClose }: Props) {
             multiline
           />
           <TouchableOpacity
-            style={[styles.sendButton, { backgroundColor: tint }]}
+            style={[styles.sendButton, { backgroundColor: tint, opacity: isSending ? 0.5 : 1 }]}
             onPress={handleSendMessage}
+            disabled={isSending || !inputText.trim()}
           >
             <Ionicons name="send" size={20} color="#fff" />
           </TouchableOpacity>
