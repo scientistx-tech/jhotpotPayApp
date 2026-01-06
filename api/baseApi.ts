@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { logout } from "../store/slices/authSlice";
 
 const rawBaseQuery = fetchBaseQuery({
-  baseUrl: "http://api.jhotpotpay.com/api/v1",
+  baseUrl: "https://api.jhotpotpay.com/api/v1",
   prepareHeaders: async (headers) => {
     const token = await getToken();
     if (token) headers.set("Authorization", `Bearer ${token}`);

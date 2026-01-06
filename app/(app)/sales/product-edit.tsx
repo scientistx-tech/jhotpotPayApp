@@ -78,7 +78,7 @@ export default function ProductEdit() {
         images: images.length > 0 ? images : [], // previous images (URLs)
         newImages: imagesWithMime.length > 0 ? imagesWithMime : undefined,
       }).unwrap();
-      console.log('Update result:', resualt);
+
       Alert.alert('Success', 'Product updated successfully');
       router.back();
     } catch (e) {

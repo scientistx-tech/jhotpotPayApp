@@ -75,7 +75,7 @@ export default function RechargeAmount() {
 
 
   const handleProceedPress = () => {
-    console.log('handleProceedPress called, canProceed:', canProceed);
+
     if (canProceed) {
       setShowDetailsModal(true);
     }
@@ -92,11 +92,11 @@ export default function RechargeAmount() {
       network_type: networkType,
       phone,
     };
-    console.log(payload, "aa")
+
     if (customAmount) {
       payload.amount = Number(customAmount);
     }
-    console.log(payload, "outside")
+
     // Never send both amount and offerId
     try {
       const result = await recharge(payload).unwrap();
@@ -106,8 +106,6 @@ export default function RechargeAmount() {
         alert(result?.message || 'Recharge successful!');
         router.replace('/(tabs)'); // Navigate to home page
       }
-      console.log(result);
-      // Do not close modal or show alert here; let modal show success/error
     } catch (e: any) {
       // Error handled by isRechargeError
     }
