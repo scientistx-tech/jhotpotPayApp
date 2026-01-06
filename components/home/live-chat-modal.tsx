@@ -117,7 +117,7 @@ export default function LiveChatModal({ visible, onClose }: Props) {
         {/* Header */}
         <View style={[styles.header, { backgroundColor: tint }]}>
           <Text style={styles.headerTitle}>Chat With Agent</Text>
-          <View style={styles.headerStatus}>
+          {/* <View style={styles.headerStatus}>
             {isConnected ? (
               <View style={styles.statusConnected}>
                 <View style={styles.statusDot} />
@@ -129,7 +129,7 @@ export default function LiveChatModal({ visible, onClose }: Props) {
                 <Text style={[styles.statusText, { color: '#FF6B6B' }]}>Disconnected</Text>
               </View>
             )}
-          </View>
+          </View> */}
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <Ionicons name="close" size={24} color="#fff" />
           </TouchableOpacity>
