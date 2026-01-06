@@ -10,6 +10,8 @@ import packageReducer from "./slices/packageSlice";
 import productReducer from "./slices/productSlice";
 import rechargeReducer from "./slices/rechargeSlice";
 import saleReducer from "./slices/saleSlice";
+import contactReducer from "./slices/contactSlice";
+import bannerReducer from "./slices/bannerSlice";
 
 
 export const store = configureStore({
@@ -21,6 +23,8 @@ export const store = configureStore({
     sale: saleReducer,
     balance: balanceReducer,
     package: packageReducer,
+    contact: contactReducer,
+    banner: bannerReducer,
     [baseApi.reducerPath]: baseApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>

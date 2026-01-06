@@ -1,8 +1,11 @@
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { RootState } from '@/store/store';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useSelector } from 'react-redux';
 
 type HomeHeaderProps = {
   userName?: string;
@@ -15,16 +18,23 @@ type HomeHeaderProps = {
 };
 
 export default function HomeHeader({
-  userName = 'Omuk Ahmed',
-  userTitle = 'Top for Balance',
-  greeting = 'স্বাগতম আবার!',
-  onNotificationPress,
-  onSharePress,
+
   showBackButton = false,
   onBackPress,
 }: HomeHeaderProps) {
   const router = useRouter();
   const tint = useThemeColor({}, 'tint');
+
+  const user = useSelector((state: RootState) => state.auth.user);
+  console.log(user)
+  // user is likely UserResponse or null
+  const userName = user?.data?.name || 'User';
+  const balance = (user as any)?.data?.balance ?? 0;
+  // Balance visibility state
+  const [showBalance, setShowBalance] = useState(false);
+  const handleBalancePress = () => {
+    setShowBalance((prev) => !prev);
+  };
 
   const handleNotificationPress = () => {
     router.push('/(app)/wallet/history');
@@ -54,29 +64,39 @@ export default function HomeHeader({
         />
         <View style={styles.userInfo}>
           <Text style={styles.userName}>{userName}</Text>
-          <View style={[styles.badge, { backgroundColor: '#E3F2FD' }]}>
+          <TouchableOpacity
+            style={styles.balanceButton}
+            onPress={handleBalancePress}
+            activeOpacity={0.7}
+          >
             <FontAwesome6 name="dollar-sign" size={12} color={tint} style={styles.dollarIcon} />
-            <Text style={[styles.badgeText, { color: tint }]}>{userTitle}</Text>
-          </View>
+            <Text style={[styles.badgeText, { color: tint, marginRight: 6 }]}>Balance</Text>
+            <Text style={[styles.balanceText, { color: tint }]}> {showBalance ? `${balance} ৳` : '****'} </Text>
+            <Ionicons
+              name={showBalance ? 'eye-off' : 'eye'}
+              size={16}
+              color={tint}
+              style={{ marginLeft: 4 }}
+            />
+          </TouchableOpacity>
         </View>
-      </View>
-
-      {/* Right Icons */}
-      <View style={styles.rightSection}>
-        <TouchableOpacity
-          style={styles.iconButton}
-          onPress={handleNotificationPress}
-          accessibilityLabel="Notifications"
-        >
-          <Ionicons name="notifications" size={24} color={tint} />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.iconButton}
-          onPress={handleProfilePress}
-          accessibilityLabel="Profile"
-        >
-          <FontAwesome6 name="circle-user" size={20} color={tint} />
-        </TouchableOpacity>
+        {/* Right Icons */}
+        <View style={styles.rightSection}>
+          <TouchableOpacity
+            style={styles.iconButton}
+            onPress={handleNotificationPress}
+            accessibilityLabel="Notifications"
+          >
+            <Ionicons name="notifications" size={24} color={tint} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.iconButton}
+            onPress={handleProfilePress}
+            accessibilityLabel="Profile"
+          >
+            <FontAwesome6 name="circle-user" size={20} color={tint} />
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -119,13 +139,20 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#11181C',
   },
-  badge: {
+  balanceButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#E3F2FD',
+    borderRadius: 16,
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 12,
+    marginTop: 2,
     gap: 4,
+  },
+  balanceText: {
+    fontSize: 14,
+    fontWeight: '600',
+    letterSpacing: 1,
   },
   dollarIcon: {
     marginTop: 1,

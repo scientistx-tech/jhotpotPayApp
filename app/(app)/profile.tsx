@@ -18,7 +18,7 @@ export default function ProfilePage() {
   const user = useSelector((state: RootState) => state.auth.user);
   // user is likely { data: { ...user fields... }, ... }
   const userData = user?.data || {};
-  console.log("user profile:", userData);
+
 
   const [profileData, setProfileData] = useState({
     name: userData.name || '',
@@ -35,7 +35,7 @@ export default function ProfilePage() {
     status: userData.status || '',
   });
 
-  console.log("profile data:", profileData);
+
 
   const [isEditing, setIsEditing] = useState(false);
   const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
@@ -60,7 +60,7 @@ export default function ProfilePage() {
         referralCode: profileData.referralCode,
       }).unwrap();
       setIsEditing(false);
-      console.log('Profile updated:', profileData);
+     
     } catch (error) {
       console.log('Profile update error:', error);
     }

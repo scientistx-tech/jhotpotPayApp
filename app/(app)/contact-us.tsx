@@ -4,7 +4,8 @@ import { useThemeColor } from '@/hooks/use-theme-color';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, TextInput, TouchableOpacity, View,KeyboardAvoidingView, Platform, } from 'react-native';
+import { useCreateContactMutation } from '../../api/contactApi';
 
 export default function ContactUsPage() {
   const router = useRouter();
@@ -14,20 +15,44 @@ export default function ContactUsPage() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    phoneNumber: '',
+    phone: '',
     message: '',
   });
 
+  const [createContact] = useCreateContactMutation();
+
   const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    // If the field is phoneNumber, map it to phone
+    if (field === 'phoneNumber') {
+      setFormData((prev) => ({
+        ...prev,
+        phone: value,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+    }
   };
 
-  const handleSubmit = () => {
-    console.log('Contact form submitted:', formData);
-    // Show success message or send to backend
+  const handleSubmit = async () => {
+    if (!formData.name || !formData.email || !formData.phone || !formData.message) {
+      alert('Please fill in all fields.');
+      return;
+    }
+    try {
+      await createContact({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        message: formData.message,
+      }).unwrap();
+      alert('Your message has been sent!');
+      setFormData({ name: '', email: '', phone: '', message: '' });
+    } catch (err: any) {
+      alert('Failed to send message. Please try again.');
+    }
   };
 
   return (
@@ -44,13 +69,22 @@ export default function ContactUsPage() {
         <View style={{ width: 40 }} />
       </View>
 
-      <ScrollView
-        style={styles.content}
-        contentContainerStyle={styles.contentContainer}
+       <KeyboardAvoidingView
+                style={{ flex: 1 }}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                keyboardVerticalOffset={0}
+            >
+              <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={[
+          styles.screen,
+          { flexGrow: 1, paddingTop: 50 }
+        ]}
+        keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
         {/* Contact Information Section */}
-        <View style={[styles.card, { backgroundColor: bg }]}>
+        {/* <View style={[styles.card, { backgroundColor: bg }]}>
           <ThemedText style={styles.sectionTitle}>Contact Information</ThemedText>
           
           <View style={styles.infoRow}>
@@ -72,7 +106,7 @@ export default function ContactUsPage() {
             <ThemedText style={styles.infoLabel}>Address:</ThemedText>
             <ThemedText style={styles.infoValue}>Deorgach, Amtoli Adorsho Bazar, Chunarughat, Habiganj, Sylhet.</ThemedText>
           </View>
-        </View>
+        </View> */}
 
         {/* Get In Touch Section */}
         <View style={[styles.card, { backgroundColor: bg }]}>
@@ -109,8 +143,8 @@ export default function ContactUsPage() {
             <TextInput
               style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
               placeholder="Enter your phone number"
-              value={formData.phoneNumber}
-              onChangeText={(value) => handleInputChange('phoneNumber', value)}
+              value={formData.phone}
+              onChangeText={(value) => handleInputChange('phone', value)}
               keyboardType="phone-pad"
               placeholderTextColor="#999"
             />
@@ -141,6 +175,7 @@ export default function ContactUsPage() {
 
         <View style={{ height: 30 }} />
       </ScrollView>
+            </KeyboardAvoidingView>
     </ThemedView>
   );
 }
@@ -181,6 +216,9 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
+   screen: {
+        paddingHorizontal: 20
+    },
   contentContainer: {
     paddingHorizontal: 16,
     paddingVertical: 20,

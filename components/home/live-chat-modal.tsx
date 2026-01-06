@@ -13,13 +13,13 @@ import {
   View,
 } from 'react-native';
 
-
 import {
   Message as ChatMessage,
   useCreateConversationQuery,
   useGetMessagesQuery,
   useSendMessageMutation,
 } from '@/api/chatApi';
+import { useChat } from '@/hooks/useChat';
 
 type Props = {
   visible: boolean;
@@ -30,44 +30,82 @@ export default function LiveChatModal({ visible, onClose }: Props) {
 
   const tint = useThemeColor({}, 'tint');
   const [inputText, setInputText] = useState('');
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [loading, setLoading] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
   // Create or fetch conversation
-  const { data: conversationData, isLoading: isConversationLoading, refetch: refetchConversation } = useCreateConversationQuery();
+  const { data: conversationData, isLoading: isConversationLoading } = useCreateConversationQuery();
   const conversationId = conversationData?.data?.id;
 
-  // Fetch messages for conversation
+  // Fetch messages only when opening the chat modal
   const {
     data: messagesData,
     isLoading: isMessagesLoading,
     refetch: refetchMessages,
   } = useGetMessagesQuery(conversationId!, {
     skip: !conversationId || !visible,
-    pollingInterval: visible && conversationId ? 3000 : 0,
   });
 
   // Send message mutation
   const [sendMessage, { isLoading: isSending }] = useSendMessageMutation();
 
+  // Socket.io integration for real-time messages
+  const { isConnected, error, broadcastMessage } = useChat({
+    conversationId,
+    onNewMessage: (incomingMessage: ChatMessage) => {
+      setMessages((prev) => [...prev, incomingMessage]);
+      scrollToBottom();
+    },
+  });
+
+  // Auto-scroll to bottom on new messages
+  const scrollToBottom = () => {
+    setTimeout(() => {
+      scrollViewRef.current?.scrollToEnd({ animated: true });
+    }, 100);
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  // Load messages when modal opens and conversation is ready
+  useEffect(() => {
+    if (!visible || !conversationId || !messagesData) return;
+    setLoading(true);
+    setMessages(messagesData.data || []);
+    setLoading(false);
+  }, [visible, conversationId, messagesData]);
+
   // Send message handler
   const handleSendMessage = async () => {
     if (inputText.trim() && conversationId) {
       try {
-        await sendMessage({ conversationId, text: inputText }).unwrap();
+        const messageText = inputText;
         setInputText('');
-        refetchMessages();
+        
+        const response = await sendMessage({ 
+          conversationId, 
+          text: messageText 
+        }).unwrap();
+        
+        // Add message to local state
+        setMessages((prev) => [...prev, response.data]);
+
+        // Broadcast via socket.io for real-time update if connected
+        if (isConnected) {
+          broadcastMessage(conversationId, response.data);
+        }
+
+        scrollToBottom();
       } catch (e) {
-        // Optionally handle error
+        // Restore message on error
+        setInputText(inputText);
+        console.error('Failed to send message:', e);
       }
     }
   };
-
-  // Auto-scroll to bottom on new messages
-  useEffect(() => {
-    if (scrollViewRef.current) {
-      scrollViewRef.current.scrollToEnd({ animated: true });
-    }
-  }, [messagesData]);
 
   return (
     <Modal visible={visible} animationType="slide" transparent={false}>
@@ -79,6 +117,19 @@ export default function LiveChatModal({ visible, onClose }: Props) {
         {/* Header */}
         <View style={[styles.header, { backgroundColor: tint }]}>
           <Text style={styles.headerTitle}>Chat With Agent</Text>
+          {/* <View style={styles.headerStatus}>
+            {isConnected ? (
+              <View style={styles.statusConnected}>
+                <View style={styles.statusDot} />
+                <Text style={styles.statusText}>Connected</Text>
+              </View>
+            ) : (
+              <View style={styles.statusDisconnected}>
+                <View style={[styles.statusDot, { backgroundColor: '#FF6B6B' }]} />
+                <Text style={[styles.statusText, { color: '#FF6B6B' }]}>Disconnected</Text>
+              </View>
+            )}
+          </View> */}
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <Ionicons name="close" size={24} color="#fff" />
           </TouchableOpacity>
@@ -91,10 +142,10 @@ export default function LiveChatModal({ visible, onClose }: Props) {
           style={styles.messagesContainer}
           contentContainerStyle={styles.messagesContent}
         >
-          {isConversationLoading || isMessagesLoading ? (
+          {isConversationLoading || loading ? (
             <Text>Loading chat...</Text>
           ) : (
-            messagesData?.data?.map((message: ChatMessage) => (
+            messages.map((message: ChatMessage) => (
               <View
                 key={message.id}
                 style={[
@@ -172,6 +223,32 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: '#fff',
+  },
+  headerStatus: {
+    position: 'absolute',
+    right: 60,
+    top: 50,
+  },
+  statusConnected: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  statusDisconnected: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#6BCB77',
+  },
+  statusText: {
+    fontSize: 12,
+    color: '#6BCB77',
+    fontWeight: '500',
   },
   closeButton: {
     position: 'absolute',

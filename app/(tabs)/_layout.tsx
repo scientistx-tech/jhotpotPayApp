@@ -22,9 +22,6 @@ export default function TabLayout() {
           title: 'Home',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
           header: (props) => <HomeHeader
-            userName="Omul Ahmed"
-            userTitle="Top for Shubaera"
-            greeting="স্বাগতম আবার!"
             onNotificationPress={() => console.log('Notifications pressed')}
             onSharePress={() => console.log('Share pressed')}
           />
@@ -36,9 +33,6 @@ export default function TabLayout() {
           title: 'বেচা বিক্রি',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="calculator" color={color} />,
             header: (props) => <HomeHeader
-            userName="Omul Ahmed"
-            userTitle="Top for Shubaera"
-            greeting="স্বাগতম আবার!"
             onNotificationPress={() => console.log('Notifications pressed')}
             onSharePress={() => console.log('Share pressed')}
           />
@@ -50,9 +44,7 @@ export default function TabLayout() {
           title: 'আমার QR',
           tabBarIcon: ({ color }) => <Ionicons name="qr-code-outline" size={26} color={color} />,
           header: (props) => <HomeHeader
-            userName="Omul Ahmed"
-            userTitle="Top for Shubaera"
-            greeting="স্বাগতম আবার!"
+  
             onNotificationPress={() => console.log('Notifications pressed')}
             onSharePress={() => console.log('Share pressed')}
           />
@@ -65,9 +57,7 @@ export default function TabLayout() {
           title: 'ঝটপট পে',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="wallet.pass.fill" color={color} />,
              header: (props) => <HomeHeader
-            userName="Omul Ahmed"
-            userTitle="Top for Shubaera"
-            greeting="স্বাগতম আবার!"
+   
             onNotificationPress={() => console.log('Notifications pressed')}
             onSharePress={() => console.log('Share pressed')}
           />
