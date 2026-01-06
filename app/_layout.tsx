@@ -62,7 +62,7 @@ export default function RootLayout() {
         <GestureHandlerRootView style={{ flex: 1 }}>
           <ThemeProvider value={DefaultTheme}>
             <Slot />
-            <StatusBar style="auto" />
+            <StatusBar style="dark" />
             <Toast />
           </ThemeProvider>
         </GestureHandlerRootView>

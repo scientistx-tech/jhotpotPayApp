@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const loginSchema = z.object({
   phone: z.string().length(11, 'মোবাইল নম্বর সঠিক নয়').regex(/^\+?[0-9]{8,15}$/, 'মোবাইল নম্বর সঠিক নয়'),
-  pin: z.string().min(4, 'পিন ৪ সংখ্যা হতে হবে').max(6, 'পিন দীর্ঘ'),
+  pin: z.string().min(4, 'পিন ৪ সংখ্যা হতে হবে').max(10, 'পিন দীর্ঘ'),
 });
 
 export const phoneSchema = z.object({
@@ -16,7 +16,7 @@ export const otpSchema = z.object({
 export const profileSchema = z.object({
     name: z.string().min(1, "Name is required"),
   // phone: z.string().length(11, "Phone is not valid"), // adjust validation if needed
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string().min(4, "Password must be at least 4 characters"),
   nid: z.string().min(5, "NID is required"),
   email: z.string().email("Invalid email").optional().nullable(),
   occupation: z.string().min(1, "Occupation is required"),

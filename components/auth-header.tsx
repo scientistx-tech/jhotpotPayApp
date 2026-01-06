@@ -5,7 +5,6 @@ import type { NativeStackHeaderProps } from "@react-navigation/native-stack";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 const statusBarHeight = Constants.statusBarHeight;
 
@@ -19,7 +18,7 @@ function AuthHeader(props: AuthHeaderProps) {
     return (
         <View style={[, styles.container, { backgroundColor: tinColor }]}
         >
-            <StatusBar style="light" />
+            <StatusBar backgroundColor="white" style="dark" />
             <View style={{ height: statusBarHeight }} />
 
             {props.isBack && (

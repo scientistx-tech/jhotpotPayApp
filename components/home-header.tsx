@@ -26,9 +26,9 @@ export default function HomeHeader({
   const tint = useThemeColor({}, 'tint');
 
   const user = useSelector((state: RootState) => state.auth.user);
-  console.log(user)
+  //console.log(user)
   // user is likely UserResponse or null
-  const userName = user?.data?.name || 'User';
+  const userName = (user as any)?.data?.name || 'User';
   const balance = (user as any)?.data?.balance ?? 0;
   // Balance visibility state
   const [showBalance, setShowBalance] = useState(false);
