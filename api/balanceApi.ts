@@ -5,11 +5,16 @@ interface BalanceCredit {
 	bank_name: string;
 	account_number: string;
 	amount: string;
-	transaction_id: string;
-	online_pay: boolean;
+	transaction_id: string | null;
+	online_pay?: boolean;
 	status: string;
-	userId: string;
+	userId?: string;
 	createdAt: string;
+	user?: {
+		id: string;
+		name: string;
+		phone: string;
+	};
 }
 
 interface CreditRequest {
@@ -53,6 +58,18 @@ interface CreditListResponse {
 	data: BalanceCredit[];
 }
 
+interface DebitListResponse {
+	success: boolean;
+	message: string;
+	meta: {
+		page: number;
+		limit: number;
+		total: number;
+		totalPage: number;
+	};
+	data: BalanceCredit[];
+}
+
 export const balanceApi = baseApi.injectEndpoints({
 	overrideExisting: true,
 	endpoints: (builder) => ({
@@ -81,6 +98,15 @@ export const balanceApi = baseApi.injectEndpoints({
 			}),
 			providesTags: ["BalanceCredits"],
 		}),
+
+		getDebits: builder.query<DebitListResponse, { page?: number; limit?: number; search?: string; status?: string }>({
+			query: ({ page = 1, limit = 10, search = "", status = "" }) => ({
+				url: "/balance/debits",
+				method: "GET",
+				params: { page, limit, search, status },
+			}),
+			providesTags: ["BalanceCredits"],
+		}),
 		debitBalance: builder.mutation<DebitResponse, DebitRequest>({
 			query: (body) => ({
 				url: "/balance/debit",
@@ -105,6 +131,7 @@ export const {
 	useCreditBalanceMutation,
 	useDebitBalanceMutation,
 	useGetCreditsQuery,
+	useGetDebitsQuery,
 	useGetUserCreditQuery,
- 	useBkashOnlinePayMutation,
+	useBkashOnlinePayMutation,
 } = balanceApi;

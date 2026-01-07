@@ -70,11 +70,11 @@ export function useChat(options: UseChatsOptions = {}) {
       options.onNewMessage?.(message);
     };
 
-    socketRef.current.on('message:new', handleNewMessage);
+    socketRef.current.on('message', handleNewMessage);
 
     return () => {
       if (socketRef.current) {
-        socketRef.current.off('message:new', handleNewMessage);
+        socketRef.current.off('message', handleNewMessage);
       }
     };
   }, [options.conversationId, options.onNewMessage]);

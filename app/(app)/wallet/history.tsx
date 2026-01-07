@@ -4,25 +4,76 @@ import RechargeHeader from '@/components/recharge/recharge-header';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { useRouter } from 'expo-router';
-import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
-import { FlatList, StyleSheet, TextInput,  View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { FlatList, StyleSheet, TextInput, View } from 'react-native';
+import { useSelector } from 'react-redux';
 
-import { useGetCreditsQuery } from '@/api/balanceApi';
+import { useGetCreditsQuery, useGetDebitsQuery } from '@/api/balanceApi';
+import { useGetRechargesQuery } from '@/api/rechargeApi';
 import Pagination from '@/components/pagination';
 
 export default function WalletHistory() {
   const [page, setPage] = useState(1);
   const user = useSelector((state: RootState) => state.auth.user);
-
   const [limit] = useState(10);
   const [refreshing, setRefreshing] = useState(false);
   const [transactionId, setTransactionId] = useState('');
+  const [search, setSearch] = useState('');
+  const [historyType, setHistoryType] = useState<'recharge' | 'credit' | 'debit'>('recharge');
 
-  const { data, isLoading, isError, refetch, isFetching } = useGetCreditsQuery({ page, limit, transactionId, userId: user?.id || '' });
-  const credits = data?.data || [];
-  const totalPages = data?.meta?.totalPages || 1;
+  // Queries
+  const {
+    data: rechargeData,
+    isLoading: rechargeLoading,
+    refetch: rechargeRefetch,
+    isFetching: rechargeFetching,
+  } = useGetRechargesQuery({ page, limit, search });
+
+  const {
+    data: creditData,
+    isLoading: creditLoading,
+    refetch: creditRefetch,
+    isFetching: creditFetching,
+  } = useGetCreditsQuery({ page, limit, transactionId, userId: user?.id || '' });
+
+  const {
+    data: debitData,
+    isLoading: debitLoading,
+    refetch: debitRefetch,
+    isFetching: debitFetching,
+  } = useGetDebitsQuery({ page, limit, search });
+
+  // Data selection
+  let items: any[] = [];
+  let totalPages = 1;
+  let isLoading = false;
+  let isFetching = false;
+  let refetchFn = () => {};
+  let emptyText = '';
+
+  if (historyType === 'recharge') {
+    items = rechargeData?.data || [];
+    totalPages = rechargeData?.meta?.totalPages || 1;
+    isLoading = rechargeLoading;
+    isFetching = rechargeFetching;
+    refetchFn = rechargeRefetch;
+    emptyText = 'কোনো রিচার্জ ইতিহাস পাওয়া যায়নি।';
+  } else if (historyType === 'credit') {
+    items = creditData?.data || [];
+    totalPages = creditData?.meta?.totalPages || 1;
+    isLoading = creditLoading;
+    isFetching = creditFetching;
+    refetchFn = creditRefetch;
+    emptyText = 'কোনো জমা ইতিহাস পাওয়া যায়নি।';
+  } else {
+    items = debitData?.data || [];
+    totalPages = debitData?.meta?.totalPage || 1;
+    isLoading = debitLoading;
+    isFetching = debitFetching;
+    refetchFn = debitRefetch;
+    emptyText = 'কোনো উত্তোলন ইতিহাস পাওয়া যায়নি।';
+  }
 
   const router = useRouter();
   const tint = useThemeColor({}, 'tint');
@@ -30,66 +81,149 @@ export default function WalletHistory() {
 
   const handleBackPress = () => router.back();
 
-  // Render each credit item
-  const renderItem = ({ item }: { item: any }) => (
-    <View style={[styles.card, { backgroundColor: bg }]}> 
-      <View style={styles.cardContent}>
-        {/* Avatar: Use first letter of bank_name */}
-        <View style={[styles.avatar, { backgroundColor: '#E8F4F8' }]}> 
-          <ThemedText style={[styles.avatarText, { color: '#248AEF' }]}> 
-            {item.bank_name?.[0] || 'B'}
-          </ThemedText>
+  // Render item for each type
+  const renderItem = ({ item }: { item: any }) => {
+    if (historyType === 'recharge') {
+      return (
+        <View style={[styles.card, { backgroundColor: bg }]}> 
+          <View style={styles.cardContent}>
+            {/* Avatar: Use first letter of network_type */}
+            <View style={[styles.avatar, { backgroundColor: '#E8F4F8' }]}> 
+              <ThemedText style={[styles.avatarText, { color: '#248AEF' }]}> 
+                {item.network_type?.[0] || 'R'}
+              </ThemedText>
+            </View>
+            <View style={styles.details}>
+              <ThemedText style={styles.title}>{item.network_type} ({item.status})</ThemedText>
+              <ThemedText style={styles.description}>
+                Phone: {item.phone}{"\n"}Offer: {item.offer?.name || 'N/A'}
+              </ThemedText>
+            </View>
+            <View style={styles.rightSection}>
+              <ThemedText style={[styles.amount, { color: tint }]}>BDT {item.amount ?? 'N/A'}</ThemedText>
+              <ThemedText style={styles.dateTime}>{new Date(item.createdAt).toLocaleString()}</ThemedText>
+            </View>
+          </View>
         </View>
-        {/* Details */}
-        <View style={styles.details}>
-          <ThemedText style={styles.title}>{item.bank_name} ({item.status})</ThemedText>
-          <ThemedText style={styles.description}>
-            Account: {item.account_number}{"\n"}Txn: {item.transaction_id}
-          </ThemedText>
+      );
+    } else if (historyType === 'credit') {
+      return (
+        <View style={[styles.card, { backgroundColor: bg }]}> 
+          <View style={styles.cardContent}>
+            <View style={[styles.avatar, { backgroundColor: '#E8F4F8' }]}> 
+              <ThemedText style={[styles.avatarText, { color: '#248AEF' }]}> 
+                {item.bank_name?.[0] || 'B'}
+              </ThemedText>
+            </View>
+            <View style={styles.details}>
+              <ThemedText style={styles.title}>{item.bank_name} ({item.status})</ThemedText>
+              <ThemedText style={styles.description}>
+                Account: {item.account_number}{"\n"}Txn: {item.transaction_id}
+              </ThemedText>
+            </View>
+            <View style={styles.rightSection}>
+              <ThemedText style={[styles.amount, { color: tint }]}>BDT {item.amount}</ThemedText>
+              <ThemedText style={styles.dateTime}>{new Date(item.createdAt).toLocaleString()}</ThemedText>
+            </View>
+          </View>
         </View>
-        {/* Amount and Date */}
-        <View style={styles.rightSection}>
-          <ThemedText style={[styles.amount, { color: tint }]}>BDT {item.amount}</ThemedText>
-          <ThemedText style={styles.dateTime}>{new Date(item.createdAt).toLocaleString()}</ThemedText>
+      );
+    } else {
+      return (
+        <View style={[styles.card, { backgroundColor: bg }]}> 
+          <View style={styles.cardContent}>
+            <View style={[styles.avatar, { backgroundColor: '#E8F4F8' }]}> 
+              <ThemedText style={[styles.avatarText, { color: '#248AEF' }]}> 
+                {item.bank_name?.[0] || 'B'}
+              </ThemedText>
+            </View>
+            <View style={styles.details}>
+              <ThemedText style={styles.title}>{item.bank_name} ({item.status})</ThemedText>
+              <ThemedText style={styles.description}>
+                Account: {item.account_number}{"\n"}Txn: {item.transaction_id}
+              </ThemedText>
+            </View>
+            <View style={styles.rightSection}>
+              <ThemedText style={[styles.amount, { color: tint }]}>BDT {item.amount}</ThemedText>
+              <ThemedText style={styles.dateTime}>{new Date(item.createdAt).toLocaleString()}</ThemedText>
+            </View>
+          </View>
         </View>
-      </View>
-    </View>
-  );
+      );
+    }
+  };
 
   return (
     <ThemedView style={styles.container}>
       <RechargeHeader
-          title="লেনদেনের ইতিহাস"
+        title="হিস্টোরি"
         showBack={true}
         onBackPress={handleBackPress}
       />
 
+      {/* History Type Selector */}
+      <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 8, paddingHorizontal: 12, marginTop: 12 }}>
+        <View style={{ flex: 1 }}>
+          <ThemedText
+            style={{
+              textAlign: 'center',
+              padding: 10,
+              backgroundColor: historyType === 'recharge' ? '#248AEF' : '#E3E7ED',
+              color: historyType === 'recharge' ? '#fff' : '#248AEF',
+              borderRadius: 8,
+              fontWeight: 'bold',
+            }}
+            onPress={() => { setHistoryType('recharge'); setPage(1); }}
+          >রিচার্জ</ThemedText>
+        </View>
+        <View style={{ flex: 1 }}>
+          <ThemedText
+            style={{
+              textAlign: 'center',
+              padding: 10,
+              backgroundColor: historyType === 'credit' ? '#248AEF' : '#E3E7ED',
+              color: historyType === 'credit' ? '#fff' : '#248AEF',
+              borderRadius: 8,
+              fontWeight: 'bold',
+            }}
+            onPress={() => { setHistoryType('credit'); setPage(1); }}
+          >জমা</ThemedText>
+        </View>
+        <View style={{ flex: 1 }}>
+          <ThemedText
+            style={{
+              textAlign: 'center',
+              padding: 10,
+              backgroundColor: historyType === 'debit' ? '#248AEF' : '#E3E7ED',
+              color: historyType === 'debit' ? '#fff' : '#248AEF',
+              borderRadius: 8,
+              fontWeight: 'bold',
+            }}
+            onPress={() => { setHistoryType('debit'); setPage(1); }}
+          >উত্তোলন</ThemedText>
+        </View>
+      </View>
+
       {/* Search Fields */}
       <View style={styles.searchContainer}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="লেনদেন আইডি দিয়ে অনুসন্ধান করুন"
-          value={transactionId}
+        <TextInput
+          style={styles.searchInput}
+          placeholder={historyType === 'recharge' ? 'ফোন নম্বর/অফার দিয়ে অনুসন্ধান করুন' : 'লেনদেন আইডি/ব্যাংক দিয়ে অনুসন্ধান করুন'}
+          value={historyType === 'credit' ? transactionId : search}
           onChangeText={text => {
-            setTransactionId(text);
+            if (historyType === 'credit') {
+              setTransactionId(text);
+            } else {
+              setSearch(text);
+            }
             setPage(1);
           }}
           returnKeyType="search"
         />
-
-        {/* <TouchableOpacity
-          style={styles.clearBtn}
-          onPress={() => {
-            setTransactionId('');
-            setPage(1);
-          }}
-        >
-          <ThemedText style={styles.clearBtnText}>Clear</ThemedText>
-        </TouchableOpacity> */}
       </View>
 
       <FlatList
-        data={credits}
+        data={items}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         contentContainerStyle={styles.contentContainer}
@@ -98,7 +232,7 @@ export default function WalletHistory() {
         refreshing={refreshing || isFetching}
         onRefresh={async () => {
           setRefreshing(true);
-          await refetch();
+          await refetchFn();
           setRefreshing(false);
         }}
         onEndReached={() => {
@@ -110,7 +244,7 @@ export default function WalletHistory() {
             <View style={{ marginVertical: 24 }}><ThemedText>Loading...</ThemedText></View>
           ) : (
             <ThemedText style={{ textAlign: 'center', marginVertical: 29 }}>
-                কোনো ওয়ালেট ক্রেডিট ইতিহাস পাওয়া যায়নি।
+              {emptyText}
             </ThemedText>
           )
         }

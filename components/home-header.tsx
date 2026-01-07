@@ -26,14 +26,23 @@ export default function HomeHeader({
   const tint = useThemeColor({}, 'tint');
 
   const user = useSelector((state: RootState) => state.auth.user);
-  console.log(user)
+  //console.log(user)
   // user is likely UserResponse or null
-  const userName = user?.data?.name || 'User';
+  const userName = (user as any)?.data?.name || 'User';
   const balance = (user as any)?.data?.balance ?? 0;
   // Balance visibility state
   const [showBalance, setShowBalance] = useState(false);
-  const handleBalancePress = () => {
-    setShowBalance((prev) => !prev);
+  // For refresh animation
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Show balance for 2 seconds on refresh icon click
+  const handleRefreshBalance = () => {
+    setShowBalance(true);
+    setRefreshing(true);
+    setTimeout(() => {
+      setShowBalance(false);
+      setRefreshing(false);
+    }, 1000);
   };
 
   const handleNotificationPress = () => {
@@ -64,21 +73,23 @@ export default function HomeHeader({
         />
         <View style={styles.userInfo}>
           <Text style={styles.userName}>{userName}</Text>
-          <TouchableOpacity
-            style={styles.balanceButton}
-            onPress={handleBalancePress}
-            activeOpacity={0.7}
-          >
-            <FontAwesome6 name="dollar-sign" size={12} color={tint} style={styles.dollarIcon} />
-            <Text style={[styles.badgeText, { color: tint, marginRight: 6 }]}>Balance</Text>
-            <Text style={[styles.balanceText, { color: tint }]}> {showBalance ? `${balance} ৳` : '****'} </Text>
-            <Ionicons
-              name={showBalance ? 'eye-off' : 'eye'}
-              size={16}
-              color={tint}
-              style={{ marginLeft: 4 }}
-            />
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <TouchableOpacity
+              style={styles.balanceButton}
+              onPress={handleRefreshBalance}
+              activeOpacity={0.7}
+            >
+              {
+                refreshing ? (
+                 <Text style={[styles.balanceText, { color: tint }]}>{balance} ৳</Text>
+                ) :(
+                       <Text style={[styles.balanceText, { color: tint }]}> ৳ ব্যালেন্স </Text>
+                )
+              }
+            </TouchableOpacity>
+            
+          </View>
+        </View>
         </View>
         {/* Right Icons */}
         <View style={styles.rightSection}>
@@ -97,7 +108,7 @@ export default function HomeHeader({
             <FontAwesome6 name="circle-user" size={20} color={tint} />
           </TouchableOpacity>
         </View>
-      </View>
+      
     </View>
   );
 }
@@ -105,6 +116,8 @@ export default function HomeHeader({
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
+    gap: 12,
+  
     alignItems: 'center',
     justifyContent: 'space-between',
     borderBottomLeftRadius: 24,
@@ -163,8 +176,13 @@ const styles = StyleSheet.create({
   },
   rightSection: {
     flexDirection: 'row',
+    justifyContent:'flex-end',
     alignItems: 'center',
-    gap: 12,
+    gap: 5,
+  },
+  refreshButton: {
+    padding: 4,
+    marginLeft: 2,
   },
   iconButton: {
     width: 40,
