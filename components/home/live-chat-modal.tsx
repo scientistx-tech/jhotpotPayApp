@@ -7,7 +7,7 @@ import {
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useChat } from '@/hooks/useChat';
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Modal,
@@ -51,20 +51,31 @@ export default function LiveChatModal({ visible, onClose }: Props) {
   const [sendMessage, { isLoading: isSending }] = useSendMessageMutation();
 
   // Socket.io integration for real-time messages
-  const { isConnected, error, broadcastMessage } = useChat({
-    conversationId,
-    onNewMessage: (incomingMessage: ChatMessage) => {
-      setMessages((prev) => [...prev, incomingMessage]);
+  // Always use a stable callback for onNewMessage
+  const handleNewMessage = useCallback((incomingMessage: ChatMessage) => {
+    // Only add message if it belongs to the current conversation
+    if (incomingMessage.conversationId === conversationId) {
+      setMessages((prev) => {
+        // Prevent duplicate messages by filtering out any with the same id
+        const filtered = prev.filter((m) => m.id !== incomingMessage.id);
+        return [...filtered, incomingMessage];
+      });
       scrollToBottom();
-    },
-  });
+    }
+  }, [conversationId]);
 
   // Auto-scroll to bottom on new messages
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     setTimeout(() => {
       scrollViewRef.current?.scrollToEnd({ animated: true });
     }, 100);
-  };
+  }, []);
+
+  // Socket.io integration for real-time messages
+  const { isConnected, error, broadcastMessage } = useChat({
+    conversationId,
+    onNewMessage: handleNewMessage,
+  });
 
   useEffect(() => {
     scrollToBottom();
@@ -85,19 +96,13 @@ export default function LiveChatModal({ visible, onClose }: Props) {
         const messageText = inputText;
         setInputText('');
 
-        const response = await sendMessage({
+        await sendMessage({
           conversationId,
           text: messageText
         }).unwrap();
 
-        // Add message to local state
-        setMessages((prev) => [...prev, response.data]);
-
-        // Broadcast via socket.io for real-time update if connected
-        if (isConnected) {
-          broadcastMessage(conversationId, response.data);
-        }
-
+        // Do NOT add message to local state here; rely on socket event
+        // Optionally, you can scroll to bottom
         scrollToBottom();
       } catch (e) {
         // Restore message on error
@@ -109,7 +114,6 @@ export default function LiveChatModal({ visible, onClose }: Props) {
 
   return (
     <Modal visible={visible} animationType="slide" transparent={false}>
-
       {/* Header */}
       <View style={[styles.header, { backgroundColor: tint }]}>
         <Text style={styles.headerTitle}>Chat With Agent</Text>
