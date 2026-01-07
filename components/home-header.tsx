@@ -32,8 +32,17 @@ export default function HomeHeader({
   const balance = (user as any)?.data?.balance ?? 0;
   // Balance visibility state
   const [showBalance, setShowBalance] = useState(false);
-  const handleBalancePress = () => {
-    setShowBalance((prev) => !prev);
+  // For refresh animation
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Show balance for 2 seconds on refresh icon click
+  const handleRefreshBalance = () => {
+    setShowBalance(true);
+    setRefreshing(true);
+    setTimeout(() => {
+      setShowBalance(false);
+      setRefreshing(false);
+    }, 1000);
   };
 
   const handleNotificationPress = () => {
@@ -64,21 +73,17 @@ export default function HomeHeader({
         />
         <View style={styles.userInfo}>
           <Text style={styles.userName}>{userName}</Text>
-          <TouchableOpacity
-            style={styles.balanceButton}
-            onPress={handleBalancePress}
-            activeOpacity={0.7}
-          >
-            <FontAwesome6 name="dollar-sign" size={12} color={tint} style={styles.dollarIcon} />
-            <Text style={[styles.badgeText, { color: tint, marginRight: 6 }]}>Balance</Text>
-            <Text style={[styles.balanceText, { color: tint }]}> {showBalance ? `${balance} ৳` : '****'} </Text>
-            <Ionicons
-              name={showBalance ? 'eye-off' : 'eye'}
-              size={16}
-              color={tint}
-              style={{ marginLeft: 4 }}
-            />
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <TouchableOpacity
+              style={styles.balanceButton}
+              onPress={handleRefreshBalance}
+              activeOpacity={0.7}
+            >
+              <FontAwesome6 name="dollar-sign" size={12} color={tint} style={styles.dollarIcon} />
+              <Text style={[styles.balanceText, { color: tint }]}> {showBalance ? `${balance} ৳` : 'Balance'} </Text>
+            </TouchableOpacity>
+            
+          </View>
         </View>
         {/* Right Icons */}
         <View style={styles.rightSection}>
@@ -165,6 +170,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+  },
+  refreshButton: {
+    padding: 4,
+    marginLeft: 2,
   },
   iconButton: {
     width: 40,
