@@ -17,9 +17,9 @@ export default function HomeScreen() {
 
   // Stats data arrays
   const firstRowStats = [
-    { id: 1, amount: '500 TK', label: 'Total Recharge', bgColor: '#248AEF', fontSize: 24 },
-    { id: 2, amount: '100 TK', label: 'Total Commission', bgColor: '#248AEF', fontSize: 24 },
-    { id: 3, amount: '0 TK', label: 'Statistics', bgColor: '#248AEF', fontSize: 24 },
+    { id: 1, amount: '500 টাকা', label: 'মোট রিচার্জ', bgColor: '#248AEF', fontSize: 24 },
+    { id: 2, amount: '100 টাকা', label: 'মোট কমিশন', bgColor: '#248AEF', fontSize: 24 },
+    { id: 3, amount: '0 টাকা', label: 'পরিসংখ্যান', bgColor: '#248AEF', fontSize: 24 },
   ];
 
   const secondRowStats = [

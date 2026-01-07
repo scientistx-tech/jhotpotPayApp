@@ -1,4 +1,4 @@
-import { useDeleteProductMutation, useGetProductsQuery } from '@/api/productApi';
+import { useDeleteProductMutation, useGetProductsQuery, useToggleStockMutation } from '@/api/productApi';
 import CustomButton from '@/components/custom-button';
 import Pagination from '@/components/pagination';
 import { RechargeHeader } from '@/components/recharge';
@@ -31,17 +31,20 @@ export default function ProductList() {
   const [confirmVisible, setConfirmVisible] = useState(false);
 
 
+
+
   // Fetch products from API
   const { data, isLoading, isError, refetch, isFetching } = useGetProductsQuery({ page, limit, search });
   const products = data?.data || [];
+
   const totalPages = data?.meta?.totalPages || 1;
 
   // Delete mutation
   const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation();
 
-  // Track toggling state for each product
-  const [togglingId, setTogglingId] = useState<string | null>(null);
-  const [toggleStates, setToggleStates] = useState<{ [id: string]: boolean }>({});
+
+
+
 
   const handleBackPress = () => router.back();
 
@@ -83,6 +86,23 @@ export default function ProductList() {
   };
 
 
+  // Stock toggle mutation
+  const [toggleStock, { isLoading: isToggling }] = useToggleStockMutation();
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+
+  const handleToggleStock = async ({ productId }: { productId: string }) => {
+    setTogglingId(productId);
+    try {
+      await toggleStock({ id: productId }).unwrap();
+      refetch();
+    } catch (e) {
+      // Optionally show error
+    }
+    setTogglingId(null);
+  };
+
+
+
   // Image slider state for each product
   const imageIndexes = useRef<{ [id: string]: number }>({});
   const [, forceUpdate] = useState(0); // to trigger re-render
@@ -90,7 +110,7 @@ export default function ProductList() {
   useEffect(() => {
     const interval = setInterval(() => {
       products.forEach((item: any) => {
-        const images = item.images && item.images.length > 0 ? item.images : [ ];
+        const images = item.images && item.images.length > 0 ? item.images : [];
         if (images.length > 1) {
           if (typeof imageIndexes.current[item.id] !== 'number') imageIndexes.current[item.id] = 0;
           imageIndexes.current[item.id] = (imageIndexes.current[item.id] + 1) % images.length;
@@ -120,32 +140,11 @@ export default function ProductList() {
   const renderItem = ({ item }: { item: any }) => {
     const images = item.images && item.images.length > 0 ? item.images : [];
     const currentIndex = imageIndexes.current[item.id] || 0;
-    // Use local toggle state if available, else from item
-    const isStock = typeof toggleStates[item.id] === 'boolean' ? toggleStates[item.id] : item.isStock;
 
-    const handleToggleStock = async () => {
-      setTogglingId(item.id);
-      try {
-        const res = await fetch(
-          `http://api.jhotpotpay.com/api/v1/product/toggle-stock-product/${item.id}`,
-          {
-            method: 'GET',
-            headers: {
-              'Authorization': '',
-            },
-          }
-        );
-        const data = await res.json();
-        if (data?.success && data?.data) {
-          console.log(data)
-          setToggleStates((prev) => ({ ...prev, [item.id]: data.data.isStock }));
-        }
-      } catch (e) {}
-      setTogglingId(null);
-    };
+
 
     return (
-      <View style={[styles.card, { backgroundColor: bg }]}> 
+      <View style={[styles.card, { backgroundColor: bg }]}>
         <View style={styles.cardRow}>
           <View style={styles.sliderContainer}>
             <Image
@@ -153,14 +152,14 @@ export default function ProductList() {
               style={styles.productImage}
             />
             {images.length > 1 && (
-                <View style={styles.sliderDots}>
+              <View style={styles.sliderDots}>
                 {images.map((_: string, idx: number) => (
                   <View
-                  key={idx}
-                  style={[styles.dot, currentIndex === idx && styles.activeDot]}
+                    key={idx}
+                    style={[styles.dot, currentIndex === idx && styles.activeDot]}
                   />
                 ))}
-                </View>
+              </View>
             )}
           </View>
           <View style={{ flex: 1 }}>
@@ -177,35 +176,37 @@ export default function ProductList() {
                     paddingVertical: 7,
                     paddingHorizontal: 16,
                     borderRadius: 20,
-                    backgroundColor: isStock ? '#E8F9F1' : '#FFF1F3',
+                    backgroundColor: item?.isStock ? '#E8F9F1' : '#FFF1F3',
                     borderWidth: 1.5,
-                    borderColor: isStock ? '#12B76A' : '#F04438',
-                    shadowColor: isStock ? '#12B76A' : '#F04438',
+                    borderColor: item?.isStock ? '#12B76A' : '#F04438',
+                    shadowColor: item?.isStock ? '#12B76A' : '#F04438',
                     shadowOpacity: 0.08,
                     shadowRadius: 6,
                     shadowOffset: { width: 0, height: 2 },
                     elevation: 2,
                   },
                 ]}
-                onPress={handleToggleStock}
-                disabled={togglingId === item.id}
+                onPress={() => handleToggleStock({ productId: item.id })}
+                disabled={isToggling && togglingId === item.id}
                 activeOpacity={0.8}
               >
                 <MaterialCommunityIcons
-                  name={isStock ? 'check-circle' : 'close-circle'}
+                  name={item?.isStock ? 'check-circle' : 'close-circle'}
                   size={22}
-                  color={isStock ? '#12B76A' : '#F04438'}
+                  color={item?.isStock ? '#12B76A' : '#F04438'}
                   style={{ marginRight: 8 }}
                 />
                 <Text
                   style={{
-                    color: isStock ? '#12B76A' : '#F04438',
+                    color: item?.isStock ? '#12B76A' : '#F04438',
                     fontWeight: '700',
                     fontSize: 15,
                     letterSpacing: 0.2,
                   }}
                 >
-                  {togglingId === item.id ? 'Updating...' : isStock ? 'Stock In' : 'Stock Out'}
+                  {isToggling && togglingId === item.id
+                    ? 'Updating...'
+                    : item?.isStock ? 'Stock In' : 'Stock Out'}
                 </Text>
               </TouchableOpacity>
             </View>
