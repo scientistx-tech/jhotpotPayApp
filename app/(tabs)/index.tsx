@@ -29,35 +29,36 @@ export default function HomeScreen() {
   ];
 
   const walletItems = [
-    { id: 1, icon: 'wallet-plus', label: 'Add Balance', color: '#248AEF' },
-    { id: 2, icon: 'cash-multiple', label: 'Cash Out', color: '#FF6B6B' },
-    { id: 3, icon: 'phone', label: 'Recharge', color: '#FFD93D' },
-    { id: 4, icon: 'receipt', label: 'Pay Bill', color: '#6BCB77' },
-    { id: 5, icon: 'qrcode', label: 'PIN Change', color: '#4D96FF' },
-    { id: 6, icon: 'history', label: 'History', color: '#9B59B6' },
+    { id: 1, icon: 'wallet-plus', label: 'ব্যালেন্স যোগ করুন', color: '#248AEF' },
+    { id: 2, icon: 'cash-multiple', label: 'ক্যাশ আউট', color: '#FF6B6B' },
+    { id: 3, icon: 'phone', label: 'রিচার্জ', color: '#FFD93D' },
+    { id: 4, icon: 'receipt', label: 'বিল পরিশোধ', color: '#6BCB77' },
+    { id: 5, icon: 'qrcode', label: 'পিন পরিবর্তন', color: '#4D96FF' },
+    { id: 6, icon: 'history', label: 'হিস্টোরি', color: '#9B59B6' },
   ];
 
   const tollKhataItems = [
     { id: 1, icon: 'store', label: 'বাকি খাতা', color: '#248AEF' },
     { id: 2, icon: 'file-document', label: 'বেচা বিক্রি', color: '#FF6B6B' },
     { id: 3, icon: 'account-multiple', label: 'বিক্রির খাতা', color: '#FFD93D' },
-    { id: 4, icon: 'receipt', label: 'Pay Bill', color: '#6BCB77' },
+     { id: 4, icon: 'package-variant', label: 'পণ্য ব্যবস্থাপনা', color: '#E67E22' },
+    // { id: 4, icon: 'receipt', label: 'বিল পরিশোধ', color: '#6BCB77' },
     { id: 5, icon: 'account-voice', label: 'গ্রাহক তালিকা', color: '#4D96FF' },
-    { id: 6, icon: 'history', label: 'History', color: '#9B59B6' },
+    { id: 6, icon: 'history', label: 'হিস্টোরি', color: '#9B59B6' },
   ];
 
   const handleWalletItemPress = (item: any) => {
-    if (item.label === 'Add Balance') {
+    if (item.label === 'ব্যালেন্স যোগ করুন') {
       router.push('/(app)/wallet/add-balance');
-    } else if (item.label === 'Cash Out') {
+    } else if (item.label === 'ক্যাশ আউট') {
       router.push('/(app)/wallet/cash-out');
-    } else if (item.label === 'Recharge') {
+    } else if (item.label === 'রিচার্জ') {
       router.push('/(app)/recharge/enter-number');
-    } else if (item.label === 'PIN Change') {
+    } else if (item.label === 'পিন পরিবর্তন') {
       router.push('/(app)/wallet/change-pin');
-    } else if (item.label === 'Pay Bill') {
+    } else if (item.label === 'বিল পরিশোধ') {
       router.push('/(app)/wallet/pay-bill');
-    } else if (item.label === 'History') {
+    } else if (item.label === 'হিস্টোরি') {
       router.push('/(app)/wallet/history');
     } else {
       console.log('Wallet item pressed:', item.label);
@@ -73,9 +74,13 @@ export default function HomeScreen() {
       router.push('/(app)/sales/product-management');
     } else if (item.label === 'গ্রাহক তালিকা') {
       router.push('/(app)/sales/customer-list');
-    } else if (item.label === 'History') {
+    } else if (item.label === 'হিস্টোরি') {
       router.push('/(app)/sales/history');
-    }else {
+    } else if (item.label === 'পণ্য ব্যবস্থাপনা') {
+      router.push('/(app)/sales/product-list');
+    }
+    
+    else {
       console.log('Menu item pressed:', item.label);
     }
   };

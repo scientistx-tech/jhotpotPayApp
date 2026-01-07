@@ -18,7 +18,7 @@ export default function TollKhataSection({ items, onItemPress }: Props) {
   return (
     <View style={styles.section}>
       <ThemedText type="title" style={{ fontSize: 18, marginBottom: 16 }}>
-        Tali Khata Section
+       তালিখাতা সেকশন
       </ThemedText>
       <View style={styles.gridContainer}>
         {items.map((item) => (

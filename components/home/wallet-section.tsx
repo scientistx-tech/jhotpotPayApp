@@ -17,6 +17,10 @@ type Props = {
 export default function WalletSection({ items, onItemPress }: Props) {
   return (
     <View style={styles.section}>
+      <ThemedText type="title" style={{ fontSize: 18, marginBottom: 16 }}>
+    ওয়ালেট সেকশন
+      </ThemedText>
+      
       <View style={styles.gridContainer}>
         {items.map((item) => (
           <TouchableOpacity
