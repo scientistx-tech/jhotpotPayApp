@@ -90,9 +90,7 @@ export default function ProductList() {
   useEffect(() => {
     const interval = setInterval(() => {
       products.forEach((item: any) => {
-        const images = item.images && item.images.length > 0 ? item.images : [
-          'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=80&q=60',
-        ];
+        const images = item.images && item.images.length > 0 ? item.images : [ ];
         if (images.length > 1) {
           if (typeof imageIndexes.current[item.id] !== 'number') imageIndexes.current[item.id] = 0;
           imageIndexes.current[item.id] = (imageIndexes.current[item.id] + 1) % images.length;
@@ -120,9 +118,7 @@ export default function ProductList() {
   };
 
   const renderItem = ({ item }: { item: any }) => {
-    const images = item.images && item.images.length > 0 ? item.images : [
-      'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=80&q=60',
-    ];
+    const images = item.images && item.images.length > 0 ? item.images : [];
     const currentIndex = imageIndexes.current[item.id] || 0;
     // Use local toggle state if available, else from item
     const isStock = typeof toggleStates[item.id] === 'boolean' ? toggleStates[item.id] : item.isStock;

@@ -1,25 +1,25 @@
-import { useThemeColor } from '@/hooks/use-theme-color';
-import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useRef, useState } from 'react';
-import {
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-
 import {
   Message as ChatMessage,
   useCreateConversationQuery,
   useGetMessagesQuery,
   useSendMessageMutation,
 } from '@/api/chatApi';
+import { useThemeColor } from '@/hooks/use-theme-color';
 import { useChat } from '@/hooks/useChat';
+import { Ionicons } from '@expo/vector-icons';
+import { useEffect, useRef, useState } from 'react';
+import {
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 
 type Props = {
   visible: boolean;
@@ -84,12 +84,12 @@ export default function LiveChatModal({ visible, onClose }: Props) {
       try {
         const messageText = inputText;
         setInputText('');
-        
-        const response = await sendMessage({ 
-          conversationId, 
-          text: messageText 
+
+        const response = await sendMessage({
+          conversationId,
+          text: messageText
         }).unwrap();
-        
+
         // Add message to local state
         setMessages((prev) => [...prev, response.data]);
 
@@ -109,15 +109,11 @@ export default function LiveChatModal({ visible, onClose }: Props) {
 
   return (
     <Modal visible={visible} animationType="slide" transparent={false}>
-      <KeyboardAvoidingView
-        style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={0}
-      >
-        {/* Header */}
-        <View style={[styles.header, { backgroundColor: tint }]}>
-          <Text style={styles.headerTitle}>Chat With Agent</Text>
-          {/* <View style={styles.headerStatus}>
+
+      {/* Header */}
+      <View style={[styles.header, { backgroundColor: tint }]}>
+        <Text style={styles.headerTitle}>Chat With Agent</Text>
+        {/* <View style={styles.headerStatus}>
             {isConnected ? (
               <View style={styles.statusConnected}>
                 <View style={styles.statusDot} />
@@ -130,19 +126,30 @@ export default function LiveChatModal({ visible, onClose }: Props) {
               </View>
             )}
           </View> */}
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Ionicons name="close" size={24} color="#fff" />
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <Ionicons name="close" size={24} />
+        </TouchableOpacity>
+      </View>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
+      >
 
         {/* Messages */}
 
         <ScrollView
-          ref={scrollViewRef}
-          style={styles.messagesContainer}
-          contentContainerStyle={styles.messagesContent}
+          style={{ flex: 1 }}
+          contentContainerStyle={[
+           
+            { flexGrow: 1, paddingTop: 15, paddingBottom: 80 }
+          ]}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          {isConversationLoading || loading ? (
+        <View style={styles.messagesContainer}>
+          <View style={styles.messagesContent}>
+              {isConversationLoading || loading ? (
             <Text>Loading chat...</Text>
           ) : (
             messages.map((message: ChatMessage) => (
@@ -180,27 +187,33 @@ export default function LiveChatModal({ visible, onClose }: Props) {
               </View>
             ))
           )}
+            </View>
+
+          </View>
+
+     
         </ScrollView>
 
-        {/* Input */}
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Type Your Message Here..."
-            placeholderTextColor="#999"
-            value={inputText}
-            onChangeText={setInputText}
-            multiline
-          />
-          <TouchableOpacity
-            style={[styles.sendButton, { backgroundColor: tint, opacity: isSending ? 0.5 : 1 }]}
-            onPress={handleSendMessage}
-            disabled={isSending || !inputText.trim()}
-          >
-            <Ionicons name="send" size={20} color="#fff" />
-          </TouchableOpacity>
-        </View>
+
       </KeyboardAvoidingView>
+           {/* Input */}
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Type Your Message Here..."
+              placeholderTextColor="#999"
+              value={inputText}
+              onChangeText={setInputText}
+              multiline
+            />
+            <TouchableOpacity
+              style={[styles.sendButton, { backgroundColor: tint, opacity: isSending ? 0.5 : 1 }]}
+              onPress={handleSendMessage}
+              disabled={isSending || !inputText.trim()}
+            >
+              <Ionicons name="send" size={20} color="#fff" />
+            </TouchableOpacity>
+          </View>
     </Modal>
   );
 }
@@ -214,10 +227,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: 50,
-    paddingBottom: 16,
+    height: 60,
     paddingHorizontal: 16,
     position: 'relative',
+  },
+  screen: {
+    paddingHorizontal: 20
   },
   headerTitle: {
     fontSize: 18,
@@ -252,8 +267,11 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     position: 'absolute',
-    right: 16,
-    top: 50,
+    // right: 16,
+    // top: 50,
+    right: 10,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 16,
     width: 32,
     height: 32,
     justifyContent: 'center',
@@ -261,10 +279,10 @@ const styles = StyleSheet.create({
   },
   messagesContainer: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    // backgroundColor: '#F5F5F5',
   },
   messagesContent: {
-    padding: 16,
+    padding: 10,
     gap: 16,
   },
   messageBubble: {
@@ -305,23 +323,31 @@ const styles = StyleSheet.create({
     color: '#11181C',
   },
   agentMessageText: {
-    backgroundColor: '#fff',
+    backgroundColor: '#E0E0E0',
     color: '#11181C',
   },
+
+
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    padding: 16,
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderTopColor: '#E0E0E0',
-    gap: 12,
+     position: 'absolute',
+     left: 0,
+     right: 0,
+     bottom: 0,
+     flexDirection: 'row',
+     alignItems: 'flex-end',
+     paddingHorizontal: 10,
+     paddingVertical: 10,
+     backgroundColor: '#fff',
+     borderTopWidth: 1,
+     borderTopColor: '#E0E0E0',
+     gap: 12,
   },
   input: {
     flex: 1,
     backgroundColor: '#F5F5F5',
     borderRadius: 24,
     paddingHorizontal: 16,
+    
     paddingVertical: 12,
     fontSize: 14,
     maxHeight: 100,

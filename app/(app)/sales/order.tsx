@@ -12,8 +12,8 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
-import { ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 export default function SalesOrder() {
     const router = useRouter();
@@ -27,6 +27,27 @@ export default function SalesOrder() {
 
     const customers = customersData?.data || [];
     const products = productsData?.data || [];
+
+    // Image slider state for each product (auto-play)
+    const imageIndexes = useRef<{ [id: string]: number }>({});
+    const [, forceUpdate] = useState(0); // to trigger re-render
+
+   useEffect(() => {
+    const interval = setInterval(() => {
+      products.forEach((item: any) => {
+        const images = item.images && item.images.length > 0 ? item.images : [
+        ];
+        if (images.length > 1) {
+          if (typeof imageIndexes.current[item.id] !== 'number') imageIndexes.current[item.id] = 0;
+          imageIndexes.current[item.id] = (imageIndexes.current[item.id] + 1) % images.length;
+        } else {
+          imageIndexes.current[item.id] = 0;
+        }
+      });
+      forceUpdate((n) => n + 1);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [products]);
     // Order items: [{ productId, name, quantity, price }]
     const [orderItems, setOrderItems] = useState<any[]>([]);
 
@@ -161,12 +182,21 @@ export default function SalesOrder() {
                 onBackPress={handleBackPress}
             />
 
-            <ScrollView
-                style={styles.content}
-                contentContainerStyle={styles.contentContainer}
-                showsVerticalScrollIndicator={false}
+          <KeyboardAvoidingView
+                style={{ flex: 1 }}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                keyboardVerticalOffset={0}
             >
-                {/* Customer Selector */}
+                <ScrollView
+                    style={{ flex: 1 }}
+                    contentContainerStyle={[
+                
+                        { flexGrow: 1,  paddingBottom: 20 } 
+                    ]}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                >
+                        {/* Customer Selector */}
                 <View style={styles.customerSelectorSection}>
                     <View style={{ width: '55%' }}>
                         <SelectInput
@@ -187,12 +217,6 @@ export default function SalesOrder() {
                 {/* Customer Info */}
                 {customer && <CustomerInfoCard name={customer.name} phoneNumber={customer.phone} />}
 
-                {/* <View style={styles.section}>
-            <ThemedText >Customer Information</ThemedText>
-            <ThemedText >Name:</ThemedText>
-            <ThemedText >Phone Number:</ThemedText>
-          
-        </View> */}
 
                 {/* Product List */}
                 <View style={styles.section}>
@@ -205,14 +229,19 @@ export default function SalesOrder() {
                         showsHorizontalScrollIndicator={false}
                         contentContainerStyle={styles.productList}
                     >
-                        {products.map((product: any) => (
-                            <ProductCard
-                                key={product.id}
-                                productName={product.name}
-                                price={product.price}
-                                onFavoritePress={() => handleAddProductToOrder(product)}
-                            />
-                        ))}
+                        {products.map((product: any) => {
+                            const images = product.images && product.images.length > 0 ? product.images : [];
+                            const currentIndex = imageIndexes.current[product.id] || 0;
+                            return (
+                                <ProductCard
+                                    key={product.id}
+                                    productName={product.name}
+                                    price={product.price}
+                                    imageUrl={images[currentIndex]}
+                                    onFavoritePress={() => handleAddProductToOrder(product)}
+                                />
+                            );
+                        })}
                     </ScrollView>
                 </View>
 
@@ -309,8 +338,9 @@ export default function SalesOrder() {
 
 
                 </View>
-                <View style={styles.spacer} />
-            </ScrollView>
+               
+                </ScrollView>
+            </KeyboardAvoidingView>
 
 
 
@@ -452,6 +482,9 @@ const styles = StyleSheet.create({
     paymentLabel: {
         fontSize: 13,
         fontWeight: '600',
+    },
+       screen: {
+        paddingHorizontal: 20
     },
     paymentInput: {
         borderWidth: 1,
