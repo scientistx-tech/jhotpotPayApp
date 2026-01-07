@@ -2,14 +2,18 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { ScrollView, Share, StyleSheet, TouchableOpacity, View } from 'react-native';
+import * as MediaLibrary from 'expo-media-library';
+import { useRef } from 'react';
+import { Alert, ScrollView, Share, StyleSheet, TouchableOpacity, View } from 'react-native';
+import QRCode from 'react-native-qrcode-svg';
+import ViewShot from 'react-native-view-shot';
 
 export default function QrScreen() {
   const tint = useThemeColor({}, 'tint');
   const bg = useThemeColor({}, 'background');
-
   const userName = 'Omul Ahmed';
   const walletId = 'JP-548921';
+  const viewShotRef = useRef(null);
 
   const handleShare = async () => {
     await Share.share({
@@ -17,8 +21,23 @@ export default function QrScreen() {
     });
   };
 
-  const handleDownload = () => {
-    console.log('Download QR requested');
+  const handleDownload = async () => {
+    try {
+      // Capture QR code view
+      const uri = await viewShotRef.current.capture();
+      // Request media library permissions
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission required', 'Please allow access to save images.');
+        return;
+      }
+      // Save to gallery
+      const asset = await MediaLibrary.createAssetAsync(uri);
+      await MediaLibrary.createAlbumAsync('Download', asset, false);
+      Alert.alert('Saved', 'QR code image saved to your gallery.');
+    } catch (error) {
+      Alert.alert('Error', 'Could not save QR code.');
+    }
   };
 
   return (
@@ -30,9 +49,14 @@ export default function QrScreen() {
       >
         <View style={[styles.card, { backgroundColor: '#fff' }]}>
           <ThemedText style={styles.title}>আমার QR কোড</ThemedText>
-          <View style={[styles.qrBox, { borderColor: tint }]}>
-            <Ionicons name="qr-code" size={180} color={tint} />
-          </View>
+          <ViewShot ref={viewShotRef} options={{ format: 'png', quality: 1.0 }} style={[styles.qrBox, { borderColor: tint }]}>
+            <QRCode
+              value={`JP:${walletId}`}
+              size={180}
+              color={tint}
+              backgroundColor="#F8FAFD"
+            />
+          </ViewShot>
           <ThemedText style={styles.subtitle}>পেমেন্ট পেতে কোডটি স্ক্যান করুন</ThemedText>
         </View>
 

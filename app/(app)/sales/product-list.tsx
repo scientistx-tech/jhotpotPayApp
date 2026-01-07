@@ -9,7 +9,7 @@ import { useThemeColor } from '@/hooks/use-theme-color';
 import { Product } from '@/store/slices/productSlice';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 
@@ -36,6 +36,7 @@ export default function ProductList() {
   // Fetch products from API
   const { data, isLoading, isError, refetch, isFetching } = useGetProductsQuery({ page, limit, search });
   const products = data?.data || [];
+
 
   const totalPages = data?.meta?.totalPages || 1;
 
@@ -105,23 +106,8 @@ export default function ProductList() {
 
   // Image slider state for each product
   const imageIndexes = useRef<{ [id: string]: number }>({});
-  const [, forceUpdate] = useState(0); // to trigger re-render
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      products.forEach((item: any) => {
-        const images = item.images && item.images.length > 0 ? item.images : [];
-        if (images.length > 1) {
-          if (typeof imageIndexes.current[item.id] !== 'number') imageIndexes.current[item.id] = 0;
-          imageIndexes.current[item.id] = (imageIndexes.current[item.id] + 1) % images.length;
-        } else {
-          imageIndexes.current[item.id] = 0;
-        }
-      });
-      forceUpdate((n) => n + 1);
-    }, 2000);
-    return () => clearInterval(interval);
-  }, [products]);
+
 
   // Swipe-to-refresh handler
   const handleRefresh = async () => {
@@ -140,11 +126,8 @@ export default function ProductList() {
   const renderItem = ({ item }: { item: any }) => {
     const images = item.images && item.images.length > 0 ? item.images : [];
     const currentIndex = imageIndexes.current[item.id] || 0;
-
-
-
     return (
-      <View style={[styles.card, { backgroundColor: bg }]}>
+      <View style={[styles.card, { backgroundColor: bg }]}> 
         <View style={styles.cardRow}>
           <View style={styles.sliderContainer}>
             <Image
@@ -274,8 +257,6 @@ export default function ProductList() {
           onRefresh={handleRefresh}
           onEndReached={handleEndReached}
           onEndReachedThreshold={0.2}
-          onScrollEndDrag={handleEndReached}
-          onMomentumScrollEnd={handleEndReached}
           showsVerticalScrollIndicator={false}
         />
 
