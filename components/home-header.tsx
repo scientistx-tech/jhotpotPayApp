@@ -79,11 +79,17 @@ export default function HomeHeader({
               onPress={handleRefreshBalance}
               activeOpacity={0.7}
             >
-              <FontAwesome6 name="dollar-sign" size={12} color={tint} style={styles.dollarIcon} />
-              <Text style={[styles.balanceText, { color: tint }]}> {showBalance ? `${balance} ৳` : 'Balance'} </Text>
+              {
+                refreshing ? (
+                 <Text style={[styles.balanceText, { color: tint }]}>{balance} ৳</Text>
+                ) :(
+                       <Text style={[styles.balanceText, { color: tint }]}> ৳ ব্যালেন্স </Text>
+                )
+              }
             </TouchableOpacity>
             
           </View>
+        </View>
         </View>
         {/* Right Icons */}
         <View style={styles.rightSection}>
@@ -102,7 +108,7 @@ export default function HomeHeader({
             <FontAwesome6 name="circle-user" size={20} color={tint} />
           </TouchableOpacity>
         </View>
-      </View>
+      
     </View>
   );
 }
@@ -110,6 +116,8 @@ export default function HomeHeader({
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
+    gap: 12,
+  
     alignItems: 'center',
     justifyContent: 'space-between',
     borderBottomLeftRadius: 24,
@@ -168,8 +176,9 @@ const styles = StyleSheet.create({
   },
   rightSection: {
     flexDirection: 'row',
+    justifyContent:'flex-end',
     alignItems: 'center',
-    gap: 12,
+    gap: 5,
   },
   refreshButton: {
     padding: 4,
