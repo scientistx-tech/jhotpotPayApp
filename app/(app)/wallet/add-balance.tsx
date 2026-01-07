@@ -13,7 +13,7 @@ import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View
 
 type PaymentMethod = 'manual' | 'online';
 
-type PaymentProvider = 'bkash';
+type PaymentProvider = 'bkash' | 'nagad' | 'rocket' | 'upay';
 
 type AccountType = 'SEND_MONEY' | 'CASH_OUT' | 'PAYMENT';
 
@@ -33,6 +33,21 @@ const PROVIDERS: Provider[] = [
   {
     id: 'bkash',
     name: 'বিকাশ',
+    logo: undefined, // Image removed for now
+  },
+  {
+    id: 'nagad',
+    name: 'নগদ',
+    logo: undefined, // Image removed for now
+  },
+  {
+    id: 'rocket',
+    name: 'রকেট',
+    logo: undefined, // Image removed for now
+  },
+  {
+    id: 'upay',
+    name: 'উপায়',
     logo: undefined, // Image removed for now
   },
 ];
@@ -139,14 +154,19 @@ export default function AddBalance() {
       {/* Bank selection */}
       <ThemedText style={{ marginBottom: 6, fontSize: 13 }}>ব্যাংক নির্বাচন করুন</ThemedText>
       <View style={styles.providersRow}>
-        <Pressable
-          key="bkash"
-          style={[styles.providerCard, { borderColor: tint }]}
-          onPress={() => setSelectedProvider('bkash')}
-        >
-          {/* Image removed for now */}
-          <ThemedText style={styles.providerName}>বিকাশ</ThemedText>
-        </Pressable>
+        {PROVIDERS.map((provider) => (
+          <Pressable
+            key={provider.id}
+            style={[
+              styles.providerCard,
+              { borderColor: selectedProvider === provider.id ? '#0066FF' : '#E5E8ED', backgroundColor: selectedProvider === provider.id ? '#EEF3FA' : '#F8FAFD' }
+            ]}
+            onPress={() => setSelectedProvider(provider.id)}
+          >
+            {/* Image removed for now */}
+            <ThemedText style={styles.providerName}>{provider.name}</ThemedText>
+          </Pressable>
+        ))}
       </View>
       {/* Account type selection */}
       <ThemedText style={{ marginTop: 12, marginBottom: 6, fontSize: 13 }}>অ্যাকাউন্ট টাইপ</ThemedText>
@@ -164,7 +184,7 @@ export default function AddBalance() {
         ))}
       </View>
       {/* Show account info if loaded */}
-      {isAccountLoading ? (
+      {/* {isAccountLoading ? (
         <ThemedText style={{ fontSize: 13, color: tint }}>অ্যাকাউন্ট তথ্য লোড হচ্ছে...</ThemedText>
       ) : accountData && accountData.data ? (
         <View style={{ marginBottom: 8 }}>
@@ -172,7 +192,7 @@ export default function AddBalance() {
         </View>
       ) : accountError ? (
         <ThemedText style={{ fontSize: 13, color: 'red' }}>অ্যাকাউন্ট তথ্য পাওয়া যায়নি</ThemedText>
-      ) : null}
+      ) : null} */}
       <RoundedInput
         placeholder="লেনদেন আইডি লিখুন"
         value={form.trnxId}
@@ -200,7 +220,10 @@ export default function AddBalance() {
       <View style={styles.providersRow}>
         <Pressable
           key="bkash"
-          style={[styles.providerCard, { borderColor: tint }]}
+          style={[
+            styles.providerCard,
+            { borderColor: selectedProvider === 'bkash' ? '#0066FF' : '#E5E8ED', backgroundColor: selectedProvider === 'bkash' ? '#EEF3FA' : '#F8FAFD' }
+          ]}
           onPress={() => setSelectedProvider('bkash')}
         >
           {/* Image removed for now */}
