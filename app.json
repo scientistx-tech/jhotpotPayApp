@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "jhotpotPayApp",
+    "name": "Jhotpot Pay",
     "slug": "jhotpotPayApp",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -19,7 +19,8 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.scientistx.jhotpotpay"
     },
     "web": {
       "output": "static",
@@ -56,6 +57,7 @@
     },
     "updates": {
       "url": "https://u.expo.dev/2cba56c5-7e38-4d9a-89c8-1890f578f7b1"
-    }
+    },
+    "owner": "sazzad991"
   }
 }
