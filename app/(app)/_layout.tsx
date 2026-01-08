@@ -85,6 +85,10 @@ export default function AppStackLayout() {
         options={{ presentation: 'card', animation: 'slide_from_right' }}
       />
       <Stack.Screen
+        name="view-plan"
+        options={{ presentation: 'card', animation: 'slide_from_right' }}
+      />
+      <Stack.Screen
         name="contact-us"
         options={{ presentation: 'card', animation: 'slide_from_right' }}
       />
