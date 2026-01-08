@@ -100,7 +100,11 @@ export default function ProfilePage() {
 
         {/* Plan Buttons */}
         <View style={styles.planButtonsSection}>
-          <TouchableOpacity style={[styles.planButton, { backgroundColor: tint }]}>
+          <TouchableOpacity 
+            style={[styles.planButton, { backgroundColor: tint }]
+            }
+            onPress={() => router.push('/(app)/view-plan')}
+          >
             <ThemedText style={styles.planButtonText}>প্ল্যান দেখুন</ThemedText>
           </TouchableOpacity>
           <TouchableOpacity 
