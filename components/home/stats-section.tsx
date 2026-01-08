@@ -1,6 +1,5 @@
 import { ThemedText } from '@/components/themed-text';
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 type StatItem = {
   id: number;
@@ -13,6 +12,8 @@ type StatItem = {
 type Props = {
   firstRowStats: StatItem[];
   secondRowStats: StatItem[];
+  sort: 'day' | 'month' | 'year';
+  onSortChange: (sort: 'day' | 'month' | 'year') => void;
 };
 
 const StatsCard = ({ amount, label, bgColor }: StatItem) => (
@@ -26,9 +27,9 @@ const StatsCard = ({ amount, label, bgColor }: StatItem) => (
       style={{
         fontSize: 10,
         color: '#11181C',
-        marginTop: 10,
+        marginTop: 3,
         fontWeight: '500',
-        textAlign: 'center',
+        textAlign: 'left',
       }}
     >
       {label}
@@ -36,21 +37,47 @@ const StatsCard = ({ amount, label, bgColor }: StatItem) => (
   </View>
 );
 
-export default function StatsSection({ firstRowStats, secondRowStats }: Props) {
+export default function StatsSection({ firstRowStats, secondRowStats, sort, onSortChange }: Props) {
   return (
-    <View style={styles.statsWrapper}>
-      {/* First Row */}
-      <View style={styles.statsRowContainer}>
-        {firstRowStats.map((stat) => (
-          <StatsCard key={stat.id} {...stat} />
-        ))}
+    <View style={styles.section}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
+        <ThemedText type="title" style={{ fontSize: 18, flex: 1 }}>
+          আপডেট​
+        </ThemedText>
+        <View style={styles.sortTabsContainer}>
+          {[
+            { label: 'দিন', value: 'day' },
+            { label: 'মাস', value: 'month' },
+            { label: 'বছর', value: 'year' },
+          ].map((tab) => (
+            <TouchableOpacity
+              key={tab.value}
+              style={[
+                styles.sortTab,
+                sort === tab.value && styles.sortTabActive,
+              ]}
+              onPress={() => onSortChange(tab.value as 'day' | 'month' | 'year')}
+            >
+              <ThemedText style={{ color: sort === tab.value ? '#fff' : '#248AEF', fontWeight: 'bold', fontSize: 14 }}>
+                {tab.label}
+              </ThemedText>
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
-
-      {/* Second Row */}
-      <View style={[styles.statsRowContainer, { marginTop: 12 }]}>
-        {secondRowStats.map((stat) => (
-          <StatsCard key={stat.id} {...stat} />
-        ))}
+      <View style={styles.statsWrapper}>
+        {/* First Row */}
+        <View style={styles.statsRowContainer}>
+          {firstRowStats.map((stat) => (
+            <StatsCard key={stat.id} {...stat} />
+          ))}
+        </View>
+        {/* Second Row */}
+        <View style={[styles.statsRowContainer, { marginTop: 12 }]}>
+          {secondRowStats.map((stat) => (
+            <StatsCard key={stat.id} {...stat} />
+          ))}
+        </View>
       </View>
     </View>
   );
@@ -58,8 +85,6 @@ export default function StatsSection({ firstRowStats, secondRowStats }: Props) {
 
 const styles = StyleSheet.create({
   statsWrapper: {
-    marginHorizontal: 16,
-    marginTop: 30,
     backgroundColor: '#fff',
     borderRadius: 16,
     padding: 16,
@@ -69,6 +94,10 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 3,
   },
+  section: {
+    paddingHorizontal: 16,
+    marginTop: 30,
+  },
   statsRowContainer: {
     flexDirection: 'row',
     gap: 10,
@@ -76,6 +105,7 @@ const styles = StyleSheet.create({
   statsCardItem: {
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   amountBox: {
     backgroundColor: '#248AEF',
@@ -86,5 +116,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     minHeight: 70,
+  },
+  sortTabsContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#E3F2FD',
+    borderRadius: 10,
+    padding: 2,
+    alignItems: 'center',
+    marginLeft: 12,
+  },
+  sortTab: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 8,
+    marginHorizontal: 2,
+    backgroundColor: 'transparent',
+  },
+  sortTabActive: {
+    backgroundColor: '#248AEF',
   },
 });

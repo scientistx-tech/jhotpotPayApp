@@ -4,11 +4,12 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { RootState } from '@/store/store';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Image, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSelector } from 'react-redux';
 
 export default function ProfilePage() {
@@ -76,7 +77,7 @@ export default function ProfilePage() {
         >
           <Ionicons name="arrow-back" size={24} color={tint} />
         </TouchableOpacity>
-        <ThemedText style={styles.headerTitle}>My Profile</ThemedText>
+        <ThemedText style={styles.headerTitle}>আমার প্রোফাইল</ThemedText>
         <TouchableOpacity
           onPress={() => setIsEditing(!isEditing)}
           style={styles.editButton}
@@ -92,23 +93,21 @@ export default function ProfilePage() {
       >
         {/* Avatar Section */}
         <View style={styles.avatarSection}>
-          <Image
-            source={{ uri: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=200&q=60' }}
-            style={styles.avatar}
-            resizeMode="cover"
-          />
+          <View style={[styles.avatarPlaceholder, { backgroundColor: `${tint}20` }]}>
+            <MaterialCommunityIcons name="account-circle" size={48} color={tint} />
+          </View>
         </View>
 
         {/* Plan Buttons */}
         <View style={styles.planButtonsSection}>
           <TouchableOpacity style={[styles.planButton, { backgroundColor: tint }]}>
-            <ThemedText style={styles.planButtonText}>View Plan</ThemedText>
+            <ThemedText style={styles.planButtonText}>প্ল্যান দেখুন</ThemedText>
           </TouchableOpacity>
           <TouchableOpacity 
             style={[styles.planButton, { backgroundColor: '#E8F1FF', borderWidth: 1, borderColor: tint }]}
             onPress={() => router.push('/(app)/upgrade-plan')}
           >
-            <ThemedText style={[styles.planButtonText, { color: tint }]}>Upgrade Plan</ThemedText>
+            <ThemedText style={[styles.planButtonText, { color: tint }]}>প্ল্যান আপগ্রেড করুন</ThemedText>
           </TouchableOpacity>
         </View>
 
@@ -156,21 +155,21 @@ export default function ProfilePage() {
             style={[styles.linkSection, { borderBottomWidth: 1, borderBottomColor: '#E5E8ED' }]}
             onPress={() => router.push('/(app)/change-password')}
           >
-            <ThemedText style={styles.linkText}>Change Password</ThemedText>
+            <ThemedText style={styles.linkText}>পিন  পরিবর্তন করুন</ThemedText>
             <Ionicons name="chevron-forward" size={20} color={tint} />
           </TouchableOpacity>
           <TouchableOpacity 
             style={[styles.linkSection, { borderBottomWidth: 1, borderBottomColor: '#E5E8ED' }]}
             onPress={() => router.push('/(app)/contact-us')}
           >
-            <ThemedText style={styles.linkText}>Contact Us</ThemedText>
+            <ThemedText style={styles.linkText}>যোগাযোগ করুন</ThemedText>
             <Ionicons name="chevron-forward" size={20} color={tint} />
           </TouchableOpacity>
           <TouchableOpacity 
             style={styles.linkSection}
             onPress={() => router.push('/(app)/about-us')}
           >
-            <ThemedText style={styles.linkText}>About Jhotpot Pay</ThemedText>
+            <ThemedText style={styles.linkText}>ঝটপট পে সম্পর্কে</ThemedText>
             <Ionicons name="chevron-forward" size={20} color={tint} />
           </TouchableOpacity>
 
@@ -191,7 +190,7 @@ export default function ProfilePage() {
             onPress={handleSave}
             disabled={isUpdating}
           >
-            <ThemedText style={styles.saveButtonText}>{isUpdating ? 'Saving...' : 'Save Changes'}</ThemedText>
+            <ThemedText style={styles.saveButtonText}>{isUpdating ? 'সংরক্ষণ হচ্ছে...' : 'পরিবর্তন সংরক্ষণ করুন'}</ThemedText>
           </TouchableOpacity>
         </View>
       )}
@@ -203,6 +202,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f7fb',
+  },
+    avatarPlaceholder: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   header: {
     flexDirection: 'row',

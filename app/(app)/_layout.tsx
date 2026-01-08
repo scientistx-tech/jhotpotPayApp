@@ -10,27 +10,27 @@ export default function AppStackLayout() {
     >
       <Stack.Screen
         name="recharge/enter-number"
-        options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+        options={{ presentation: 'modal', animation: 'slide_from_right' }}
       />
       <Stack.Screen
         name="recharge/internet"
-        options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+        options={{ presentation: 'modal', animation: 'slide_from_right' }}
       />
       <Stack.Screen
         name="recharge/call-rate"
-        options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+        options={{ presentation: 'modal', animation: 'slide_from_right' }}
       />
       <Stack.Screen
         name="recharge/amount"
-        options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+        options={{ presentation: 'modal', animation: 'slide_from_right' }}
       />
       <Stack.Screen
         name="recharge/minute"
-        options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+        options={{ presentation: 'modal', animation: 'slide_from_right' }}
       />
       <Stack.Screen
         name="recharge/bundle"
-        options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+        options={{ presentation: 'modal', animation: 'slide_from_right' }}
       />
       <Stack.Screen
         name="sales/order"

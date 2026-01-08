@@ -1,11 +1,10 @@
 import { useGetSalesQuery, useUpdateSaleMutation } from '@/api/saleApi';
-import Pagination from '@/components/pagination';
 import { RechargeHeader } from '@/components/recharge';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { ActivityIndicator, FlatList, Modal, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -26,23 +25,43 @@ export default function SaleHistory() {
   const [editDue, setEditDue] = useState('');
   const [updateSale, { isLoading: isUpdating }] = useUpdateSaleMutation();
 
+  // Infinite scroll state
+  const [allSales, setAllSales] = useState<any[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+
   // Fetch sales from API
   const { data, isLoading, isError, refetch, isFetching } = useGetSalesQuery({ page, limit });
-  const sales = data?.data || [];
   const totalPages = data?.meta?.totalPages || 1;
+
+  // Infinite scroll: append new data
+  React.useEffect(() => {
+    if (data?.data) {
+      if (page === 1) {
+        setAllSales(data.data);
+      } else {
+        setAllSales((prev) => {
+          // Avoid duplicates
+          const ids = new Set(prev.map((s) => s.id));
+          return [...prev, ...data.data.filter((s: any) => !ids.has(s.id))];
+        });
+      }
+      setHasMore(page < totalPages);
+    }
+  }, [data, page]);
 
   const handleBackPress = () => router.back();
 
   // Swipe-to-refresh handler
   const handleRefresh = async () => {
     setRefreshing(true);
+    setPage(1);
     await refetch();
     setRefreshing(false);
   };
 
-  // Pagination handler for FlatList
+  // Infinite scroll handler for FlatList
   const handleEndReached = () => {
-    if (!isLoading && page < totalPages) {
+    if (!isLoading && hasMore && !refreshing && !isFetching) {
       setPage((prev) => prev + 1);
     }
   };
@@ -107,29 +126,23 @@ export default function SaleHistory() {
       <View style={styles.content}>
         {/* Sale List with FlatList */}
         <FlatList
-          data={sales}
+          data={allSales}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
           contentContainerStyle={{ gap: 12, marginTop: 14, paddingBottom: 40 }}
           ListEmptyComponent={<ThemedText style={{ textAlign: 'center', marginVertical: 29 }}>কোনো বিক্রির তথ্য পাওয়া যায়নি।</ThemedText>}
-          ListFooterComponent={isLoading ? <ActivityIndicator size="large" color={tint} style={{ marginVertical: 24 }} /> : null}
-          refreshing={refreshing || isFetching}
+          ListFooterComponent={
+            (isLoading || isFetching) && hasMore ? (
+              <ActivityIndicator size="large" color={tint} style={{ marginVertical: 24 }} />
+            ) : null
+          }
+          refreshing={refreshing}
           onRefresh={handleRefresh}
           onEndReached={handleEndReached}
           onEndReachedThreshold={0.2}
-          onScrollEndDrag={handleEndReached}
-          onMomentumScrollEnd={handleEndReached}
           showsVerticalScrollIndicator={false}
         />
-
-        {/* Pagination (optional, if you want manual page control) */}
-        {totalPages > 1 && (
-          <Pagination
-            page={page}
-            totalPages={totalPages}
-            onPageChange={setPage}
-          />
-        )}
+        {/* Pagination removed for infinite scroll UX */}
 
         <View style={{ height: 24 }} />
       </View>

@@ -45,7 +45,8 @@ export default function RechargeEnterNumber() {
   return (
     <ThemedView style={styles.container}>
       <RechargeHeader
-        title="Mobile Recharge"
+        title="মোবাইল রিচার্জ"
+
         showBack={true}
         rightIcon="wallet-plus"
         onBackPress={handleBackPress}
@@ -63,21 +64,21 @@ export default function RechargeEnterNumber() {
           <View style={styles.card}>
             <View style={styles.formSection}>
               <ThemedText type="defaultSemiBold" style={styles.label}>
-                Recipient
+                প্রাপকের মোবাইল নম্বর
               </ThemedText>
               {/* Use RoundedInput for phone number */}
               <RoundedInput
                 label=""
-                placeholder="Enter phone number..."
+                placeholder="মোবাইল নম্বর লিখুন..."
                 value={phone}
                 onChangeText={setPhone}
                 keyboardType="phone-pad"
               />
               <SelectDropdown
-                label="Select Operator"
+                label="অপারেটর নির্বাচন করুন"
                 value={networkType}
                 options={NETWORK_TYPES.map((op) => op.label)}
-                placeholder="Choose operator"
+                placeholder="অপারেটর নির্বাচন করুন"
                 onSelect={setNetworkType}
                 isOpen={openOperator}
                 setOpen={setOpenOperator}
@@ -96,7 +97,7 @@ export default function RechargeEnterNumber() {
     </ThemedView>
   );
 }
-  // ...existing styles...
+// ...existing styles...
 
 const styles = StyleSheet.create({
   container: {

@@ -1,6 +1,5 @@
 import { Customer, useDeleteCustomerMutation, useGetCustomersQuery } from '@/api/customerApi';
 import CustomButton from '@/components/custom-button';
-import Pagination from '@/components/pagination';
 import { RechargeHeader } from '@/components/recharge';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -8,7 +7,8 @@ import ConfirmModal from '@/components/ui/confirm-modal';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import React, { useState } from 'react';
+
 import { ActivityIndicator, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 
@@ -24,6 +24,8 @@ export default function CustomerList() {
   const [limit] = useState(10);
   const [search, setSearch] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const [allCustomers, setAllCustomers] = useState<Customer[]>([]);
+  const [hasMore, setHasMore] = useState(true);
 
   // Delete modal state
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -32,8 +34,28 @@ export default function CustomerList() {
 
   // Fetch products from API
   const { data, isLoading, isError, refetch, isFetching } = useGetCustomersQuery({ page, limit, search });
-  const customers = data?.data || [];
   const totalPages = data?.meta?.totalPages || 1;
+
+  // Infinite scroll: append new data
+  React.useEffect(() => {
+    if (data?.data) {
+      if (page === 1) {
+        setAllCustomers(data.data);
+      } else {
+        setAllCustomers((prev) => {
+          // Avoid duplicates
+          const ids = new Set(prev.map((c) => c.id));
+          return [...prev, ...data.data.filter((c: Customer) => !ids.has(c.id))];
+        });
+      }
+      setHasMore(page < (data?.meta?.totalPages || 1));
+    }
+  }, [data, page]);
+
+  // Reset list on search
+  React.useEffect(() => {
+    setPage(1);
+  }, [search]);
 
   // Delete mutation
   const [deleteCustomer, { isLoading: isDeleting }] = useDeleteCustomerMutation();
@@ -77,13 +99,14 @@ export default function CustomerList() {
   // Swipe-to-refresh handler
   const handleRefresh = async () => {
     setRefreshing(true);
+    setPage(1);
     await refetch();
     setRefreshing(false);
   };
 
-  // Pagination handler for FlatList
+  // Infinite scroll handler for FlatList
   const handleEndReached = () => {
-    if (!isLoading && page < totalPages) {
+    if (!isLoading && hasMore && !refreshing && !isFetching) {
       setPage((prev) => prev + 1);
     }
   };
@@ -145,31 +168,26 @@ export default function CustomerList() {
           />
         </View>
 
-        {/* Customer List with FlatList */}
+        {/* Customer List with FlatList (Infinite Scroll) */}
         <FlatList
-          data={customers}
+          data={allCustomers}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
           contentContainerStyle={{ gap: 12, marginTop: 14, paddingBottom: 40 }}
           ListEmptyComponent={<Text style={{ textAlign: 'center', marginVertical: 29 }}>কোনো কাস্টমার পাওয়া যায়নি।</Text>}
-          ListFooterComponent={isLoading ? <ActivityIndicator size="large" color={tint} style={{ marginVertical: 24 }} /> : null}
-          refreshing={refreshing || isFetching}
+          ListFooterComponent={
+            (isLoading || isFetching) && hasMore ? (
+              <ActivityIndicator size="large" color={tint} style={{ marginVertical: 24 }} />
+            ) : null
+          }
+          refreshing={refreshing}
           onRefresh={handleRefresh}
           onEndReached={handleEndReached}
           onEndReachedThreshold={0.2}
-          onScrollEndDrag={handleEndReached}
-          onMomentumScrollEnd={handleEndReached}
           showsVerticalScrollIndicator={false}
         />
 
-        {/* Pagination (optional, if you want manual page control) */}
-        {totalPages > 1 && (
-          <Pagination
-            page={page}
-            totalPages={totalPages}
-            onPageChange={setPage}
-          />
-        )}
+        {/* Pagination removed for infinite scroll UX */}
 
         <View style={{ height: 24 }} />
 

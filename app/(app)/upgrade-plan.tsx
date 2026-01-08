@@ -1,65 +1,3 @@
-
-// import { useBuyPackageMutation, useGetPackagesQuery } from '@/api/packageApi';
-// import { useThemeColor } from '@/hooks/use-theme-color';
-// import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-
-// const UpgradePlan = () => {
-//   const tint = useThemeColor({}, 'tint');
-//   const bg = useThemeColor({}, 'background');
-//   const { data, isLoading, isError, refetch } = useGetPackagesQuery();
-//   const [buyPackage, { isLoading: isBuying }] = useBuyPackageMutation();
-
-//   const handleBuy = async (packageId: string) => {
-//     try {
-//       const res = await buyPackage({ packageId }).unwrap();
-//       if (res.success) {
-//         Alert.alert('Success', res.message || 'Package purchased successfully');
-//         refetch();
-//       } else {
-//         Alert.alert('Error', res.message || 'Could not buy package');
-//       }
-//     } catch (err: any) {
-//       Alert.alert('Error', err?.message || 'Could not buy package');
-//     }
-//   };
-
-//   const packages = data?.data || [];
-
-//   return (
-//     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-//       <Text style={styles.header}>Upgrade Plan</Text>
-//       {isLoading ? (
-//         <ActivityIndicator size="large" color={tint} style={{ marginTop: 32 }} />
-//       ) : isError ? (
-//         <Text style={styles.error}>Could not load plans.</Text>
-//       ) : packages.length === 0 ? (
-//         <Text style={styles.empty}>No plans found.</Text>
-//       ) : (
-//         packages.map(pkg => (
-//           <View key={pkg.id} style={[styles.card, { backgroundColor: bg }]}> 
-//             <Text style={styles.title}>{pkg.name}</Text>
-//             <Text style={styles.details}>{pkg.details}</Text>
-//             <View style={styles.infoRow}>
-//               <Text style={styles.info}>Product Limit: {pkg.product_limit}</Text>
-//               <Text style={styles.info}>Recharge Commission: {pkg.recharge_commission}%</Text>
-//             </View>
-//             <Text style={styles.price}>Price: BDT {pkg.price}</Text>
-// <TouchableOpacity
-//   style={[styles.buyButton, { backgroundColor: tint, opacity: isBuying ? 0.6 : 1 }]}
-//   onPress={() => handleBuy(pkg.id)}
-//   disabled={isBuying}
-// >
-//   <Text style={styles.buyButtonText}>{isBuying ? 'Processing...' : 'Buy'}</Text>
-// </TouchableOpacity>
-//           </View>
-//         ))
-//       )}
-//       <View style={{ height: 32 }} />
-//     </ScrollView>
-//   );
-// };
-
-
 import { useBuyPackageMutation, useGetPackagesQuery } from '@/api/packageApi';
 import { RechargeHeader } from '@/components/recharge';
 import { ThemedText } from '@/components/themed-text';
@@ -76,23 +14,20 @@ export default function UpgradePlan() {
   const bg = useThemeColor({}, 'background');
 
 
-
   const handleBackPress = () => router.back();
   const [refreshing, setRefreshing] = useState(false);
 
 
-
-
-
-
   const { data, isLoading, isError, refetch } = useGetPackagesQuery();
+  
   const [buyPackage] = useBuyPackageMutation();
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   const handleBuyPackage = async (packageId: string) => {
-    setProcessingId(packageId);
     try {
       const res = await buyPackage({ packageId }).unwrap();
+      console.log(res);
+
       if (res.success) {
         Alert.alert('Success', res.message || 'Package purchased successfully');
         refetch();
@@ -100,11 +35,13 @@ export default function UpgradePlan() {
         Alert.alert('Error', res.message || 'Could not buy package');
       }
     } catch (err: any) {
+      console.log(err)
+      console.log(err?.data?.message)
       if (err?.err?.statusCode === 400 || err?.status === 400) {
-        Alert.alert('Low Balance', 'Please add balance to continue.');
+        Alert.alert('Error', err?.data?.message || 'Please add balance to continue.');
         router.replace('/(app)/wallet/add-balance');
       } else {
-        Alert.alert('Error', err?.message || 'Could not buy package');
+        Alert.alert('Error', err?.data?.message || 'Could not buy package');
       }
     } finally {
       setProcessingId(null);
@@ -134,9 +71,9 @@ export default function UpgradePlan() {
           <View style={{ flex: 1 }}>
             <ThemedText style={styles.nameText}>{item.name}</ThemedText>
             <ThemedText style={styles.nameText}>{item.details}</ThemedText>
-            <ThemedText style={styles.metaText}>Product Limit: {item.product_limit}</ThemedText>
-            <ThemedText style={styles.metaText}>Recharge Commission: {item.recharge_commission}</ThemedText>
-            <ThemedText style={styles.metaText}>Price: BDT {item.price}</ThemedText>
+            <ThemedText style={styles.metaText}>সীমা: {item.product_limit}</ThemedText>
+            <ThemedText style={styles.metaText}>রিচার্জ কমিশন: {item.recharge_commission}</ThemedText>
+            <ThemedText style={styles.metaText}>মূল্য: {item.price} টাকা</ThemedText>
           </View>
           <View style={styles.actions}>
             <TouchableOpacity
@@ -144,7 +81,7 @@ export default function UpgradePlan() {
               onPress={() => handleBuyPackage(item.id)}
               disabled={isProcessing}
             >
-              <ThemedText style={{ color: 'white' }}>{isProcessing ? 'Processing...' : 'Buy'}</ThemedText>
+              <ThemedText style={{ color: 'white' }}>{isProcessing ? 'প্রসেস হচ্ছে...' : 'কিনুন'}</ThemedText>
             </TouchableOpacity>
           </View>
         </View>
@@ -157,7 +94,7 @@ export default function UpgradePlan() {
   return (
     <ThemedView style={styles.container}>
       <RechargeHeader
-        title="Upgrade Plan"
+        title="প্ল্যান আপগ্রেড"
         showBack={true}
         onBackPress={handleBackPress}
       />
@@ -171,7 +108,7 @@ export default function UpgradePlan() {
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
           contentContainerStyle={{ gap: 12, marginTop: 14, paddingBottom: 40 }}
-          ListEmptyComponent={<Text style={{ textAlign: 'center', marginVertical: 29 }}>No Upgrade Plan.</Text>}
+          ListEmptyComponent={<Text style={{ textAlign: 'center', marginVertical: 29 }}>কোনো আপগ্রেড প্ল্যান নেই।</Text>}
           ListFooterComponent={isLoading ? <ActivityIndicator size="large" color={tint} style={{ marginVertical: 24 }} /> : null}
           refreshing={refreshing || isLoading}
           onRefresh={handleRefresh}

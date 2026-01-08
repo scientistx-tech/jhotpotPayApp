@@ -51,7 +51,7 @@ export default function ChangePassword() {
         >
           <Ionicons name="arrow-back" size={24} color={tint} />
         </TouchableOpacity>
-        <ThemedText style={styles.headerTitle}>Change Password</ThemedText>
+        <ThemedText style={styles.headerTitle}>পিন পরিবর্তন</ThemedText>
         <View style={{ width: 40 }} />
       </View>
       <KeyboardAvoidingView
@@ -67,11 +67,10 @@ export default function ChangePassword() {
           ]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}>
-          <ThemedText type='title' style={{ textAlign: 'center', marginTop: 40 }}>পাসওয়ার্ড পরিবর্তন করুন</ThemedText>
           <View style={{ height: 24 }} />
-          <FormInput name='oldPassword' control={control} label='পুরাতন পাসওয়ার্ড' placeholder='পুরাতন পাসওয়ার্ড দিন' secureTextEntry />
-          <FormInput name='newPassword' control={control} label='নতুন পাসওয়ার্ড' placeholder='নতুন পাসওয়ার্ড দিন' secureTextEntry />
-          <FormInput name='confirm' control={control} label='নতুন পাসওয়ার্ড নিশ্চিত করুন' placeholder='আবার দিন' secureTextEntry />
+          <FormInput name='oldPassword' control={control} label='পুরাতন পিন' placeholder='পুরাতন পিন দিন' secureTextEntry />
+          <FormInput name='newPassword' control={control} label='নতুন পিন' placeholder='নতুন পিন দিন' secureTextEntry />
+          <FormInput name='confirm' control={control} label='নতুন পিন নিশ্চিত করুন' placeholder='আবার দিন' secureTextEntry />
           <View style={{ height: 20 }} />
           <CustomButton isLoading={isLoading} title='পরিবর্তন করুন' onPress={handleSubmit(handleChangePassword)} />
         </ScrollView>

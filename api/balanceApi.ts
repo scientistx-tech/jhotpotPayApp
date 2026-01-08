@@ -70,6 +70,45 @@ interface DebitListResponse {
 	data: BalanceCredit[];
 }
 
+// User Overview Types
+interface UserOverviewBase {
+	totalProduct: number;
+	totalRecharge: number;
+	totalCommission: number;
+}
+
+interface UserOverviewDay extends UserOverviewBase {
+	day: {
+		earning: number;
+		sells: number;
+		due: number;
+	};
+}
+
+interface UserOverviewMonth extends UserOverviewBase {
+	month: {
+		earning: number;
+		sells: number;
+		due: number;
+	};
+}
+
+interface UserOverviewYear extends UserOverviewBase {
+	year: {
+		earning: number;
+		sells: number;
+		due: number;
+	};
+}
+
+type UserOverviewData = UserOverviewDay | UserOverviewMonth | UserOverviewYear;
+
+interface UserOverviewResponse {
+	success: boolean;
+	message: string;
+	data: UserOverviewData;
+}
+
 export const balanceApi = baseApi.injectEndpoints({
 	overrideExisting: true,
 	endpoints: (builder) => ({
@@ -79,8 +118,19 @@ export const balanceApi = baseApi.injectEndpoints({
 				method: "POST",
 				body,
 			}),
+
+			
 			invalidatesTags: ["BalanceCredits"],
 		}),
+
+		// Get user overview (day, month, year)
+			getUserOverview: builder.query<UserOverviewResponse, { sort: 'day' | 'month' | 'year' }>({
+				query: ({ sort }) => ({
+					url: `/system/overview/user`,
+					method: 'GET',
+					params: { sort },
+				}),
+			}),
 
 		// Online pay via bKash
 		bkashOnlinePay: builder.mutation<{ success: boolean; message: string; data: any }, { amount: string }>({
@@ -134,4 +184,5 @@ export const {
 	useGetDebitsQuery,
 	useGetUserCreditQuery,
 	useBkashOnlinePayMutation,
+	useGetUserOverviewQuery,
 } = balanceApi;

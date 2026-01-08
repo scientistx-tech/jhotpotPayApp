@@ -1,6 +1,5 @@
 import { useDeleteProductMutation, useGetProductsQuery, useToggleStockMutation } from '@/api/productApi';
 import CustomButton from '@/components/custom-button';
-import Pagination from '@/components/pagination';
 import { RechargeHeader } from '@/components/recharge';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -9,7 +8,8 @@ import { useThemeColor } from '@/hooks/use-theme-color';
 import { Product } from '@/store/slices/productSlice';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
+
 import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 
@@ -25,6 +25,8 @@ export default function ProductList() {
   const [limit] = useState(10);
   const [search, setSearch] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const [allProducts, setAllProducts] = React.useState<Product[]>([]);
+  const [hasMore, setHasMore] = React.useState(true);
 
   // Delete modal state
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -35,10 +37,28 @@ export default function ProductList() {
 
   // Fetch products from API
   const { data, isLoading, isError, refetch, isFetching } = useGetProductsQuery({ page, limit, search });
-  const products = data?.data || [];
-
-
   const totalPages = data?.meta?.totalPages || 1;
+
+  // Infinite scroll: append new data
+  React.useEffect(() => {
+    if (data?.data) {
+      if (page === 1) {
+        setAllProducts(data.data);
+      } else {
+        setAllProducts((prev) => {
+          // Avoid duplicates
+          const ids = new Set(prev.map((p) => p.id));
+          return [...prev, ...data.data.filter((p: Product) => !ids.has(p.id))];
+        });
+      }
+      setHasMore(page < (data?.meta?.totalPages || 1));
+    }
+  }, [data, page]);
+
+  // Reset list on search
+  React.useEffect(() => {
+    setPage(1);
+  }, [search]);
 
   // Delete mutation
   const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation();
@@ -94,8 +114,15 @@ export default function ProductList() {
   const handleToggleStock = async ({ productId }: { productId: string }) => {
     setTogglingId(productId);
     try {
-      await toggleStock({ id: productId }).unwrap();
-      refetch();
+      const updated = await toggleStock({ id: productId }).unwrap();
+      // Optimistically update the product in allProducts
+      setAllProducts((prev) =>
+        prev.map((p) =>
+          p.id === productId ? { ...p, isStock: updated?.isStock ?? !p.isStock } : p
+        )
+      );
+      // Optionally refetch for consistency
+      // refetch();
     } catch (e) {
       // Optionally show error
     }
@@ -112,13 +139,14 @@ export default function ProductList() {
   // Swipe-to-refresh handler
   const handleRefresh = async () => {
     setRefreshing(true);
+    setPage(1);
     await refetch();
     setRefreshing(false);
   };
 
-  // Pagination handler for FlatList
+  // Infinite scroll handler for FlatList
   const handleEndReached = () => {
-    if (!isLoading && page < totalPages) {
+    if (!isLoading && hasMore && !refreshing && !isFetching) {
       setPage((prev) => prev + 1);
     }
   };
@@ -245,29 +273,25 @@ export default function ProductList() {
           />
         </View>
 
-        {/* Product List with FlatList */}
+        {/* Product List with FlatList (Infinite Scroll) */}
         <FlatList
-          data={products}
+          data={allProducts}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
           contentContainerStyle={{ gap: 12, marginTop: 14, paddingBottom: 40 }}
           ListEmptyComponent={<Text style={{ textAlign: 'center', marginVertical: 29 }}>কোনো পণ্য পাওয়া যায়নি।</Text>}
-          ListFooterComponent={isLoading ? <ActivityIndicator size="large" color={tint} style={{ marginVertical: 24 }} /> : null}
-          refreshing={refreshing || isFetching}
+          ListFooterComponent={
+            (isLoading || isFetching) && hasMore ? (
+              <ActivityIndicator size="large" color={tint} style={{ marginVertical: 24 }} />
+            ) : null
+          }
+          refreshing={refreshing}
           onRefresh={handleRefresh}
           onEndReached={handleEndReached}
           onEndReachedThreshold={0.2}
           showsVerticalScrollIndicator={false}
         />
-
-        {/* Pagination (optional, if you want manual page control) */}
-        {totalPages > 1 && (
-          <Pagination
-            page={page}
-            totalPages={totalPages}
-            onPageChange={setPage}
-          />
-        )}
+        {/* Pagination removed for infinite scroll UX */}
 
         <View style={{ height: 24 }} />
 

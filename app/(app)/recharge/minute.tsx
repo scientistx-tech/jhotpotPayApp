@@ -12,11 +12,11 @@ type SimType = 'PRE_PAID' | 'POST_PAID';
 type AmountCategory = 'amount' | 'internet' | 'minute' | 'bundle' | 'call-rate';
 
 const CATEGORIES: { id: AmountCategory; label: string }[] = [
-  { id: 'amount', label: 'Amount' },
-  { id: 'internet', label: 'Internet' },
-  { id: 'minute', label: 'Minute' },
-  { id: 'bundle', label: 'Bundle' },
-  { id: 'call-rate', label: 'Call Rate' },
+  { id: 'amount', label: 'টাকা' },
+  { id: 'internet', label: 'ইন্টারনেট' },
+  { id: 'minute', label: 'মিনিট' },
+  { id: 'bundle', label: 'বান্ডেল' },
+  { id: 'call-rate', label: 'কল রেট' },
 ];
 
 export default function RechargeMinute() {
@@ -93,7 +93,7 @@ export default function RechargeMinute() {
   return (
     <ThemedView style={styles.container}>
       <RechargeHeader
-        title="Minute Offers"
+        title="মিনিট অফার"
         showBack={true}
         rightIcon="wallet-plus"
         onBackPress={handleBackPress}
@@ -217,7 +217,6 @@ export default function RechargeMinute() {
         validity={filteredOffers.find(o => o.id === selectedOfferId)?.validity ?? ''}
         cashback={filteredOffers.find(o => o.id === selectedOfferId)?.cash_back ? `${filteredOffers.find(o => o.id === selectedOfferId)?.cash_back} Taka Cashback` : undefined}
         price={filteredOffers.find(o => o.id === selectedOfferId)?.price ? `${filteredOffers.find(o => o.id === selectedOfferId)?.price} BDT` : 'BDT: --'}
-        availableBalance="20,000 BDT"
         onProceed={handleRecharge}
       />
     </ThemedView>
