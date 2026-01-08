@@ -86,6 +86,7 @@ export default function UpgradePlan() {
 
 
   const { data, isLoading, isError, refetch } = useGetPackagesQuery();
+  console.log(data)
   const [buyPackage] = useBuyPackageMutation();
   const [processingId, setProcessingId] = useState<string | null>(null);
 
@@ -134,9 +135,9 @@ export default function UpgradePlan() {
           <View style={{ flex: 1 }}>
             <ThemedText style={styles.nameText}>{item.name}</ThemedText>
             <ThemedText style={styles.nameText}>{item.details}</ThemedText>
-            <ThemedText style={styles.metaText}>Product Limit: {item.product_limit}</ThemedText>
-            <ThemedText style={styles.metaText}>Recharge Commission: {item.recharge_commission}</ThemedText>
-            <ThemedText style={styles.metaText}>Price: BDT {item.price}</ThemedText>
+            <ThemedText style={styles.metaText}>সীমা: {item.product_limit}</ThemedText>
+            <ThemedText style={styles.metaText}>রিচার্জ কমিশন: {item.recharge_commission}</ThemedText>
+            <ThemedText style={styles.metaText}>মূল্য: {item.price} টাকা</ThemedText>
           </View>
           <View style={styles.actions}>
             <TouchableOpacity
@@ -144,7 +145,7 @@ export default function UpgradePlan() {
               onPress={() => handleBuyPackage(item.id)}
               disabled={isProcessing}
             >
-              <ThemedText style={{ color: 'white' }}>{isProcessing ? 'Processing...' : 'Buy'}</ThemedText>
+              <ThemedText style={{ color: 'white' }}>{isProcessing ? 'প্রসেস হচ্ছে...' : 'কিনুন'}</ThemedText>
             </TouchableOpacity>
           </View>
         </View>
@@ -157,7 +158,7 @@ export default function UpgradePlan() {
   return (
     <ThemedView style={styles.container}>
       <RechargeHeader
-        title="Upgrade Plan"
+        title="প্ল্যান আপগ্রেড"
         showBack={true}
         onBackPress={handleBackPress}
       />
@@ -171,7 +172,7 @@ export default function UpgradePlan() {
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
           contentContainerStyle={{ gap: 12, marginTop: 14, paddingBottom: 40 }}
-          ListEmptyComponent={<Text style={{ textAlign: 'center', marginVertical: 29 }}>No Upgrade Plan.</Text>}
+          ListEmptyComponent={<Text style={{ textAlign: 'center', marginVertical: 29 }}>কোনো আপগ্রেড প্ল্যান নেই।</Text>}
           ListFooterComponent={isLoading ? <ActivityIndicator size="large" color={tint} style={{ marginVertical: 24 }} /> : null}
           refreshing={refreshing || isLoading}
           onRefresh={handleRefresh}

@@ -11,6 +11,8 @@ import { usePhone } from '../../../context/PhoneContext';
 import { useRechargeMutation } from '@/api/rechargeApi';
 import OfferDetailsModal from '@/components/recharge/offer-details-modal';
 import { z } from 'zod';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store/store';
 
 
 const sim_type = z.enum(["PRE_PAID", "POST_PAID"]);
@@ -29,17 +31,20 @@ const AMOUNT_OFFERS: Offer[] = [
 ];
 
 const CATEGORIES: { id: AmountCategory; label: string }[] = [
-  { id: 'amount', label: 'Amount' },
-  { id: 'internet', label: 'Internet' },
-  { id: 'minute', label: 'Minute' },
-  { id: 'bundle', label: 'Bundle' },
-  { id: 'call-rate', label: 'Call Rate' },
+  { id: 'amount', label: 'টাকা' },
+  { id: 'internet', label: 'ইন্টারনেট' },
+  { id: 'minute', label: 'মিনিট' },
+  { id: 'bundle', label: 'বান্ডেল' },
+  { id: 'call-rate', label: 'কল রেট' },
 ];
 
 
 export default function RechargeAmount() {
   const router = useRouter();
   const tint = useThemeColor({}, 'tint');
+  const user = useSelector((state: RootState) => state.auth.user);
+  // user is likely { data: { ...user fields... }, ... }
+  const userData = user?.data || {};
   // Get params from navigation
   const params = typeof router === 'object' && 'params' in router ? (router as any).params : (router as any)?.getCurrentRoute?.()?.params;
   const { phone: phoneContext } = usePhone();
@@ -140,7 +145,7 @@ export default function RechargeAmount() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.card}>
-            <RecipientCard name="MD. Mystogan Islam" phone={phone} />
+            <RecipientCard name="" phone={phone} />
 
             {/* TypeSelector replaced with simType selector */}
             <View style={{ marginVertical: 12, marginHorizontal: 16 }}>
@@ -214,29 +219,37 @@ export default function RechargeAmount() {
                     })}
                   </View>
 
-                  <View style={styles.typeAmountSection}>
+                    <View style={styles.typeAmountSection}>
                     <TextInput
-                      placeholder="Type Amount..."
+                      placeholder="এখানে পরিমাণ লিখুন..."
                       value={customAmount}
                       onChangeText={(text) => {
-                        setCustomAmount(text);
-                        if (text !== '') setSelectedOfferId(null);
+                      setCustomAmount(text);
+                      if (text !== '') setSelectedOfferId(null);
                       }}
                       keyboardType="numeric"
                       placeholderTextColor="#248AEF"
                       style={styles.customAmountInput}
                     />
-                  </View>
+                    </View>
                 </View>
               )}
 
               {/*  */}
               <View style={styles.availableBalanceContainer}>
-                <ThemedText style={styles.availableBalanceText}>Available Balance: 20,000 BDT</ThemedText>
+                <ThemedText style={styles.availableBalanceText}>উপলব্ধ ব্যালেন্স: ৳{userData.balance || '0'} টাকা</ThemedText>
               </View>
 
             </View>
-            {/* <View style={styles.spacer} /> */}
+           
+          </View>
+        </ScrollView>
+
+
+
+      </KeyboardAvoidingView>
+
+       {/* <View style={styles.spacer} /> */}
             <View style={{ marginTop: 90 }}>
               {
                 !showDetailsModal && <View style={styles.bottomSection}>
@@ -253,12 +266,6 @@ export default function RechargeAmount() {
                 </View>
               }
             </View>
-          </View>
-        </ScrollView>
-
-
-
-      </KeyboardAvoidingView>
 
       <OfferDetailsModal
         visible={showDetailsModal}

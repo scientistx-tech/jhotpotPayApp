@@ -1,6 +1,8 @@
 import { ThemedText } from '@/components/themed-text';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { RootState } from '@/store/store';
 import { Modal, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { useSelector } from 'react-redux';
 
 export type OfferDetailsModalProps = {
   visible: boolean;
@@ -12,7 +14,6 @@ export type OfferDetailsModalProps = {
   cashback?: string;
   price: string;
   onProceed?: () => void;
-  availableBalance?: string;
   headerTitle?: string;
 };
 
@@ -24,13 +25,16 @@ export default function OfferDetailsModal({
   offerTitle,
   validity,
   cashback,
-  headerTitle="Offer Details",
+  headerTitle="রিচার্জ বিস্তারিত",
   price,
   onProceed,
-  availableBalance = '20,000 BDT',
 }: OfferDetailsModalProps) {
   const tint = useThemeColor({}, 'tint');
   const bg = useThemeColor({}, 'background');
+
+  const user = useSelector((state: RootState) => state.auth.user);
+  // user is likely { data: { ...user fields... }, ... }
+  const userData = user?.data || {};
 
   return (
     <Modal
@@ -45,7 +49,7 @@ export default function OfferDetailsModal({
           <View style={styles.header}>
             <ThemedText style={styles.headerTitle}>{headerTitle}</ThemedText>
             <TouchableOpacity onPress={onClose}>
-              <ThemedText style={[styles.closeBtn, { color: '#FF6B6B' }]}>Close</ThemedText>
+              <ThemedText style={[styles.closeBtn, { color: '#FF6B6B' }]}>বন্ধ করুন</ThemedText>
             </TouchableOpacity>
           </View>
 
@@ -79,9 +83,9 @@ export default function OfferDetailsModal({
 
           {/* Available Balance */}
           <View style={[styles.balanceSection, { backgroundColor: `${tint}08` }]}>
-            <ThemedText style={styles.balanceLabel}>Available Balance</ThemedText>
+            <ThemedText style={styles.balanceLabel}>উপলব্ধ ব্যালেন্স</ThemedText>
             <ThemedText type="defaultSemiBold" style={styles.balanceAmount}>
-              {availableBalance}
+              {`৳${userData.balance || '0'} টাকা`}
             </ThemedText>
           </View>
 
@@ -90,7 +94,7 @@ export default function OfferDetailsModal({
             onPress={onProceed}
             style={[styles.proceedBtn, { backgroundColor: tint }]}
           >
-            <ThemedText style={styles.proceedBtnText}>Proceed</ThemedText>
+            <ThemedText style={styles.proceedBtnText}>এগিয়ে যান</ThemedText>
           </TouchableOpacity>
         </View>
       </View>

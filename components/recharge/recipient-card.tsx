@@ -13,7 +13,7 @@ export type RecipientCardProps = {
 };
 
 export default function RecipientCard({
-  name,
+  // name,
   phone,
   avatarSource,
   onChangePress,
@@ -25,7 +25,9 @@ export default function RecipientCard({
 
   return (
     <View style={[styles.container, { backgroundColor: bg }]}>
-      <ThemedText style={styles.label}>Recipient</ThemedText>
+      <ThemedText style={{ fontSize: 12, marginBottom: 8, color: tint }}>
+        প্রাপক 
+      </ThemedText>
 
       <View style={styles.card}>
         {avatarSource ? (
@@ -37,9 +39,9 @@ export default function RecipientCard({
         )}
 
         <View style={styles.info}>
-          <ThemedText type="defaultSemiBold" style={styles.name}>
+          {/* <ThemedText type="defaultSemiBold" style={styles.name}>
             {name}
-          </ThemedText>
+          </ThemedText> */}
           <ThemedText style={styles.phone}>{phone}</ThemedText>
         </View>
 
