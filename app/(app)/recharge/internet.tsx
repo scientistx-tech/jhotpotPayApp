@@ -220,7 +220,6 @@ export default function RechargeInternet() {
         validity={filteredOffers.find(o => o.id === selectedOfferId)?.validity ?? ''}
         cashback={filteredOffers.find(o => o.id === selectedOfferId)?.cash_back ? `${filteredOffers.find(o => o.id === selectedOfferId)?.cash_back} Taka Cashback` : undefined}
         price={filteredOffers.find(o => o.id === selectedOfferId)?.price ? `${filteredOffers.find(o => o.id === selectedOfferId)?.price} BDT` : 'BDT: --'}
-        availableBalance="20,000 BDT"
         onProceed={handleRecharge}
       />
     </ThemedView>

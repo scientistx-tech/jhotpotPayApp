@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 import RechargeHeader from '@/components/recharge/recharge-header';
 import { ThemedText } from '@/components/themed-text';
@@ -11,7 +11,6 @@ import { useSelector } from 'react-redux';
 
 import { useGetCreditsQuery, useGetDebitsQuery } from '@/api/balanceApi';
 import { useGetRechargesQuery } from '@/api/rechargeApi';
-import Pagination from '@/components/pagination';
 
 export default function WalletHistory() {
   const [page, setPage] = useState(1);
@@ -44,6 +43,10 @@ export default function WalletHistory() {
     isFetching: debitFetching,
   } = useGetDebitsQuery({ page, limit, search });
 
+  // Infinite scroll state
+  const [allItems, setAllItems] = useState<any[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+
   // Data selection
   let items: any[] = [];
   let totalPages = 1;
@@ -51,29 +54,54 @@ export default function WalletHistory() {
   let isFetching = false;
   let refetchFn = () => {};
   let emptyText = '';
+  let data: any = null;
 
   if (historyType === 'recharge') {
-    items = rechargeData?.data || [];
+    data = rechargeData;
     totalPages = rechargeData?.meta?.totalPages || 1;
     isLoading = rechargeLoading;
     isFetching = rechargeFetching;
     refetchFn = rechargeRefetch;
     emptyText = 'কোনো রিচার্জ ইতিহাস পাওয়া যায়নি।';
   } else if (historyType === 'credit') {
-    items = creditData?.data || [];
+    data = creditData;
     totalPages = creditData?.meta?.totalPages || 1;
     isLoading = creditLoading;
     isFetching = creditFetching;
     refetchFn = creditRefetch;
     emptyText = 'কোনো জমা ইতিহাস পাওয়া যায়নি।';
   } else {
-    items = debitData?.data || [];
+    data = debitData;
     totalPages = debitData?.meta?.totalPage || 1;
     isLoading = debitLoading;
     isFetching = debitFetching;
     refetchFn = debitRefetch;
     emptyText = 'কোনো উত্তোলন ইতিহাস পাওয়া যায়নি।';
   }
+
+  // Infinite scroll: append new data
+  React.useEffect(() => {
+    if (data?.data) {
+      if (page === 1) {
+        setAllItems(data.data);
+      } else {
+        setAllItems((prev) => {
+          // Avoid duplicates
+          const ids = new Set(prev.map((i) => i.id));
+          return [...prev, ...data.data.filter((i: any) => !ids.has(i.id))];
+        });
+      }
+      setHasMore(page < totalPages);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, page, historyType]);
+
+  // Reset list on search/historyType change
+  React.useEffect(() => {
+    setPage(1);
+  }, [search, transactionId, historyType]);
+
+  items = allItems;
 
   const router = useRouter();
   const tint = useThemeColor({}, 'tint');
@@ -229,37 +257,30 @@ export default function WalletHistory() {
         contentContainerStyle={styles.contentContainer}
         scrollEnabled={true}
         showsVerticalScrollIndicator={false}
-        refreshing={refreshing || isFetching}
+        refreshing={refreshing}
         onRefresh={async () => {
           setRefreshing(true);
+          setPage(1);
           await refetchFn();
           setRefreshing(false);
         }}
         onEndReached={() => {
-          if (!isLoading && page < totalPages) setPage((prev) => prev + 1);
+          if (!isLoading && hasMore && !refreshing && !isFetching) setPage((prev) => prev + 1);
         }}
         onEndReachedThreshold={0.2}
-        ListEmptyComponent={
-          isLoading ? (
+        ListFooterComponent={
+          (isLoading || isFetching) && hasMore ? (
             <View style={{ marginVertical: 24 }}><ThemedText>Loading...</ThemedText></View>
-          ) : (
+          ) : null
+        }
+        ListEmptyComponent={
+          !isLoading && items.length === 0 ? (
             <ThemedText style={{ textAlign: 'center', marginVertical: 29 }}>
               {emptyText}
             </ThemedText>
-          )
+          ) : null
         }
       />
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <View style={styles.paginationContainer}>
-          <Pagination
-            page={page}
-            totalPages={totalPages}
-            onPageChange={setPage}
-          />
-        </View>
-      )}
 
       <View style={{ height: 24 }} />
     </ThemedView>
