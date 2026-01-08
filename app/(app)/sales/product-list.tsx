@@ -114,8 +114,15 @@ export default function ProductList() {
   const handleToggleStock = async ({ productId }: { productId: string }) => {
     setTogglingId(productId);
     try {
-      await toggleStock({ id: productId }).unwrap();
-      refetch();
+      const updated = await toggleStock({ id: productId }).unwrap();
+      // Optimistically update the product in allProducts
+      setAllProducts((prev) =>
+        prev.map((p) =>
+          p.id === productId ? { ...p, isStock: updated?.isStock ?? !p.isStock } : p
+        )
+      );
+      // Optionally refetch for consistency
+      // refetch();
     } catch (e) {
       // Optionally show error
     }
