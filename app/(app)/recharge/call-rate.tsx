@@ -82,8 +82,8 @@ export default function RechargeCallRate() {
         router.replace('/(tabs)'); // Navigate to home page
       }
       // Optionally, navigate or reset state here
-    } catch {
-      // Error handled by isRechargeError
+    } catch (e: any) {
+      alert(e?.data?.message || 'Recharge failed. Please try again.');
     }
    };
  

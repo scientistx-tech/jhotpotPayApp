@@ -81,8 +81,8 @@ export default function RechargeMinute() {
         alert(result?.message || 'Recharge successful!');
        router.replace('/(tabs)'); // Navigate to home page
      }
-    } catch {
-      // Error handled by isRechargeError
+    } catch (e: any){
+      alert(e?.data?.message || 'Recharge failed. Please try again.');
     }
   };
 

@@ -113,6 +113,8 @@ export default function RechargeAmount() {
       }
     } catch (e: any) {
       // Error handled by isRechargeError
+      console.log(e)
+      alert(e?.data?.message || 'Recharge failed. Please try again.');
     }
   };
 
