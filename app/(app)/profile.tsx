@@ -1,24 +1,25 @@
-import { useUpdateProfileMutation } from '@/api/authApi';
+import { useCheckAuthQuery, useUpdateProfileMutation } from '@/api/authApi';
 import LogoutButton from '@/components/logout-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { RootState } from '@/store/store';
+
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
-import { useSelector } from 'react-redux';
+
 
 export default function ProfilePage() {
   const router = useRouter();
   const tint = useThemeColor({}, 'tint');
   const bg = useThemeColor({}, 'background');
-  const user = useSelector((state: RootState) => state.auth.user);
-  // user is likely { data: { ...user fields... }, ... }
-  const userData = user?.data || {};
+
+  const { data, refetch } = useCheckAuthQuery();
+  const userData = (data as any)?.data || {};
+
 
 
   const [profileData, setProfileData] = useState({
@@ -60,6 +61,7 @@ export default function ProfilePage() {
         address: profileData.address,
         referralCode: profileData.referralCode,
       }).unwrap();
+      await refetch();
       setIsEditing(false);
      
     } catch (error) {

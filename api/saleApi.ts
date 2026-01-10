@@ -72,11 +72,11 @@ export const saleApi = baseApi.injectEndpoints({
 				{ type: "Sales", id: "LIST" },
 			],
 		}),
-		getSales: builder.query<SaleListResponse, { page?: number; limit?: number }>({
-			query: ({ page = 1, limit = 10 }) => ({
+		getSales: builder.query<SaleListResponse, { page?: number; limit?: number ,due?: boolean}>({
+			query: ({ page = 1, limit = 10, due }) => ({
 				url: "/product/sales",
 				method: "GET",
-				params: { page, limit },
+				params: { page, limit, due },
 			}),
 			providesTags: ["Sales"],
 		})

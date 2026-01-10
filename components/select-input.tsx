@@ -1,6 +1,5 @@
 import { ThemedText } from '@/components/themed-text';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { FlatList, Modal, StyleProp, StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
 
@@ -33,54 +32,37 @@ export default function SelectInput({
   };
 
   return (
-    <View style={styles.wrapper}>
+    <View style={[styles.selectGroup, style]}>
       {label ? (
-        <ThemedText type="defaultSemiBold" style={styles.label}>
-          {label}
-        </ThemedText>
+        <ThemedText style={styles.selectLabel}>{label}</ThemedText>
       ) : null}
-
       <TouchableOpacity
-        style={[styles.input, { borderColor: tint, backgroundColor: '#FFFFFF' }, style]}
+        style={[styles.selectBox, visible && { borderColor: '#248AEF' }]}
         onPress={() => setVisible(true)}
-        activeOpacity={0.7}
+        activeOpacity={0.8}
       >
-        <ThemedText style={[styles.inputText, !value && styles.placeholderText]}>
+        <ThemedText style={[styles.selectText, !value && { color: '#9AA1B0' }]}>
           {selectedLabel}
         </ThemedText>
-        <MaterialCommunityIcons name="chevron-down" size={24} color={tint} />
+        <ThemedText style={styles.chevron}>{visible ? '▲' : '▼'}</ThemedText>
       </TouchableOpacity>
-
-      <Modal visible={visible} transparent animationType="fade" onRequestClose={() => setVisible(false)}>
-        <TouchableOpacity
-          style={styles.overlay}
-          activeOpacity={1}
-          onPress={() => setVisible(false)}
-        >
-          <View style={[styles.dropdown, { backgroundColor: bg }]}>
+      <Modal
+        visible={visible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setVisible(false)}
+      >
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setVisible(false)}>
+          <View style={styles.modalContent}>
             <FlatList
               data={options}
               keyExtractor={(item) => item.value}
-              scrollEnabled={options.length > 6}
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  style={[
-                    styles.option,
-                    value === item.value && [styles.optionActive, { backgroundColor: '#E5F2FF' }],
-                  ]}
+                  style={styles.dropdownOption}
                   onPress={() => handleSelect(item.value, item.label)}
                 >
-                  <ThemedText
-                    style={[
-                      styles.optionText,
-                      value === item.value && { color: tint, fontWeight: '600' },
-                    ]}
-                  >
-                    {item.label}
-                  </ThemedText>
-                  {value === item.value && (
-                    <MaterialCommunityIcons name="check" size={20} color={tint} />
-                  )}
+                  <ThemedText style={styles.dropdownText}>{item.label}</ThemedText>
                 </TouchableOpacity>
               )}
             />
@@ -92,59 +74,50 @@ export default function SelectInput({
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    marginVertical: 8,
-  },
-  label: {
-    marginBottom: 6,
-    fontSize: 13,
-  },
-  input: {
-    height: 50,
+  selectGroup: { marginVertical: 6 },
+  selectLabel: { fontSize: 13, fontWeight: '600', color: '#11181C', marginBottom: 8 },
+  selectBox: {
     borderWidth: 1,
-    borderRadius: 28,
-    paddingHorizontal: 16,
-    fontSize: 16,
+    borderColor: '#248AEF',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    height: 50,
+    backgroundColor: '#F8FAFD',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  inputText: {
-    fontSize: 16,
+  selectText: { fontSize: 14, color: '#11181C' },
+  chevron: { fontSize: 14, color: '#9AA1B0', marginLeft: 8 },
+  modalOverlay: {
     flex: 1,
-  },
-  placeholderText: {
-    color: '#9AA8B2',
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0,0,0,0.2)',
     justifyContent: 'center',
-  },
-  dropdown: {
-    marginHorizontal: 16,
-    borderRadius: 16,
-    maxHeight: 400,
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 8,
-  },
-  option: {
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+  },
+  modalContent: {
+    position:'absolute',
+    width:'80%',
+    maxHeight: 350,
+    backgroundColor: '#fff',
+    marginHorizontal: 20,
+    top: '35%',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#248AEF',
+    paddingVertical: 8,
+    paddingHorizontal: 0,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+  },
+  dropdownOption: {
+    paddingVertical: 12,
     paddingHorizontal: 16,
-    paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E8ED',
+    borderBottomColor: '#F0F2F5',
   },
-  optionActive: {
-    backgroundColor: '#E5F2FF',
-  },
-  optionText: {
-    fontSize: 14,
-    flex: 1,
-  },
+  dropdownText: { fontSize: 14, color: '#11181C' },
 });

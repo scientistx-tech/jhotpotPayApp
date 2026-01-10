@@ -11,6 +11,7 @@ import { ThemedView } from '@/components/themed-view';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -71,7 +72,7 @@ export default function HomeScreen() {
       id: 3,
       amount: `${statsData?.due ?? 0} টাকা`,
       label: sort === 'day' ? 'আজকের বাকি' : sort === 'month' ? 'মাসিক বাকি' : 'বার্ষিক বাকি',
-      bgColor: '#FFD93D',
+      bgColor: '#430adf',
       fontSize: 18,
     },
   ];
@@ -162,7 +163,9 @@ export default function HomeScreen() {
 
       <FloatingActionButton onPress={handleFabPress} />
       
-      <LiveChatModal visible={isChatVisible} onClose={() => setIsChatVisible(false)} />
+      <SafeAreaView>
+        <LiveChatModal visible={isChatVisible} onClose={() => setIsChatVisible(false)} />
+      </SafeAreaView>
     </ThemedView>
   );
 }

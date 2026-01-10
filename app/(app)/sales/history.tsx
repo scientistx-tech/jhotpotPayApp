@@ -107,9 +107,9 @@ export default function SaleHistory() {
             <ThemedText style={styles.metaText}>বাকি: {item.due} টাকা</ThemedText>
             <ThemedText style={styles.metaText}>পণ্য সংখ্যা: {item.salesItems?.length || 0}</ThemedText>
           </View>
-          <TouchableOpacity onPress={() => openEditModal(item)} style={{ marginLeft: 8 }}>
+          {/* <TouchableOpacity onPress={() => openEditModal(item)} style={{ marginLeft: 8 }}>
             <Icon name="edit" size={22} color={tint} />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       </View>
     );

@@ -50,9 +50,9 @@ export default function RootLayout() {
 
 
   if (!ready) return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#fff" }}>
       <ActivityIndicator size={'small'} color={tinColor} />
-      <Text>Loading...</Text>
+      <Text style={{ color: "#000" }}>Loading...</Text>
     </View>
   ); // Loading screen optional
 

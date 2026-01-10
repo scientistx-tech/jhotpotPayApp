@@ -1,6 +1,6 @@
 import { ThemedView } from '@/components/themed-view';
 import { useLocalSearchParams } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 
 export default function BkashWebviewScreen() {

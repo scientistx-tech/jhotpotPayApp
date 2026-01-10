@@ -64,10 +64,12 @@ export default function LiveChatModal({ visible, onClose }: Props) {
     }
   }, [conversationId]);
 
-  // Auto-scroll to bottom on new messages
+  // Auto-scroll to bottom on new messages or when modal opens
   const scrollToBottom = useCallback(() => {
     setTimeout(() => {
-      scrollViewRef.current?.scrollToEnd({ animated: true });
+      if (scrollViewRef.current) {
+        scrollViewRef.current.scrollToEnd({ animated: true });
+      }
     }, 100);
   }, []);
 
@@ -78,8 +80,10 @@ export default function LiveChatModal({ visible, onClose }: Props) {
   });
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    if (visible) {
+      scrollToBottom();
+    }
+  }, [messages, visible]);
 
   // Load messages when modal opens and conversation is ready
   useEffect(() => {
@@ -87,6 +91,10 @@ export default function LiveChatModal({ visible, onClose }: Props) {
     setLoading(true);
     setMessages(messagesData.data || []);
     setLoading(false);
+    // Scroll to bottom when modal opens and messages are loaded
+    setTimeout(() => {
+      scrollToBottom();
+    }, 150);
   }, [visible, conversationId, messagesData]);
 
   // Send message handler
@@ -143,9 +151,9 @@ export default function LiveChatModal({ visible, onClose }: Props) {
         {/* Messages */}
 
         <ScrollView
+          ref={scrollViewRef}
           style={{ flex: 1 }}
           contentContainerStyle={[
-           
             { flexGrow: 1, paddingTop: 15, paddingBottom: 80 }
           ]}
           keyboardShouldPersistTaps="handled"
