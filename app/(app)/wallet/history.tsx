@@ -36,6 +36,8 @@ export default function WalletHistory() {
     isFetching: creditFetching,
   } = useGetCreditsQuery({ page, limit, transactionId, userId: user?.id || '' });
 
+  console.log(creditData)
+
   const {
     data: debitData,
     isLoading: debitLoading,
@@ -148,10 +150,14 @@ export default function WalletHistory() {
               <ThemedText style={styles.description}>
                 Account: {item.account_number}{"\n"}Txn: {item.transaction_id}
               </ThemedText>
+              <ThemedText style={styles.description}>
+                Status: {item?.status}
+              </ThemedText>
             </View>
             <View style={styles.rightSection}>
               <ThemedText style={[styles.amount, { color: tint }]}>BDT {item.amount}</ThemedText>
               <ThemedText style={styles.dateTime}>{new Date(item.createdAt).toLocaleString()}</ThemedText>
+              
             </View>
           </View>
         </View>

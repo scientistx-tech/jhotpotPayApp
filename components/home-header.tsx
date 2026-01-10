@@ -1,11 +1,11 @@
+import { useCheckAuthQuery } from '@/api/authApi';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { RootState } from '@/store/store';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useSelector } from 'react-redux';
+
 
 type HomeHeaderProps = {
   userName?: string;
@@ -24,23 +24,20 @@ export default function HomeHeader({
 }: HomeHeaderProps) {
   const router = useRouter();
   const tint = useThemeColor({}, 'tint');
+  const { data, refetch } = useCheckAuthQuery();
 
-  const user = useSelector((state: RootState) => state.auth.user);
-  //console.log(user)
   // user is likely UserResponse or null
-  const userName = (user as any)?.data?.name || 'User';
-  const balance = (user as any)?.data?.balance ?? 0;
-  // Balance visibility state
-  const [showBalance, setShowBalance] = useState(false);
+  const userName = (data as any)?.data?.name || 'User';
+  const balance = (data as any)?.data?.balance ?? 0;
+
   // For refresh animation
   const [refreshing, setRefreshing] = useState(false);
 
   // Show balance for 2 seconds on refresh icon click
   const handleRefreshBalance = () => {
-    setShowBalance(true);
+    refetch();
     setRefreshing(true);
     setTimeout(() => {
-      setShowBalance(false);
       setRefreshing(false);
     }, 1000);
   };
@@ -81,34 +78,34 @@ export default function HomeHeader({
             >
               {
                 refreshing ? (
-                 <Text style={[styles.balanceText, { color: tint }]}>{balance} ৳</Text>
-                ) :(
-                       <Text style={[styles.balanceText, { color: tint }]}> ৳ ব্যালেন্স </Text>
+                  <Text style={[styles.balanceText, { color: tint }]}>{balance} ৳</Text>
+                ) : (
+                  <Text style={[styles.balanceText, { color: tint }]}> ৳ ব্যালেন্স </Text>
                 )
               }
             </TouchableOpacity>
-            
+
           </View>
         </View>
-        </View>
-        {/* Right Icons */}
-        <View style={styles.rightSection}>
-          <TouchableOpacity
-            style={styles.iconButton}
-            onPress={handleNotificationPress}
-            accessibilityLabel="Notifications"
-          >
-            <Ionicons name="notifications" size={24} color={tint} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.iconButton}
-            onPress={handleProfilePress}
-            accessibilityLabel="Profile"
-          >
-            <FontAwesome6 name="circle-user" size={20} color={tint} />
-          </TouchableOpacity>
-        </View>
-      
+      </View>
+      {/* Right Icons */}
+      <View style={styles.rightSection}>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={handleNotificationPress}
+          accessibilityLabel="Notifications"
+        >
+          <Ionicons name="notifications" size={24} color={tint} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={handleProfilePress}
+          accessibilityLabel="Profile"
+        >
+          <FontAwesome6 name="circle-user" size={20} color={tint} />
+        </TouchableOpacity>
+      </View>
+
     </View>
   );
 }
@@ -117,7 +114,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     gap: 12,
-  
+
     alignItems: 'center',
     justifyContent: 'space-between',
     borderBottomLeftRadius: 24,
@@ -176,7 +173,7 @@ const styles = StyleSheet.create({
   },
   rightSection: {
     flexDirection: 'row',
-    justifyContent:'flex-end',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     gap: 5,
   },

@@ -2,14 +2,11 @@ import { useCheckAuthQuery } from '@/api/authApi';
 import { RechargeHeader } from '@/components/recharge';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { useThemeColor } from '@/hooks/use-theme-color';
 import { useRouter } from 'expo-router';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 export default function ViewPlanPage() {
-    const tint = useThemeColor({}, 'tint');
     const router = useRouter();
-    const bg = useThemeColor({}, 'background');
     const { data, isLoading, error } = useCheckAuthQuery();
 
     const packageInfo = data?.data?.packageBuyers?.[0]?.package;
