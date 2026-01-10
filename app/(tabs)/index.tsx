@@ -71,7 +71,7 @@ export default function HomeScreen() {
       id: 3,
       amount: `${statsData?.due ?? 0} টাকা`,
       label: sort === 'day' ? 'আজকের বাকি' : sort === 'month' ? 'মাসিক বাকি' : 'বার্ষিক বাকি',
-      bgColor: '#FFD93D',
+      bgColor: '#430adf',
       fontSize: 18,
     },
   ];

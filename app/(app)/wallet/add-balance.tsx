@@ -94,6 +94,7 @@ export default function AddBalance() {
           password: form.pin,
         };
         const res = await creditBalance(payload).unwrap();
+        console.log(res)
         if (res.success) {
           alert('ব্যালেন্স সফলভাবে যোগ হয়েছে!');
           router.replace('/(app)/wallet/history');
@@ -102,6 +103,7 @@ export default function AddBalance() {
           alert(res.message || 'কিছু ভুল হয়েছে');
         }
       } catch (e: any) {
+        console.log(e)
         alert(e?.data?.message || 'কিছু ভুল হয়েছে');
       }
     } else if (method === 'online') {
@@ -184,7 +186,7 @@ export default function AddBalance() {
         ))}
       </View>
       {/* Show account info if loaded */}
-      {/* {isAccountLoading ? (
+      {isAccountLoading ? (
         <ThemedText style={{ fontSize: 13, color: tint }}>অ্যাকাউন্ট তথ্য লোড হচ্ছে...</ThemedText>
       ) : accountData && accountData.data ? (
         <View style={{ marginBottom: 8 }}>
@@ -192,7 +194,7 @@ export default function AddBalance() {
         </View>
       ) : accountError ? (
         <ThemedText style={{ fontSize: 13, color: 'red' }}>অ্যাকাউন্ট তথ্য পাওয়া যায়নি</ThemedText>
-      ) : null} */}
+      ) : null}
       <RoundedInput
         placeholder="লেনদেন আইডি লিখুন"
         value={form.trnxId}
