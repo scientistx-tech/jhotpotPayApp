@@ -51,7 +51,7 @@ export default function CashOut() {
       }).unwrap();
       if (res.success) {
         Alert.alert('Success', res.message || 'Debit Created!');
-        // Optionally, you can navigate or reset form here
+         router.push({ pathname: '/(app)/wallet/history', params: { initialType: 'debit' } });
       }
     } catch (err: any) {
       // Check for low balance error (statusCode 400)

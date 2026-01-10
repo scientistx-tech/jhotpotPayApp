@@ -83,7 +83,7 @@ export default function RechargeInternet() {
           await refetch();
         setShowDetailsModal(false);
         alert(result?.message || 'Recharge successful!');
-        router.replace('/(tabs)'); // Navigate to home page
+        router.replace('/(app)/wallet/history');
       }
       // Optionally, navigate or reset state here
     } catch (e: any) {

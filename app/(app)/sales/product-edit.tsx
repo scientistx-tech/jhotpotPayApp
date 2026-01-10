@@ -15,6 +15,8 @@ export default function ProductEdit() {
   const { id } = useLocalSearchParams();
   const tint = useThemeColor({}, 'tint');
 
+  
+
   // Fetch product details
   const { data, isLoading: isFetching } = useGetProductQuery({ id });
   const product = data?.data;

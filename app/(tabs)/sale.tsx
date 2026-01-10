@@ -36,6 +36,10 @@ export default function Sale() {
     }else if (item.label === 'বিল পরিশোধ') {
       router.push('/(app)/wallet/pay-bill');
     } 
+
+    else if (item.label === 'বিক্রির খাতা') {
+      router.push('/(app)/sales/history');
+    }
     
     else {
       console.log('Menu item pressed:', item.label);

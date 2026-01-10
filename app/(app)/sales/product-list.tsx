@@ -96,9 +96,9 @@ export default function ProductList() {
     if (!deleteId) return;
     try {
       await deleteProduct({ id: deleteId }).unwrap();
+      await refetch();
       setConfirmVisible(false);
       setDeleteId(null);
-      refetch();
     } catch (e) {
       // Optionally show error
       setConfirmVisible(false);

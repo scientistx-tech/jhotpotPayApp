@@ -111,7 +111,7 @@ export default function RechargeAmount() {
         await refetch();
         setShowDetailsModal(false);
         alert(result?.message || 'Recharge successful!');
-        router.replace('/(tabs)'); // Navigate to home page
+       router.replace('/(app)/wallet/history');
       }
     } catch (e: any) {
       // Error handled by isRechargeError

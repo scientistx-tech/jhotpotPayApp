@@ -97,7 +97,7 @@ export default function AddBalance() {
         console.log(res)
         if (res.success) {
           alert('ব্যালেন্স সফলভাবে যোগ হয়েছে!');
-          router.replace('/(app)/wallet/history');
+          router.push({ pathname: '/(app)/wallet/history', params: { initialType: 'credit' } });
           setForm({ trnxId: '', amount: '', pin: '' });
         } else {
           alert(res.message || 'কিছু ভুল হয়েছে');
