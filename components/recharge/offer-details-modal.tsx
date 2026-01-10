@@ -1,8 +1,8 @@
+import { useCheckAuthQuery } from '@/api/authApi';
 import { ThemedText } from '@/components/themed-text';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { RootState } from '@/store/store';
 import { Modal, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { useSelector } from 'react-redux';
+
 
 export type OfferDetailsModalProps = {
   visible: boolean;
@@ -32,9 +32,8 @@ export default function OfferDetailsModal({
   const tint = useThemeColor({}, 'tint');
   const bg = useThemeColor({}, 'background');
 
-  const user = useSelector((state: RootState) => state.auth.user);
-  // user is likely { data: { ...user fields... }, ... }
-  const userData = user?.data || {};
+   const { data } = useCheckAuthQuery();
+    const userData = (data as any)?.data || {};
 
   return (
     <Modal

@@ -11,8 +11,8 @@ import { usePhone } from '../../../context/PhoneContext';
 import { useRechargeMutation } from '@/api/rechargeApi';
 import OfferDetailsModal from '@/components/recharge/offer-details-modal';
 import { z } from 'zod';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
+
+import { useCheckAuthQuery } from '@/api/authApi';
 
 
 const sim_type = z.enum(["PRE_PAID", "POST_PAID"]);
@@ -42,9 +42,10 @@ const CATEGORIES: { id: AmountCategory; label: string }[] = [
 export default function RechargeAmount() {
   const router = useRouter();
   const tint = useThemeColor({}, 'tint');
-  const user = useSelector((state: RootState) => state.auth.user);
-  // user is likely { data: { ...user fields... }, ... }
-  const userData = user?.data || {};
+  
+   const { data, refetch } = useCheckAuthQuery();
+    const userData = (data as any)?.data || {};
+
   // Get params from navigation
   const params = typeof router === 'object' && 'params' in router ? (router as any).params : (router as any)?.getCurrentRoute?.()?.params;
   const { phone: phoneContext } = usePhone();
@@ -107,6 +108,7 @@ export default function RechargeAmount() {
       const result = await recharge(payload).unwrap();
       setRechargeResult(result);
       if (result?.success) {
+        await refetch();
         setShowDetailsModal(false);
         alert(result?.message || 'Recharge successful!');
         router.replace('/(tabs)'); // Navigate to home page

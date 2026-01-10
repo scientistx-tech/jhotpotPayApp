@@ -8,6 +8,7 @@ import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { usePhone } from '../../../context/PhoneContext';
+import { useCheckAuthQuery } from '@/api/authApi';
 type SimType = 'PRE_PAID' | 'POST_PAID';
 type AmountCategory = 'amount' | 'internet' | 'minute' | 'bundle' | 'call-rate';
 
@@ -34,6 +35,7 @@ export default function RechargeInternet() {
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [recharge] = useRechargeMutation();
+   const { refetch } = useCheckAuthQuery();
 
   const networkType = initialNetworkType;
   const { data, isLoading } = useGetRechargeOffersQuery({ sim_type: simType, network_type: networkType });
@@ -78,6 +80,7 @@ export default function RechargeInternet() {
     try {
       const result = await recharge(payload).unwrap();
       if (result.success) {
+          await refetch();
         setShowDetailsModal(false);
         alert(result?.message || 'Recharge successful!');
         router.replace('/(tabs)'); // Navigate to home page
