@@ -1,3 +1,4 @@
+import { useCheckAuthQuery } from '@/api/authApi';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -11,13 +12,15 @@ import ViewShot from 'react-native-view-shot';
 export default function QrScreen() {
   const tint = useThemeColor({}, 'tint');
   const bg = useThemeColor({}, 'background');
-  const userName = 'Omul Ahmed';
+
   const walletId = 'JP-548921';
   const viewShotRef = useRef(null);
+  const { data, refetch } = useCheckAuthQuery();
+  const userName = (data as any)?.data?.name || 'User';
 
   const handleShare = async () => {
     await Share.share({
-      message: `Scan my Jhotpot Pay QR to pay ${userName} (ID: ${walletId}).`,
+      message: `Scan my Jhotpot Pay QR to pay ${userName}`,
     });
   };
 
@@ -51,7 +54,7 @@ export default function QrScreen() {
           <ThemedText style={styles.title}>আমার QR কোড</ThemedText>
           <ViewShot ref={viewShotRef} options={{ format: 'png', quality: 1.0 }} style={[styles.qrBox, { borderColor: tint }]}>
             <QRCode
-              value={`JP:${walletId}`}
+             value={userName}
               size={180}
               color={tint}
               backgroundColor="#F8FAFD"
@@ -64,10 +67,6 @@ export default function QrScreen() {
           <View style={styles.infoRow}>
             <ThemedText style={styles.label}>নাম</ThemedText>
             <ThemedText style={styles.value}>{userName}</ThemedText>
-          </View>
-          <View style={styles.infoRow}>
-            <ThemedText style={styles.label}>ওয়ালেট আইডি</ThemedText>
-            <ThemedText style={styles.value}>{walletId}</ThemedText>
           </View>
         </View>
 

@@ -255,7 +255,7 @@ export default function SalesOrder() {
                         <ThemedText style={[styles.headerCell, { flex: 1, textAlign: 'right' }]}>
                             Price
                         </ThemedText>
-                        <ThemedText style={[styles.headerCell, { width: 40 }]}>Delete</ThemedText>
+                        <ThemedText style={[styles.headerCell, { width: 40, marginLeft: 5 }]}>Delete</ThemedText>
                     </View>
 
                     {orderItems.map((item) => (
@@ -263,7 +263,7 @@ export default function SalesOrder() {
                             key={item.productId}
                             itemName={item.name}
                             quantity={item.quantity}
-                            price={`BDT ${item.price}`}
+                            price={`${item.price}`}
                             onDelete={() => setOrderItems(orderItems.filter((i) => i.productId !== item.productId))}
                             onQuantityChange={(qty) => setOrderItems(orderItems.map((i) => i.productId === item.productId ? { ...i, quantity: Math.max(1, qty) } : i))}
                         />
@@ -424,7 +424,7 @@ const styles = StyleSheet.create({
         borderBottomWidth: 2,
         borderBottomColor: '#E5E8ED',
         backgroundColor: '#F8F9FA',
-        paddingHorizontal: 8,
+        paddingHorizontal: 2,
         borderRadius: 8,
     },
     headerCell: {

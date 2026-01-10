@@ -10,8 +10,8 @@ import {
 import { ThemedView } from '@/components/themed-view';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ScrollView } from 'react-native-gesture-handler';
+
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -163,9 +163,8 @@ export default function HomeScreen() {
 
       <FloatingActionButton onPress={handleFabPress} />
       
-      <SafeAreaView>
         <LiveChatModal visible={isChatVisible} onClose={() => setIsChatVisible(false)} />
-      </SafeAreaView>
+
     </ThemedView>
   );
 }

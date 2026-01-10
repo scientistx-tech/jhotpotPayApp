@@ -82,7 +82,7 @@ export default function RechargeMinute() {
           await refetch();
        setShowDetailsModal(false);
         alert(result?.message || 'Recharge successful!');
-       router.replace('/(tabs)'); // Navigate to home page
+      router.replace('/(app)/wallet/history');
      }
     } catch (e: any){
       alert(e?.data?.message || 'Recharge failed. Please try again.');

@@ -13,7 +13,7 @@ export default function JhotpotPayScreen() {
   const [isChatVisible, setIsChatVisible] = useState(false);
 
   const walletItems = [
-    { id: 1, icon: 'wallet-plus', label: 'ব্যালেন্স যোগ ', color: '#248AEF' },
+    { id: 1, icon: 'wallet-plus', label: 'ব্যালেন্স যোগ', color: '#248AEF' },
     { id: 2, icon: 'cash-multiple', label: 'ক্যাশ আউট', color: '#FF6B6B' },
     { id: 3, icon: 'phone', label: 'রিচার্জ', color: '#FFD93D' },
     { id: 4, icon: 'receipt', label: 'বিল পরিশোধ', color: '#6BCB77' },

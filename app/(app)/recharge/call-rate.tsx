@@ -82,7 +82,7 @@ export default function RechargeCallRate() {
           await refetch();
         setShowDetailsModal(false);
          alert(result?.message || 'Recharge successful!');
-        router.replace('/(tabs)'); // Navigate to home page
+        router.replace('/(app)/wallet/history');
       }
       // Optionally, navigate or reset state here
     } catch (e: any) {

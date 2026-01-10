@@ -22,6 +22,7 @@ export default function Login() {
     const handleLogin = async (data: { phone: string, pin: string }) => {
         try {
             const res = await loginApi({ password: data.pin, phone: data.phone }).unwrap()
+            console.log("ddddddd",res)
             if (res.success && res.data?.token && res.data?.user) {
                 router.replace("/(tabs)");
             } else {
@@ -32,6 +33,7 @@ export default function Login() {
                 })
             }
         } catch (error: any) {
+         
             Toast.show({
                 type: "error",
                 text1: "Error",
