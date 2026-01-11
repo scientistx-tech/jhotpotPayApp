@@ -3,7 +3,6 @@ import { ActionButton, RechargeHeader } from '@/components/recharge';
 import RoundedInput from '@/components/rounded-input';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { useThemeColor } from '@/hooks/use-theme-color';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
@@ -15,15 +14,32 @@ const NETWORK_TYPES = [
   { id: 'AIRTEL', label: 'Airtel' },
   { id: 'BANGLALINK', label: 'Banglalink' },
   { id: 'TELETALK', label: 'Teletalk' },
-  { id: 'SKITTO', label: 'Skitto' },
 ];
 
 export default function RechargeEnterNumber() {
   const router = useRouter();
-  const tint = useThemeColor({}, 'tint');
+
   const [phone, setPhone] = useState('');
   const [networkType, setNetworkType] = useState('Grameenphone');
   const [openOperator, setOpenOperator] = useState(false);
+
+  // Helper to detect network by prefix
+  const detectNetworkType = (number: string): string => {
+    const cleaned = number.replace(/\D/g, '');
+    if (cleaned.startsWith('017') || cleaned.startsWith('013')) return 'Grameenphone';
+    if (cleaned.startsWith('018')) return 'Robi';
+    if (cleaned.startsWith('016')) return 'Airtel';
+    if (cleaned.startsWith('019')) return 'Banglalink';
+    if (cleaned.startsWith('015')) return 'Teletalk';
+    return networkType; // fallback to current
+  };
+
+  // Handler for phone input that also sets networkType
+  const handlePhoneChange = (value: string) => {
+    setPhone(value);
+    const detected = detectNetworkType(value);
+    setNetworkType(detected);
+  };
 
   const { setPhone: setPhoneContext } = usePhone();
   const canProceed = useMemo(() => phone.trim().length >= 11 && networkType, [phone, networkType]);
@@ -71,7 +87,7 @@ export default function RechargeEnterNumber() {
                 label=""
                 placeholder="মোবাইল নম্বর লিখুন..."
                 value={phone}
-                onChangeText={setPhone}
+                onChangeText={handlePhoneChange}
                 keyboardType="phone-pad"
               />
               <SelectDropdown
