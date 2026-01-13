@@ -16,7 +16,7 @@ export interface Sale {
 	total: number;
 	tax: number;
 	paid: number;
-	due: number;
+	due?: number;
 	createdAt: string;
 	userId: string;
 	salesItems: SaleItem[];
@@ -60,7 +60,6 @@ export const saleApi = baseApi.injectEndpoints({
 		updateSale: builder.mutation<SaleResponse, {
 			id: string;
 			paid: number;
-			due: number;
 		}>({
 			query: ({ id, ...body }) => ({
 				url: `/product/sales/${id}`,

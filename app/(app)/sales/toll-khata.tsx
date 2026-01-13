@@ -24,7 +24,7 @@ export default function TollKhata() {
    const [editModalVisible, setEditModalVisible] = useState(false);
    const [editSale, setEditSale] = useState<any>(null);
    const [editPaid, setEditPaid] = useState('');
-   const [editDue, setEditDue] = useState('');
+
    const [updateSale, { isLoading: isUpdating }] = useUpdateSaleMutation();
  
    // Infinite scroll state
@@ -72,7 +72,6 @@ export default function TollKhata() {
    const openEditModal = (sale: any) => {
      setEditSale(sale);
      setEditPaid(sale.paid.toString());
-     setEditDue(sale.due.toString());
      setEditModalVisible(true);
    };
    const closeEditModal = () => {
@@ -85,7 +84,6 @@ export default function TollKhata() {
        await updateSale({
          id: editSale.id,
          paid: Number(editPaid),
-         due: Number(editDue),
        }).unwrap();
        refetch();
        closeEditModal();
@@ -100,7 +98,9 @@ export default function TollKhata() {
        <View style={[styles.card, { backgroundColor: bg }]}> 
          <View style={styles.cardRow}>
            <View style={{ flex: 1, gap: 6 }}>
-             <ThemedText style={styles.nameText}>সেল আইডি: {item.id}</ThemedText>
+              <ThemedText style={styles.metaText}> গ্রাহক: {item?.customer?.name}</ThemedText>
+            <ThemedText style={styles.metaText}> গ্রাহক ইমেইল: {item?.customer?.email}</ThemedText>
+            <ThemedText style={styles.metaText}> গ্রাহক ফোন: {item?.customer?.phone}</ThemedText>
              <ThemedText style={styles.metaText}>তারিখ: {new Date(item.createdAt).toLocaleString('bn-BD')}</ThemedText>
              <ThemedText style={styles.metaText}>সাবটোটাল: {item.subtotal} টাকা</ThemedText>
              <ThemedText style={styles.metaText}>ডিসকাউন্ট: {item.discount} টাকা</ThemedText>
@@ -168,15 +168,6 @@ export default function TollKhata() {
                  keyboardType="numeric"
                  value={editPaid}
                  onChangeText={setEditPaid}
-               />
-             </View>
-             <View style={{ marginBottom: 12 }}>
-               <ThemedText style={{ marginBottom: 4 }}>Due Amount</ThemedText>
-               <TextInput
-                 style={{ borderWidth: 1, borderColor: '#E5E8ED', borderRadius: 8, padding: 10, fontSize: 15 }}
-                 keyboardType="numeric"
-                 value={editDue}
-                 onChangeText={setEditDue}
                />
              </View>
              <View style={{ flexDirection: 'row', gap: 12, justifyContent: 'flex-end' }}>

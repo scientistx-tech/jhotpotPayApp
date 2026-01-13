@@ -16,7 +16,7 @@ export interface Sale {
 	total: number;
 	tax: number;
 	paid: number;
-	due: number;
+	due?: number;
 	createdAt: string;
 	userId: string;
 	salesItems: SaleItem[];

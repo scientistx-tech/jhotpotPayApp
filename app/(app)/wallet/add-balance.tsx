@@ -5,6 +5,7 @@ import RoundedInput from '@/components/rounded-input';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import * as Clipboard from 'expo-clipboard';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View, type ImageSourcePropType } from 'react-native';
@@ -146,6 +147,13 @@ export default function AddBalance() {
     );
   };
 
+  const handleCopyAccountNumber = () => {
+    if (accountData && accountData.data && accountData.data.account_number) {
+      Clipboard.setStringAsync(accountData.data.account_number);
+      alert('এজেন্ট নম্বর কপি হয়েছে!');
+    }
+  };
+
   const renderManualForm = () => (
     <View style={[styles.card, { backgroundColor: bg }]}>
       <View className="noteBox">
@@ -191,6 +199,12 @@ export default function AddBalance() {
       ) : accountData && accountData.data ? (
         <View style={{ marginBottom: 8 }}>
           <ThemedText style={{ fontSize: 13, color: '#11181C' }}>অ্যাকাউন্ট নম্বর: {accountData.data.account_number}</ThemedText>
+          <CustomButton
+            title="এজেন্ট নম্বর কপি করুন"
+            onPress={handleCopyAccountNumber}
+            style={{ marginTop: 6, alignSelf: 'flex-start', paddingHorizontal: 12, paddingVertical: 6 }}
+            textStyle={{ fontSize: 12 }}
+          />
         </View>
       ) : accountError ? (
         <ThemedText style={{ fontSize: 13, color: 'red' }}>অ্যাকাউন্ট তথ্য পাওয়া যায়নি</ThemedText>
