@@ -49,7 +49,7 @@ export default function RechargeEnterNumber() {
       setPhoneContext(phone);
       router.push({
         pathname: '/(app)/recharge/amount',
-        params: { phone, network_type: networkType },
+        params: { phone, network_type: networkType.toUpperCase() },
       });
     }
   };

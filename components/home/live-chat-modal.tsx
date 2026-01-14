@@ -12,7 +12,6 @@ import {
   KeyboardAvoidingView,
   Modal,
   Platform,
-
   StyleSheet,
   Text,
   TextInput,
@@ -20,6 +19,7 @@ import {
   View,
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type Props = {
   visible: boolean;
@@ -38,15 +38,20 @@ export default function LiveChatModal({ visible, onClose }: Props) {
   const { data: conversationData, isLoading: isConversationLoading } = useCreateConversationQuery();
   const conversationId = conversationData?.data?.id;
 
-  // Fetch messages only when opening the chat modal
+  // Fetch messages ONLY when ready
   const {
     data: messagesData,
     isLoading: isMessagesLoading,
-    refetch: refetchMessages,
-  } = useGetMessagesQuery(conversationId!, {
+    refetch,
+  } = useGetMessagesQuery(conversationId as string, {
     skip: !conversationId || !visible,
   });
 
+  useEffect(() => {
+    if (visible && conversationId) {
+      refetch();
+    }
+  }, [visible, conversationId, refetch]);
   // Send message mutation
   const [sendMessage, { isLoading: isSending }] = useSendMessageMutation();
 
@@ -122,10 +127,11 @@ export default function LiveChatModal({ visible, onClose }: Props) {
 
   return (
     <Modal visible={visible} animationType="slide" transparent={false}>
-      {/* Header */}
-      <View style={[styles.header, { backgroundColor: tint }]}>
-        <Text style={styles.headerTitle}>Chat With Agent</Text>
-        {/* <View style={styles.headerStatus}>
+      <SafeAreaView style={{ flex: 1 }}>
+        {/* Header */}
+        <View style={[styles.header, { backgroundColor: tint, }]}>
+          <Text style={styles.headerTitle}>Chat With Agent</Text>
+          {/* <View style={styles.headerStatus}>
             {isConnected ? (
               <View style={styles.statusConnected}>
                 <View style={styles.statusDot} />
@@ -138,77 +144,75 @@ export default function LiveChatModal({ visible, onClose }: Props) {
               </View>
             )}
           </View> */}
-        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-          <Ionicons name="close" size={24} />
-        </TouchableOpacity>
-      </View>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={0}
-      >
-
-        {/* Messages */}
-
-        <ScrollView
-          ref={scrollViewRef}
+          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <Ionicons name="close" size={24} />
+          </TouchableOpacity>
+        </View>
+        <KeyboardAvoidingView
           style={{ flex: 1 }}
-          contentContainerStyle={[
-            { flexGrow: 1, paddingTop: 15, paddingBottom: 80 }
-          ]}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={0}
         >
-        <View style={styles.messagesContainer}>
-          <View style={styles.messagesContent}>
-              {isConversationLoading || loading ? (
-            <Text>Loading chat...</Text>
-          ) : (
-            messages.map((message: ChatMessage) => (
-              <View
-                key={message.id}
-                style={[
-                  styles.messageBubble,
-                  message.sender ? styles.userMessage : styles.agentMessage,
-                ]}
-              >
-                <View
-                  style={[
-                    styles.avatarCircle,
-                    {
-                      backgroundColor: message.sender ? tint : '#E0E0E0',
-                    },
-                  ]}
-                >
-                  <Text style={styles.avatarText}>
-                    {message.sender ? 'U' : 'A'}
-                  </Text>
-                </View>
-                <View style={styles.messageContent}>
-                  <Text
-                    style={[
-                      styles.messageText,
-                      message.sender
-                        ? styles.userMessageText
-                        : styles.agentMessageText,
-                    ]}
-                  >
-                    {message.text}
-                  </Text>
-                </View>
+
+          {/* Messages */}
+
+          <ScrollView
+            ref={scrollViewRef}
+            style={{ flex: 1 }}
+            contentContainerStyle={[
+              { flexGrow: 1, paddingTop: 15, paddingBottom: 80 }
+            ]}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.messagesContainer}>
+              <View style={styles.messagesContent}>
+                {isConversationLoading || loading ? (
+                  <Text>Loading chat...</Text>
+                ) : (
+                  messages.map((message: ChatMessage) => (
+                    <View
+                      key={message.id}
+                      style={[
+                        styles.messageBubble,
+                        message.sender ? styles.userMessage : styles.agentMessage,
+                      ]}
+                    >
+                      <View
+                        style={[
+                          styles.avatarCircle,
+                          {
+                            backgroundColor: message.sender ? tint : '#E0E0E0',
+                          },
+                        ]}
+                      >
+                        <Text style={styles.avatarText}>
+                          {message.sender ? 'U' : 'A'}
+                        </Text>
+                      </View>
+                      <View style={styles.messageContent}>
+                        <Text
+                          style={[
+                            styles.messageText,
+                            message.sender
+                              ? styles.userMessageText
+                              : styles.agentMessageText,
+                          ]}
+                        >
+                          {message.text}
+                        </Text>
+                      </View>
+                    </View>
+                  ))
+                )}
               </View>
-            ))
-          )}
+
             </View>
 
-          </View>
 
-     
-        </ScrollView>
+          </ScrollView>
 
-
-      </KeyboardAvoidingView>
-           {/* Input */}
+          {/* Input */}
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
@@ -226,6 +230,9 @@ export default function LiveChatModal({ visible, onClose }: Props) {
               <Ionicons name="send" size={20} color="#fff" />
             </TouchableOpacity>
           </View>
+        </KeyboardAvoidingView>
+
+      </SafeAreaView>
     </Modal>
   );
 }
@@ -341,25 +348,22 @@ const styles = StyleSheet.create({
 
 
   inputContainer: {
-     position: 'absolute',
-     left: 0,
-     right: 0,
-     bottom: 0,
-     flexDirection: 'row',
-     alignItems: 'flex-end',
-     paddingHorizontal: 10,
-     paddingVertical: 10,
-     backgroundColor: '#fff',
-     borderTopWidth: 1,
-     borderTopColor: '#E0E0E0',
-     gap: 12,
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#E0E0E0',
+    gap: 12,
+    marginBottom:20
   },
   input: {
     flex: 1,
     backgroundColor: '#F5F5F5',
     borderRadius: 24,
     paddingHorizontal: 16,
-    
+
     paddingVertical: 12,
     fontSize: 14,
     maxHeight: 100,

@@ -5,7 +5,7 @@ import OfferDetailsModal from '@/components/recharge/offer-details-modal';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { usePhone } from '../../../context/PhoneContext';
@@ -24,7 +24,11 @@ export default function RechargeBundle() {
   const router = useRouter();
   const tint = useThemeColor({}, 'tint');
   // Get params from navigation
-  const params = typeof router === 'object' && 'params' in router ? (router as any).params : (router as any)?.getCurrentRoute?.()?.params;
+  const params = useLocalSearchParams<{
+    phone?: string;
+    sim_type?: SimType;
+    network_type?: string;
+  }>();
   const { phone: phoneContext } = usePhone();
   const phone = params?.phone || phoneContext;
   const initialSimType = params?.sim_type || 'PRE_PAID';
@@ -161,9 +165,9 @@ export default function RechargeBundle() {
 
         <View style={[styles.offerList, { flexDirection: 'column' }]}>
           {isLoading ? (
-            <ThemedText>Loading...</ThemedText>
+            <ThemedText style={{ textAlign: "center" }}>Loading...</ThemedText>
           ) : filteredOffers.length === 0 ? (
-            <ThemedText>No offers found.</ThemedText>
+            <ThemedText style={{ textAlign: "center" }}>No offers found.</ThemedText>
           ) : (
             filteredOffers.map((offer) => {
               const isSelected = selectedOfferId === offer.id;

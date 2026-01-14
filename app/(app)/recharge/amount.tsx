@@ -2,7 +2,7 @@ import { ActionButton, RechargeHeader, RecipientCard } from '@/components/rechar
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { usePhone } from '../../../context/PhoneContext';
@@ -47,7 +47,11 @@ export default function RechargeAmount() {
   const userData = (data as any)?.data || {};
 
   // Get params from navigation
-  const params = typeof router === 'object' && 'params' in router ? (router as any).params : (router as any)?.getCurrentRoute?.()?.params;
+  const params = useLocalSearchParams<{
+    phone?: string;
+    sim_type?: SimType;
+    network_type?: string;
+  }>();
   const { phone: phoneContext } = usePhone();
   const phone = params?.phone || phoneContext;
   const initialSimType = params?.sim_type || 'PRE_PAID';
