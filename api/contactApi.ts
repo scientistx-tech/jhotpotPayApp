@@ -2,7 +2,7 @@ import { baseApi } from "./baseApi";
 
 export interface CreateContactRequest {
 	name: string;
-	email: string;
+	email?: string;
 	phone: string;
 	message: string;
 }
@@ -10,7 +10,7 @@ export interface CreateContactRequest {
 export interface ContactResponseData {
 	id: string;
 	name: string;
-	email: string;
+	email?: string;
 	phone: string;
 	message: string;
 	createdAt: string;

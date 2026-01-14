@@ -2,7 +2,7 @@ import { ActionButton, RechargeHeader, RecipientCard } from '@/components/rechar
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { usePhone } from '../../../context/PhoneContext';
@@ -42,12 +42,16 @@ const CATEGORIES: { id: AmountCategory; label: string }[] = [
 export default function RechargeAmount() {
   const router = useRouter();
   const tint = useThemeColor({}, 'tint');
-  
-   const { data, refetch } = useCheckAuthQuery();
-    const userData = (data as any)?.data || {};
+
+  const { data, refetch } = useCheckAuthQuery();
+  const userData = (data as any)?.data || {};
 
   // Get params from navigation
-  const params = typeof router === 'object' && 'params' in router ? (router as any).params : (router as any)?.getCurrentRoute?.()?.params;
+  const params = useLocalSearchParams<{
+    phone?: string;
+    sim_type?: SimType;
+    network_type?: string;
+  }>();
   const { phone: phoneContext } = usePhone();
   const phone = params?.phone || phoneContext;
   const initialSimType = params?.sim_type || 'PRE_PAID';
@@ -111,7 +115,7 @@ export default function RechargeAmount() {
         await refetch();
         setShowDetailsModal(false);
         alert(result?.message || 'Recharge successful!');
-        router.replace('/(tabs)'); // Navigate to home page
+        router.replace('/(app)/wallet/history');
       }
     } catch (e: any) {
       // Error handled by isRechargeError
@@ -143,7 +147,7 @@ export default function RechargeAmount() {
           style={{ flex: 1 }}
           contentContainerStyle={[
             styles.screen,
-            { flexGrow: 1}
+            { flexGrow: 1 }
           ]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
@@ -223,19 +227,19 @@ export default function RechargeAmount() {
                     })}
                   </View>
 
-                    <View style={styles.typeAmountSection}>
+                  <View style={styles.typeAmountSection}>
                     <TextInput
                       placeholder="এখানে পরিমাণ লিখুন..."
                       value={customAmount}
                       onChangeText={(text) => {
-                      setCustomAmount(text);
-                      if (text !== '') setSelectedOfferId(null);
+                        setCustomAmount(text);
+                        if (text !== '') setSelectedOfferId(null);
                       }}
                       keyboardType="numeric"
                       placeholderTextColor="#248AEF"
                       style={styles.customAmountInput}
                     />
-                    </View>
+                  </View>
                 </View>
               )}
 
@@ -245,7 +249,7 @@ export default function RechargeAmount() {
               </View>
 
             </View>
-           
+
           </View>
         </ScrollView>
 
@@ -253,23 +257,23 @@ export default function RechargeAmount() {
 
       </KeyboardAvoidingView>
 
-       {/* <View style={styles.spacer} /> */}
-            <View style={{ marginTop: 90 }}>
-              {
-                !showDetailsModal && <View style={styles.bottomSection}>
-                  <View style={{ flex: 1 }}>
-                    <ActionButton
-                      label="Back"
-                      onPress={handleBackPress}
-                      variant="secondary"
-                    />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <ActionButton label="Next" onPress={handleProceedPress} disabled={!canProceed} />
-                  </View>
-                </View>
-              }
+      {/* <View style={styles.spacer} /> */}
+      <View style={{ marginTop: 90 }}>
+        {
+          !showDetailsModal && <View style={styles.bottomSection}>
+            <View style={{ flex: 1 }}>
+              <ActionButton
+                label="Back"
+                onPress={handleBackPress}
+                variant="secondary"
+              />
             </View>
+            <View style={{ flex: 1 }}>
+              <ActionButton label="Next" onPress={handleProceedPress} disabled={!canProceed} />
+            </View>
+          </View>
+        }
+      </View>
 
       <OfferDetailsModal
         visible={showDetailsModal}
@@ -406,9 +410,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
   },
-    screen: {
-        paddingHorizontal: 20
-    }
+  screen: {
+    paddingHorizontal: 20
+  }
 });
 
 

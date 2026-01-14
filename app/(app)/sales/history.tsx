@@ -1,12 +1,12 @@
-import { useGetSalesQuery, useUpdateSaleMutation } from '@/api/saleApi';
+import { useGetSalesQuery } from '@/api/saleApi';
 import { RechargeHeader } from '@/components/recharge';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { ActivityIndicator, FlatList, Modal, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { ActivityIndicator, FlatList,  StyleSheet, View } from 'react-native';
+
 
 export default function SaleHistory() {
   const router = useRouter();
@@ -18,19 +18,14 @@ export default function SaleHistory() {
   const [limit] = useState(10);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Edit modal state
-  const [editModalVisible, setEditModalVisible] = useState(false);
-  const [editSale, setEditSale] = useState<any>(null);
-  const [editPaid, setEditPaid] = useState('');
-  const [editDue, setEditDue] = useState('');
-  const [updateSale, { isLoading: isUpdating }] = useUpdateSaleMutation();
+
 
   // Infinite scroll state
   const [allSales, setAllSales] = useState<any[]>([]);
   const [hasMore, setHasMore] = useState(true);
 
   // Fetch sales from API
-  const { data, isLoading, isError, refetch, isFetching } = useGetSalesQuery({ page, limit });
+  const { data, isLoading,  refetch, isFetching } = useGetSalesQuery({ page, limit });
   const totalPages = data?.meta?.totalPages || 1;
 
   // Infinite scroll: append new data
@@ -66,39 +61,20 @@ export default function SaleHistory() {
     }
   };
 
-  // Edit modal handlers
-  const openEditModal = (sale: any) => {
-    setEditSale(sale);
-    setEditPaid(sale.paid.toString());
-    setEditDue(sale.due.toString());
-    setEditModalVisible(true);
-  };
-  const closeEditModal = () => {
-    setEditModalVisible(false);
-    setEditSale(null);
-  };
-  const handleEditSave = async () => {
-    if (!editSale) return;
-    try {
-      await updateSale({
-        id: editSale.id,
-        paid: Number(editPaid),
-        due: Number(editDue),
-      }).unwrap();
-      closeEditModal();
-      refetch();
-    } catch (e) {
-      alert('Failed to update sale');
-    }
-  };
+
+
+
 
   // Sale card renderer
   const renderItem = ({ item }: { item: any }) => {
+    console.log(item)
     return (
       <View style={[styles.card, { backgroundColor: bg }]}> 
         <View style={styles.cardRow}>
           <View style={{ flex: 1, gap: 6 }}>
-            <ThemedText style={styles.nameText}>সেল আইডি: {item.id}</ThemedText>
+            <ThemedText style={styles.metaText}> গ্রাহক: {item?.customer?.name}</ThemedText>
+            <ThemedText style={styles.metaText}> গ্রাহক ইমেইল: {item?.customer?.email}</ThemedText>
+            <ThemedText style={styles.metaText}> গ্রাহক ফোন: {item?.customer?.phone}</ThemedText>
             <ThemedText style={styles.metaText}>তারিখ: {new Date(item.createdAt).toLocaleString('bn-BD')}</ThemedText>
             <ThemedText style={styles.metaText}>সাবটোটাল: {item.subtotal} টাকা</ThemedText>
             <ThemedText style={styles.metaText}>ডিসকাউন্ট: {item.discount} টাকা</ThemedText>
@@ -147,45 +123,7 @@ export default function SaleHistory() {
         <View style={{ height: 24 }} />
       </View>
 
-      {/* Edit Sale Modal */}
-      <Modal
-        visible={editModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={closeEditModal}
-      >
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.3)' }}>
-          <View style={{ backgroundColor: '#fff', borderRadius: 12, padding: 24, width: 320 }}>
-            <ThemedText style={{ fontSize: 16, fontWeight: '700', marginBottom: 12 }}>Edit Sale Payment</ThemedText>
-            <View style={{ marginBottom: 12 }}>
-              <ThemedText style={{ marginBottom: 4 }}>Paid Amount</ThemedText>
-              <TextInput
-                style={{ borderWidth: 1, borderColor: '#E5E8ED', borderRadius: 8, padding: 10, fontSize: 15 }}
-                keyboardType="numeric"
-                value={editPaid}
-                onChangeText={setEditPaid}
-              />
-            </View>
-            <View style={{ marginBottom: 12 }}>
-              <ThemedText style={{ marginBottom: 4 }}>Due Amount</ThemedText>
-              <TextInput
-                style={{ borderWidth: 1, borderColor: '#E5E8ED', borderRadius: 8, padding: 10, fontSize: 15 }}
-                keyboardType="numeric"
-                value={editDue}
-                onChangeText={setEditDue}
-              />
-            </View>
-            <View style={{ flexDirection: 'row', gap: 12, justifyContent: 'flex-end' }}>
-              <TouchableOpacity onPress={closeEditModal} style={{ padding: 10 }}>
-                <ThemedText style={{ color: '#666' }}>Cancel</ThemedText>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={handleEditSave} style={{ backgroundColor: tint, borderRadius: 8, padding: 10 }}>
-                <ThemedText style={{ color: '#fff', fontWeight: '600' }}>{isUpdating ? 'Saving...' : 'Save'}</ThemedText>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+  
     </ThemedView>
   );
 }

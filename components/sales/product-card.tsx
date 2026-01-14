@@ -46,7 +46,7 @@ export default function ProductCard({
 
 const styles = StyleSheet.create({
   card: {
-    width: 95,
+    flex: 1,
     backgroundColor: '#fff',
     borderRadius: 12,
     overflow: 'hidden',

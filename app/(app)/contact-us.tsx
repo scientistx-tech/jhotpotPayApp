@@ -4,7 +4,7 @@ import { useThemeColor } from '@/hooks/use-theme-color';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, TextInput, TouchableOpacity, View,KeyboardAvoidingView, Platform, } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, View, } from 'react-native';
 import { useCreateContactMutation } from '../../api/contactApi';
 
 export default function ContactUsPage() {
@@ -37,20 +37,26 @@ export default function ContactUsPage() {
   };
 
   const handleSubmit = async () => {
-    if (!formData.name || !formData.email || !formData.phone || !formData.message) {
-      alert('Please fill in all fields.');
+    if (!formData.name || !formData.phone || !formData.message) {
+      alert('Please fill in all required fields.');
       return;
     }
     try {
-      await createContact({
+      // Omit email if empty string
+      const payload: any = {
         name: formData.name,
-        email: formData.email,
         phone: formData.phone,
         message: formData.message,
-      }).unwrap();
+      };
+      if (formData.email && formData.email.trim() !== "") {
+        payload.email = formData.email;
+      }
+      const res = await createContact(payload).unwrap();
+      console.log({ res });
       alert('Your message has been sent!');
       setFormData({ name: '', email: '', phone: '', message: '' });
     } catch (err: any) {
+      console.error('Error submitting contact form:', err);
       alert('Failed to send message. Please try again.');
     }
   };
@@ -126,10 +132,10 @@ export default function ContactUsPage() {
 
           {/* Your Email */}
           <View style={styles.fieldGroup}>
-            <ThemedText style={styles.fieldLabel}>Your Email</ThemedText>
+            <ThemedText style={styles.fieldLabel}>Your Email (optional)</ThemedText>
             <TextInput
               style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
-              placeholder="Enter your email"
+              placeholder="Enter your email (optional)"
               value={formData.email}
               onChangeText={(value) => handleInputChange('email', value)}
               keyboardType="email-address"

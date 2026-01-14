@@ -1,20 +1,21 @@
-import { useChangePasswordMutation } from '@/api/authApi';
+import { useChangePasswordApi } from '@/api/changePasswordApi';
 import CustomButton from '@/components/custom-button';
 import FormInput from '@/components/form-input';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { useThemeColor } from '@/hooks/use-theme-color';
+import { getToken, logout } from '@/utils/auth';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useForm } from 'react-hook-form';
 import { KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
-import Toast from 'react-native-toast-message';
-import { useThemeColor } from '@/hooks/use-theme-color';
 import { ScrollView } from 'react-native-gesture-handler';
+import Toast from 'react-native-toast-message';
 
 export default function ChangePassword() {
   const router = useRouter();
-   const tint = useThemeColor({}, 'tint');
-  const [changePassword, { isLoading }] = useChangePasswordMutation();
+  const tint = useThemeColor({}, 'tint');
+  const { changePassword, isLoading } = useChangePasswordApi();
   const { control, handleSubmit } = useForm({ defaultValues: { oldPassword: '', newPassword: '', confirm: '' } });
 
   const handleChangePassword = async (data: { oldPassword: string; newPassword: string; confirm: string }) => {
@@ -27,9 +28,18 @@ export default function ChangePassword() {
       return;
     }
     try {
-      const res = await changePassword({ oldPassword: data.oldPassword, newPassword: data.newPassword }).unwrap();
+      const token = await getToken();
+      if (!token) {
+        Toast.show({ type: 'error', text1: 'Error', text2: 'টোকেন পাওয়া যায়নি' });
+        return;
+      }
+      const res = await changePassword(token, { oldPassword: data.oldPassword, newPassword: data.newPassword });
+      console.log({ res });
       if (res.success) {
         Toast.show({ type: 'success', text1: 'Success', text2: res.message || 'পাসওয়ার্ড পরিবর্তন হয়েছে' });
+        await logout();
+        // route to auth/login after token removed
+        router.replace('/(auth)/login');
         // setTimeout(() => {
         //   router.replace('/(auth)/login');
         // }, 1200);
@@ -37,13 +47,14 @@ export default function ChangePassword() {
         Toast.show({ type: 'error', text1: 'Error', text2: res.message || 'পাসওয়ার্ড পরিবর্তন ব্যর্থ হয়েছে' });
       }
     } catch (err: any) {
-      Toast.show({ type: 'error', text1: 'Error', text2: err?.data?.message || 'পাসওয়ার্ড পরিবর্তন ব্যর্থ হয়েছে' });
+      console.log({ err });
+      Toast.show({ type: 'error', text1: 'Error', text2: err?.message || 'পাসওয়ার্ড পরিবর্তন ব্যর্থ হয়েছে' });
     }
   };
 
   return (
     <ThemedView style={{ flex: 1 }}>
-         {/* Header */}
+      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => router.back()}
@@ -63,7 +74,7 @@ export default function ChangePassword() {
           style={{ flex: 1 }}
           contentContainerStyle={[
             styles.screen,
-            { flexGrow: 1,  paddingBottom: 80 }
+            { flexGrow: 1, paddingBottom: 80 }
           ]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}>
@@ -85,7 +96,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 20,
   },
-    header: {
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -101,7 +112,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 3,
   },
-    backButton: {
+  backButton: {
     width: 40,
     height: 40,
     justifyContent: 'center',
@@ -113,7 +124,7 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'center',
   },
-   screen: {
+  screen: {
     paddingHorizontal: 20
   }
 });
