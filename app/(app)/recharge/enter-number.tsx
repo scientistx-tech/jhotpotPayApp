@@ -103,12 +103,13 @@ export default function RechargeEnterNumber() {
             </View>
           </View>
           <View style={styles.spacer} />
-        </ScrollView>
-        <View style={styles.bottomSection}>
-          <View style={{ flex: 1 }}>
-            <ActionButton label="Continue" onPress={handleNextPress} disabled={!canProceed} />
+          <View style={styles.bottomSection}>
+            <View style={{ flex: 1 }}>
+              <ActionButton label="Continue" onPress={handleNextPress} disabled={!canProceed} />
+            </View>
           </View>
-        </View>
+        </ScrollView>
+
       </KeyboardAvoidingView>
     </ThemedView>
   );

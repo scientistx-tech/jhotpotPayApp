@@ -1,3 +1,4 @@
+import { useCheckAuthQuery } from '@/api/authApi';
 import { useGetRechargeOffersQuery, useRechargeMutation } from '@/api/rechargeApi';
 import { ActionButton, RechargeHeader, RecipientCard } from '@/components/recharge';
 import OfferDetailsModal from '@/components/recharge/offer-details-modal';
@@ -8,7 +9,6 @@ import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { usePhone } from '../../../context/PhoneContext';
-import { useCheckAuthQuery } from '@/api/authApi';
 type SimType = 'PRE_PAID' | 'POST_PAID';
 type AmountCategory = 'amount' | 'internet' | 'minute' | 'bundle' | 'call-rate';
 
@@ -34,7 +34,7 @@ export default function RechargeMinute() {
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [recharge] = useRechargeMutation();
-   const { refetch } = useCheckAuthQuery();
+  const { refetch } = useCheckAuthQuery();
 
   const networkType = initialNetworkType;
   const { data, isLoading } = useGetRechargeOffersQuery({ sim_type: simType, network_type: networkType });
@@ -77,14 +77,14 @@ export default function RechargeMinute() {
       offerId: selectedOfferId,
     };
     try {
-     const result = await recharge(payload).unwrap();
-     if (result.success) {
-          await refetch();
-       setShowDetailsModal(false);
+      const result = await recharge(payload).unwrap();
+      if (result.success) {
+        await refetch();
+        setShowDetailsModal(false);
         alert(result?.message || 'Recharge successful!');
-      router.replace('/(app)/wallet/history');
-     }
-    } catch (e: any){
+        router.replace('/(app)/wallet/history');
+      }
+    } catch (e: any) {
       alert(e?.data?.message || 'Recharge failed. Please try again.');
     }
   };
@@ -156,7 +156,7 @@ export default function RechargeMinute() {
           </View>
         </View>
 
-        <View style={[styles.offerList, { flexDirection: 'column' }]}> 
+        <View style={[styles.offerList, { flexDirection: 'column' }]}>
           {isLoading ? (
             <ThemedText>Loading...</ThemedText>
           ) : filteredOffers.length === 0 ? (
@@ -171,7 +171,7 @@ export default function RechargeMinute() {
                   onPress={() => setSelectedOfferId(offer.id)}
                 >
                   <View style={styles.offerLeft}>
-                    <View style={[styles.radio, { borderColor: tint }]}> 
+                    <View style={[styles.radio, { borderColor: tint }]}>
                       {isSelected ? <View style={[styles.radioDot, { backgroundColor: tint }]} /> : null}
                     </View>
                     <View style={{ flex: 1 }}>
@@ -187,6 +187,18 @@ export default function RechargeMinute() {
                     </View>
                   </View>
                   <ThemedText style={[styles.price, { color: tint }]}>{offer.price} BDT</ThemedText>
+                  {offer.offer && (
+                    <View style={{
+                      backgroundColor: "#248AEF",
+                      padding: 2,
+                      borderRadius: 10,
+                      position: "absolute",
+                      top: -9,
+                      right: 6
+                    }}>
+                      <ThemedText style={{ color: "#fff", fontSize: 10, marginHorizontal: 2 }}>{offer.offer?.title}</ThemedText>
+                    </View>
+                  )}
                 </TouchableOpacity>
               );
             })

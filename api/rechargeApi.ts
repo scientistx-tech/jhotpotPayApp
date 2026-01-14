@@ -5,7 +5,6 @@ interface RechargeOfferResponse {
   data: RechargeOffer[];
 }
 
-
 interface RechargeUser {
   name: string;
   phone: string;
@@ -20,6 +19,10 @@ interface RechargeOffer {
   cash_back: number;
   price: number;
   offerId: string;
+  offer: {
+    id: string;
+    title: string;
+  };
   name: string;
   validity: string;
   createdAt: string;
@@ -54,7 +57,13 @@ interface GetRechargesResponse {
 
 interface RechargeRequest {
   amount?: number;
-  network_type: "GRAMEENPHONE" | "ROBI" | "AIRTEL" | "BANGLALINK" | "TELETALK" | "SKITTO";
+  network_type:
+    | "GRAMEENPHONE"
+    | "ROBI"
+    | "AIRTEL"
+    | "BANGLALINK"
+    | "TELETALK"
+    | "SKITTO";
   sim_type: "PRE_PAID" | "POST_PAID";
   offerId?: string;
   phone: string;
@@ -68,15 +77,16 @@ interface RechargeResponse {
 
 export const rechargeApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getRechargeOffers: builder.query<RechargeOfferResponse, { sim_type: string; network_type: string }>(
-      {
-        query: ({ sim_type, network_type }) => ({
-          url: `/recharge/recharge-offer`,
-          method: "GET",
-          params: { sim_type, network_type },
-        }),
-      }
-    ),
+    getRechargeOffers: builder.query<
+      RechargeOfferResponse,
+      { sim_type: string; network_type: string }
+    >({
+      query: ({ sim_type, network_type }) => ({
+        url: `/recharge/recharge-offer`,
+        method: "GET",
+        params: { sim_type, network_type },
+      }),
+    }),
     recharge: builder.mutation<RechargeResponse, RechargeRequest>({
       query: (body) => ({
         url: "/recharge",
@@ -98,4 +108,8 @@ export const rechargeApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useGetRechargeOffersQuery, useRechargeMutation, useGetRechargesQuery } = rechargeApi;
+export const {
+  useGetRechargeOffersQuery,
+  useRechargeMutation,
+  useGetRechargesQuery,
+} = rechargeApi;

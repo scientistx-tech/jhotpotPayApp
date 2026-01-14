@@ -174,7 +174,7 @@ export default function ProductAdd() {
                     style={styles.multiline}
                 />
                 <RoundedInput
-                    label="ট্যাক্স"
+                    label="ট্যাক্স %"
                     placeholder="০"
                     value={tax}
                     onChangeText={setTax}

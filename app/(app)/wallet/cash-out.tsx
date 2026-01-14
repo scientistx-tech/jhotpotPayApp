@@ -8,7 +8,7 @@ import { useThemeColor } from '@/hooks/use-theme-color';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Image, Pressable, ScrollView, StyleSheet, View, type ImageSourcePropType } from 'react-native';
+import { Alert, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View, type ImageSourcePropType } from 'react-native';
 
 import bkashLogo from '@/assets/online_payment/bkash.png';
 import nagadLogo from '@/assets/online_payment/nagad.png';
@@ -51,7 +51,7 @@ export default function CashOut() {
       }).unwrap();
       if (res.success) {
         Alert.alert('Success', res.message || 'Debit Created!');
-         router.push({ pathname: '/(app)/wallet/history', params: { initialType: 'debit' } });
+        router.push({ pathname: '/(app)/wallet/history', params: { initialType: 'debit' } });
       }
     } catch (err: any) {
       // Check for low balance error (statusCode 400)
@@ -82,64 +82,72 @@ export default function CashOut() {
         showBack
         onBackPress={handleBackPress}
       />
-
-      <ScrollView
-        style={styles.content}
-        contentContainerStyle={styles.contentContainer}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
       >
-        <View style={[styles.card, { backgroundColor: bg }]}> 
-          <ThemedText style={styles.label}>Select Operator</ThemedText>
-          <Pressable style={[styles.dropdown, { borderColor: '#E5E8ED' }]} onPress={toggleOperators}>
-            <View style={styles.dropdownLeft}>
-              <Image source={selectedOperator.logo} style={styles.operatorLogo} resizeMode="contain" />
-              <ThemedText style={styles.dropdownText}>{selectedOperator.name}</ThemedText>
-            </View>
-            <Ionicons name={showOperators ? 'chevron-up' : 'chevron-down'} size={18} color="#6B7280" />
-          </Pressable>
+        <ScrollView
+          style={styles.content}
+          contentContainerStyle={styles.contentContainer}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={[styles.card, { backgroundColor: bg }]}>
+            <ThemedText style={styles.label}>Select Operator</ThemedText>
+            <Pressable style={[styles.dropdown, { borderColor: '#E5E8ED' }]} onPress={toggleOperators}>
+              <View style={styles.dropdownLeft}>
+                <Image source={selectedOperator.logo} style={styles.operatorLogo} resizeMode="contain" />
+                <ThemedText style={styles.dropdownText}>{selectedOperator.name}</ThemedText>
+              </View>
+              <Ionicons name={showOperators ? 'chevron-up' : 'chevron-down'} size={18} color="#6B7280" />
+            </Pressable>
 
-          {showOperators && (
-            <View style={styles.dropdownList}>
-              {OPERATORS.map((op) => (
-                <Pressable key={op.id} style={styles.dropdownItem} onPress={() => handleSelect(op)}>
-                  <View style={styles.dropdownLeft}>
-                    <Image source={op.logo} style={styles.operatorLogoSmall} resizeMode="contain" />
-                    <ThemedText style={styles.dropdownText}>{op.name}</ThemedText>
-                  </View>
-                  {selectedOperator.id === op.id ? (
-                    <Ionicons name="checkmark" size={18} color={tint} />
-                  ) : null}
-                </Pressable>
-              ))}
-            </View>
-          )}
+            {showOperators && (
+              <View style={styles.dropdownList}>
+                {OPERATORS.map((op) => (
+                  <Pressable key={op.id} style={styles.dropdownItem} onPress={() => handleSelect(op)}>
+                    <View style={styles.dropdownLeft}>
+                      <Image source={op.logo} style={styles.operatorLogoSmall} resizeMode="contain" />
+                      <ThemedText style={styles.dropdownText}>{op.name}</ThemedText>
+                    </View>
+                    {selectedOperator.id === op.id ? (
+                      <Ionicons name="checkmark" size={18} color={tint} />
+                    ) : null}
+                  </Pressable>
+                ))}
+              </View>
+            )}
 
-          <View style={styles.divider} />
+            <View style={styles.divider} />
 
-          <ThemedText style={styles.label}>Select Receiver Number</ThemedText>
-          <RoundedInput
-            placeholder="Enter Receiver Number"
-            value={form.receiver}
-            onChangeText={(text) => handleChange('receiver', text)}
-            keyboardType="phone-pad"
-          />
+            <ThemedText style={styles.label}>Select Receiver Number</ThemedText>
+            <RoundedInput
+              placeholder="Enter Receiver Number"
+              value={form.receiver}
+              onChangeText={(text) => handleChange('receiver', text)}
+              keyboardType="phone-pad"
+            />
 
-          <ThemedText style={[styles.label, { marginTop: 10 }]}>Enter Amount</ThemedText>
-          <RoundedInput
-            placeholder="Enter Amount"
-            value={form.amount}
-            onChangeText={(text) => handleChange('amount', text)}
-            keyboardType="numeric"
-          />
-        </View>
+            <ThemedText style={[styles.label, { marginTop: 10 }]}>Enter Amount</ThemedText>
+            <RoundedInput
+              placeholder="Enter Amount"
+              value={form.amount}
+              onChangeText={(text) => handleChange('amount', text)}
+              keyboardType="numeric"
+            />
+          </View>
 
-        <View style={{ height: 12 }} />
-      </ScrollView>
+          <View style={{ height: 12 }} />
+          <View style={styles.bottomAction}>
+            <CustomButton title={isDebiting ? 'Processing...' : 'Submit'} onPress={handleSubmit} disabled={isDebiting} />
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
-      <View style={styles.bottomAction}>
-        <CustomButton title={isDebiting ? 'Processing...' : 'Submit'} onPress={handleSubmit} disabled={isDebiting} />
-      </View>
+
+
+
     </ThemedView>
   );
 }

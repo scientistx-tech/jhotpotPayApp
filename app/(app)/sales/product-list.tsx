@@ -8,7 +8,7 @@ import { useThemeColor } from '@/hooks/use-theme-color';
 import { Product } from '@/store/slices/productSlice';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
@@ -150,12 +150,14 @@ export default function ProductList() {
       setPage((prev) => prev + 1);
     }
   };
-
+  useEffect(() => {
+    handleRefresh()
+  }, [])
   const renderItem = ({ item }: { item: any }) => {
     const images = item.images && item.images.length > 0 ? item.images : [];
     const currentIndex = imageIndexes.current[item.id] || 0;
     return (
-      <View style={[styles.card, { backgroundColor: bg }]}> 
+      <View style={[styles.card, { backgroundColor: bg }]}>
         <View style={styles.cardRow}>
           <View style={styles.sliderContainer}>
             <Image

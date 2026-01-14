@@ -8,8 +8,12 @@ import { useThemeColor } from '@/hooks/use-theme-color';
 import * as Clipboard from 'expo-clipboard';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View, type ImageSourcePropType } from 'react-native';
+import { Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View, type ImageSourcePropType } from 'react-native';
 
+import bkashLogo from '@/assets/online_payment/bkash.png';
+import nagadLogo from '@/assets/online_payment/nagad.png';
+import rocketLogo from '@/assets/online_payment/rocket.png';
+import upayLogo from '@/assets/online_payment/upay.png';
 // import bkashLogo from '@/assets/online_payment/bkash.png';
 
 type PaymentMethod = 'manual' | 'online';
@@ -34,22 +38,22 @@ const PROVIDERS: Provider[] = [
   {
     id: 'bkash',
     name: 'বিকাশ',
-    logo: undefined, // Image removed for now
+    logo: bkashLogo, // Image removed for now
   },
   {
     id: 'nagad',
     name: 'নগদ',
-    logo: undefined, // Image removed for now
+    logo: nagadLogo, // Image removed for now
   },
   {
     id: 'rocket',
     name: 'রকেট',
-    logo: undefined, // Image removed for now
+    logo: rocketLogo, // Image removed for now
   },
   {
     id: 'upay',
     name: 'উপায়',
-    logo: undefined, // Image removed for now
+    logo: upayLogo, // Image removed for now
   },
 ];
 
@@ -174,6 +178,7 @@ export default function AddBalance() {
             onPress={() => setSelectedProvider(provider.id)}
           >
             {/* Image removed for now */}
+            <Image source={provider.logo} style={{  }} height={30} width={30} />
             <ThemedText style={styles.providerName}>{provider.name}</ThemedText>
           </Pressable>
         ))}
@@ -198,7 +203,7 @@ export default function AddBalance() {
         <ThemedText style={{ fontSize: 13, color: tint }}>অ্যাকাউন্ট তথ্য লোড হচ্ছে...</ThemedText>
       ) : accountData && accountData.data ? (
         <View style={{ marginBottom: 8 }}>
-          <ThemedText style={{ fontSize: 13, color: '#11181C' }}>অ্যাকাউন্ট নম্বর: {accountData.data.account_number}</ThemedText>
+          <ThemedText style={{ fontSize: 16, color: '#11181C', textAlign: "center" }}>অ্যাকাউন্ট নম্বর: {accountData.data.account_number}</ThemedText>
           <CustomButton
             title="এজেন্ট নম্বর কপি করুন"
             onPress={handleCopyAccountNumber}
@@ -232,7 +237,7 @@ export default function AddBalance() {
   );
 
   const renderOnlineOptions = () => (
-    <View style={[styles.card, { backgroundColor: bg }]}> 
+    <View style={[styles.card, { backgroundColor: bg }]}>
       <View style={styles.providersRow}>
         <Pressable
           key="bkash"
@@ -286,13 +291,13 @@ export default function AddBalance() {
           {method === 'manual' ? renderManualForm() : renderOnlineOptions()}
 
           <View style={{ height: 12 }} />
-           <View style={styles.bottomAction}>
-        <CustomButton title="ব্যালেন্স যোগ করুন" onPress={handleSubmit} isLoading={isCrediting || isBkashPaying} />
-      </View>
+          <View style={styles.bottomAction}>
+            <CustomButton title="ব্যালেন্স যোগ করুন" onPress={handleSubmit} isLoading={isCrediting || isBkashPaying} />
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
 
-     
+
     </ThemedView>
   );
 }

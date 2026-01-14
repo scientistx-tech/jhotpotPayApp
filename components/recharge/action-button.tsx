@@ -1,6 +1,6 @@
 import { ThemedText } from '@/components/themed-text';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { TouchableOpacity } from 'react-native';
+import { ActivityIndicator, TouchableOpacity } from 'react-native';
 
 export type ActionButtonProps = {
   label: string;
@@ -8,6 +8,7 @@ export type ActionButtonProps = {
   variant?: 'primary' | 'secondary' | 'outline';
   style?: any;
   disabled?: boolean;
+  loading?: boolean;
 };
 
 export default function ActionButton({
@@ -16,6 +17,7 @@ export default function ActionButton({
   variant = 'primary',
   style,
   disabled,
+  loading
 }: ActionButtonProps) {
   const tint = useThemeColor({}, 'tint');
 
@@ -41,7 +43,7 @@ export default function ActionButton({
       disabled={disabled}
       style={[baseStyle, variantStyle, style]}
     >
-      <ThemedText
+      {loading ? (<ActivityIndicator />) : (<ThemedText
         style={{
           color: textColor,
           fontSize: 16,
@@ -49,7 +51,7 @@ export default function ActionButton({
         }}
       >
         {label}
-      </ThemedText>
+      </ThemedText>)}
     </TouchableOpacity>
   );
 }
