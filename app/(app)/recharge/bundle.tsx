@@ -371,7 +371,7 @@ const styles = StyleSheet.create({
   bottomSection: {
     paddingHorizontal: 16,
     paddingVertical: 16,
-    paddingBottom: 24,
+    paddingBottom: 35,
     display: 'flex',
     flexDirection: 'row',
     gap: 12,

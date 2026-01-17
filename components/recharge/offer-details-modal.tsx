@@ -164,7 +164,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 12,
     borderRadius: 12,
-    marginBottom: 20,
+    // marginBottom: 20,
+    paddingBottom: 35,
   },
   balanceLabel: {
     fontSize: 12,
