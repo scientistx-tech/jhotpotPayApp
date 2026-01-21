@@ -14,6 +14,7 @@ const NETWORK_TYPES = [
   { id: 'AIRTEL', label: 'Airtel' },
   { id: 'BANGLALINK', label: 'Banglalink' },
   { id: 'TELETALK', label: 'Teletalk' },
+  { id: 'SKITTO', label: 'Skitto' },
 ];
 
 export default function RechargeEnterNumber() {
@@ -26,11 +27,12 @@ export default function RechargeEnterNumber() {
   // Helper to detect network by prefix
   const detectNetworkType = (number: string): string => {
     const cleaned = number.replace(/\D/g, '');
-    if (cleaned.startsWith('017') || cleaned.startsWith('013')) return 'Grameenphone';
+    if (cleaned.startsWith('017')) return 'Grameenphone';
     if (cleaned.startsWith('018')) return 'Robi';
     if (cleaned.startsWith('016')) return 'Airtel';
     if (cleaned.startsWith('019')) return 'Banglalink';
     if (cleaned.startsWith('015')) return 'Teletalk';
+    if (cleaned.startsWith('013')) return 'Skitto';
     return networkType; // fallback to current
   };
 

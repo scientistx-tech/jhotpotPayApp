@@ -11,17 +11,13 @@ export default function AboutUsPage() {
   const bg = useThemeColor({}, 'background');
 
   const features = [
-    'Instant and secure transactions anytime, anywhere.',
-    'User-friendly wallet experience for all ages.',
-    '24/7 customer support and agent assistance.',
-    'Powerful tools for business owners and retailers.',
-    'Fast recharge, cash-in, cash-out, and money transfers.',
-    'Lowest cost and highest flexibility in the industry.',
+    'যেকোনো সময়, যেকোনো জায়গা থেকে তাৎক্ষণিক ও নিরাপদ লেনদেন।',
+    'সব বয়সের মানুষের জন্য সহজ ও ব্যবহারবান্ধব ওয়ালেট অভিজ্ঞতা।',
+    '২৪/৭ কাস্টমার সাপোর্ট এবং এজেন্ট সহায়তা।',
+    'ব্যবসায়ী ও রিটেইলারদের জন্য শক্তিশালী টুলস।',
+    'দ্রুত রিচার্জ, ক্যাশ-ইন, ক্যাশ-আউট এবং টাকা পাঠানোর সুবিধা।',
+    'ইন্ডাস্ট্রিতে সর্বনিম্ন খরচ ও সর্বোচ্চ সুবিধা।',
   ];
-
-  const handleSubmit = () => {
-    console.log('About page submit clicked');
-  };
 
   return (
     <ThemedView style={styles.container}>
@@ -33,7 +29,7 @@ export default function AboutUsPage() {
         >
           <Ionicons name="arrow-back" size={24} color={tint} />
         </TouchableOpacity>
-        <ThemedText style={styles.headerTitle}>About Jhotpot Pay</ThemedText>
+        <ThemedText style={styles.headerTitle}>Jhotpot Pay সম্পর্কে</ThemedText>
         <View style={{ width: 40 }} />
       </View>
 
@@ -44,36 +40,38 @@ export default function AboutUsPage() {
       >
         {/* About Section */}
         <View style={[styles.card, { backgroundColor: bg }]}>
-          <ThemedText style={styles.sectionTitlePink}>About JhotPot Pay</ThemedText>
+          <ThemedText style={styles.sectionTitlePink}>Jhotpot Pay সম্পর্কে</ThemedText>
           <ThemedText style={styles.descriptionText}>
-            Jhotpot Pay is a next-generation digital financial solution designed for fast, secure, and effortless transactions. We empower users, agents, and businesses with seamless and instant mobile financial services.
+            Jhotpot Pay একটি আধুনিক ডিজিটাল ফিনান্সিয়াল সলিউশন, যা দ্রুত, নিরাপদ এবং সহজ লেনদেনের জন্য তৈরি। আমরা ব্যবহারকারী, এজেন্ট এবং ব্যবসায়ীদের জন্য নিরবচ্ছিন্ন ও তাৎক্ষণিক মোবাইল ফিনান্সিয়াল সেবা নিশ্চিত করি।
           </ThemedText>
         </View>
 
         {/* Our Mission */}
         <View style={[styles.card, { backgroundColor: bg }]}>
-          <ThemedText style={styles.sectionTitleBlue}>OUR MISSION</ThemedText>
+          <ThemedText style={styles.sectionTitleBlue}>আমাদের লক্ষ্য</ThemedText>
           <View style={[styles.boxContainer, { borderColor: tint }]}>
             <ThemedText style={styles.boxText}>
-              To build a digital payment ecosystem that is fast, reliable, and accessible for everyone – from regular users to professional agents and business owners across Bangladesh.
+              বাংলাদেশজুড়ে সাধারণ ব্যবহারকারী থেকে শুরু করে পেশাদার এজেন্ট ও ব্যবসায়ীদের জন্য দ্রুত, নির্ভরযোগ্য এবং সবার জন্য সহজলভ্য একটি ডিজিটাল পেমেন্ট ইকোসিস্টেম গড়ে তোলা।
             </ThemedText>
           </View>
         </View>
 
         {/* Our Vision */}
         <View style={[styles.card, { backgroundColor: bg }]}>
-          <ThemedText style={styles.sectionTitleBlue}>OUR VISION</ThemedText>
+          <ThemedText style={styles.sectionTitleBlue}>আমাদের ভিশন</ThemedText>
           <View style={[styles.boxContainer, { borderColor: tint }]}>
             <ThemedText style={styles.boxText}>
-              Bringing financial empowerment to millions by offering a secure, user-friendly, and innovative digital wallet experience with world-class technology.
+              বিশ্বমানের প্রযুক্তি ব্যবহার করে নিরাপদ, সহজ ও উদ্ভাবনী ডিজিটাল ওয়ালেট অভিজ্ঞতার মাধ্যমে লক্ষ লক্ষ মানুষের আর্থিক ক্ষমতায়ন নিশ্চিত করা।
             </ThemedText>
           </View>
         </View>
 
         {/* What Makes Us Different */}
         <View style={[styles.card, { backgroundColor: bg }]}>
-          <ThemedText style={[styles.sectionTitleDark, { color: tint }]}>What Makes Us Different</ThemedText>
-          
+          <ThemedText style={[styles.sectionTitleDark, { color: tint }]}>
+            আমাদের আলাদা করে তোলে যা
+          </ThemedText>
+
           {features.map((feature, index) => (
             <View key={index} style={[styles.featureBox, { borderColor: tint }]}>
               <ThemedText style={styles.featureText}>{feature}</ThemedText>
@@ -81,21 +79,12 @@ export default function AboutUsPage() {
           ))}
         </View>
 
-        {/* Submit Button */}
-        <View style={styles.buttonSection}>
-          <TouchableOpacity
-            style={[styles.submitButton, { backgroundColor: tint }]}
-            onPress={handleSubmit}
-          >
-            <ThemedText style={styles.submitButtonText}>SUBMIT</ThemedText>
-          </TouchableOpacity>
-        </View>
-
         <View style={{ height: 30 }} />
       </ScrollView>
     </ThemedView>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {

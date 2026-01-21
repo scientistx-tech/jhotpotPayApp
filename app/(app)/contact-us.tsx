@@ -22,7 +22,6 @@ export default function ContactUsPage() {
   const [createContact] = useCreateContactMutation();
 
   const handleInputChange = (field: string, value: string) => {
-    // If the field is phoneNumber, map it to phone
     if (field === 'phoneNumber') {
       setFormData((prev) => ({
         ...prev,
@@ -38,11 +37,10 @@ export default function ContactUsPage() {
 
   const handleSubmit = async () => {
     if (!formData.name || !formData.phone || !formData.message) {
-      alert('Please fill in all required fields.');
+      alert('অনুগ্রহ করে সকল প্রয়োজনীয় তথ্য পূরণ করুন।');
       return;
     }
     try {
-      // Omit email if empty string
       const payload: any = {
         name: formData.name,
         phone: formData.phone,
@@ -53,11 +51,11 @@ export default function ContactUsPage() {
       }
       const res = await createContact(payload).unwrap();
       console.log({ res });
-      alert('Your message has been sent!');
+      alert('আপনার বার্তাটি সফলভাবে পাঠানো হয়েছে!');
       setFormData({ name: '', email: '', phone: '', message: '' });
     } catch (err: any) {
       console.error('Error submitting contact form:', err);
-      alert('Failed to send message. Please try again.');
+      alert('বার্তা পাঠাতে ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।');
     }
   };
 
@@ -71,117 +69,92 @@ export default function ContactUsPage() {
         >
           <Ionicons name="arrow-back" size={24} color={tint} />
         </TouchableOpacity>
-        <ThemedText style={styles.headerTitle}>Contact Us</ThemedText>
+        <ThemedText style={styles.headerTitle}>যোগাযোগ করুন</ThemedText>
         <View style={{ width: 40 }} />
       </View>
 
-       <KeyboardAvoidingView
-                style={{ flex: 1 }}
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                keyboardVerticalOffset={0}
-            >
-              <ScrollView
+      <KeyboardAvoidingView
         style={{ flex: 1 }}
-        contentContainerStyle={[
-          styles.screen,
-          { flexGrow: 1, paddingTop: 50 }
-        ]}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
       >
-        {/* Contact Information Section */}
-        {/* <View style={[styles.card, { backgroundColor: bg }]}>
-          <ThemedText style={styles.sectionTitle}>Contact Information</ThemedText>
-          
-          <View style={styles.infoRow}>
-            <ThemedText style={styles.infoLabel}>Company:</ThemedText>
-            <ThemedText style={styles.infoValue}>Jhotpot Pay</ThemedText>
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={[
+            styles.screen,
+            { flexGrow: 1, paddingTop: 50 }
+          ]}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Get In Touch Section */}
+          <View style={[styles.card, { backgroundColor: bg }]}>
+            <ThemedText style={styles.sectionTitle}>যোগাযোগ করুন</ThemedText>
+
+            {/* Your Name */}
+            <View style={styles.fieldGroup}>
+              <ThemedText style={styles.fieldLabel}>আপনার নাম</ThemedText>
+              <TextInput
+                style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
+                placeholder="আপনার নাম লিখুন"
+                value={formData.name}
+                onChangeText={(value) => handleInputChange('name', value)}
+                placeholderTextColor="#999"
+              />
+            </View>
+
+            {/* Your Email */}
+            <View style={styles.fieldGroup}>
+              <ThemedText style={styles.fieldLabel}>আপনার ইমেইল (ঐচ্ছিক)</ThemedText>
+              <TextInput
+                style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
+                placeholder="আপনার ইমেইল লিখুন (ঐচ্ছিক)"
+                value={formData.email}
+                onChangeText={(value) => handleInputChange('email', value)}
+                keyboardType="email-address"
+                placeholderTextColor="#999"
+              />
+            </View>
+
+            {/* Phone Number */}
+            <View style={styles.fieldGroup}>
+              <ThemedText style={styles.fieldLabel}>ফোন নম্বর</ThemedText>
+              <TextInput
+                style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
+                placeholder="আপনার ফোন নম্বর লিখুন"
+                value={formData.phone}
+                onChangeText={(value) => handleInputChange('phone', value)}
+                keyboardType="phone-pad"
+                placeholderTextColor="#999"
+              />
+            </View>
+
+            {/* Your Message */}
+            <View style={styles.fieldGroup}>
+              <ThemedText style={styles.fieldLabel}>আপনার বার্তা</ThemedText>
+              <TextInput
+                style={[styles.messageInput, { color: '#11181C', borderColor: tint }]}
+                placeholder="আপনার বার্তা লিখুন"
+                value={formData.message}
+                onChangeText={(value) => handleInputChange('message', value)}
+                multiline
+                numberOfLines={5}
+                placeholderTextColor="#999"
+              />
+            </View>
+
+            {/* Submit Button */}
+            <TouchableOpacity
+              style={[styles.submitButton, { backgroundColor: tint }]}
+              onPress={handleSubmit}
+            >
+              <ThemedText style={styles.submitButtonText}>জমা দিন</ThemedText>
+            </TouchableOpacity>
           </View>
 
-          <View style={styles.infoRow}>
-            <ThemedText style={styles.infoLabel}>Phone:</ThemedText>
-            <ThemedText style={styles.infoValue}>+880 1719-362018</ThemedText>
-          </View>
-
-          <View style={styles.infoRow}>
-            <ThemedText style={styles.infoLabel}>Email:</ThemedText>
-            <ThemedText style={styles.infoValue}>jhotpotpay@gmail.com</ThemedText>
-          </View>
-
-          <View style={[styles.infoRow, { borderBottomWidth: 0 }]}>
-            <ThemedText style={styles.infoLabel}>Address:</ThemedText>
-            <ThemedText style={styles.infoValue}>Deorgach, Amtoli Adorsho Bazar, Chunarughat, Habiganj, Sylhet.</ThemedText>
-          </View>
-        </View> */}
-
-        {/* Get In Touch Section */}
-        <View style={[styles.card, { backgroundColor: bg }]}>
-          <ThemedText style={styles.sectionTitle}>Get In Touch</ThemedText>
-
-          {/* Your Name */}
-          <View style={styles.fieldGroup}>
-            <ThemedText style={styles.fieldLabel}>Your Name</ThemedText>
-            <TextInput
-              style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
-              placeholder="Enter your name"
-              value={formData.name}
-              onChangeText={(value) => handleInputChange('name', value)}
-              placeholderTextColor="#999"
-            />
-          </View>
-
-          {/* Your Email */}
-          <View style={styles.fieldGroup}>
-            <ThemedText style={styles.fieldLabel}>Your Email (optional)</ThemedText>
-            <TextInput
-              style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
-              placeholder="Enter your email (optional)"
-              value={formData.email}
-              onChangeText={(value) => handleInputChange('email', value)}
-              keyboardType="email-address"
-              placeholderTextColor="#999"
-            />
-          </View>
-
-          {/* Phone Number */}
-          <View style={styles.fieldGroup}>
-            <ThemedText style={styles.fieldLabel}>Phone Number</ThemedText>
-            <TextInput
-              style={[styles.fieldInput, { color: '#11181C', borderColor: tint }]}
-              placeholder="Enter your phone number"
-              value={formData.phone}
-              onChangeText={(value) => handleInputChange('phone', value)}
-              keyboardType="phone-pad"
-              placeholderTextColor="#999"
-            />
-          </View>
-
-          {/* Your Message */}
-          <View style={styles.fieldGroup}>
-            <ThemedText style={styles.fieldLabel}>Your Message</ThemedText>
-            <TextInput
-              style={[styles.messageInput, { color: '#11181C', borderColor: tint }]}
-              placeholder="Enter your message"
-              value={formData.message}
-              onChangeText={(value) => handleInputChange('message', value)}
-              multiline
-              numberOfLines={5}
-              placeholderTextColor="#999"
-            />
-          </View>
-
-          {/* Submit Button */}
-          <TouchableOpacity
-            style={[styles.submitButton, { backgroundColor: tint }]}
-            onPress={handleSubmit}
-          >
-            <ThemedText style={styles.submitButtonText}>SUBMIT</ThemedText>
-          </TouchableOpacity>
-        </View>
-
-        <View style={{ height: 30 }} />
-      </ScrollView>
-            </KeyboardAvoidingView>
+          <View style={{ height: 30 }} />
+        </ScrollView>
+      </KeyboardAvoidingView>
     </ThemedView>
   );
 }

@@ -12,6 +12,38 @@ import { useSelector } from 'react-redux';
 import { useGetCreditsQuery, useGetDebitsQuery } from '@/api/balanceApi';
 import { useGetRechargesQuery } from '@/api/rechargeApi';
 
+const getStatusColor = (status: string, type: 'recharge' | 'credit' | 'debit') => {
+  const s = status?.toUpperCase();
+
+  if (type === 'recharge') {
+    switch (s) {
+      case 'SUCCESS':
+        return '#16A34A'; // green
+      case 'PENDING':
+        return '#F59E0B'; // orange
+      case 'FAILED':
+        return '#DC2626'; // red
+      case 'CANCELLED':
+        return '#6B7280'; // gray
+      default:
+        return '#6B7280';
+    }
+  }
+
+  // credit & debit
+  switch (s) {
+    case 'APPROVED':
+      return '#16A34A'; // green
+    case 'PENDING':
+      return '#F59E0B'; // orange
+    case 'REJECTED':
+      return '#DC2626'; // red
+    default:
+      return '#6B7280';
+  }
+};
+
+
 export default function WalletHistory() {
   const [page, setPage] = useState(1);
   const user = useSelector((state: RootState) => state.auth.user);
@@ -54,7 +86,7 @@ export default function WalletHistory() {
   let totalPages = 1;
   let isLoading = false;
   let isFetching = false;
-  let refetchFn = () => {};
+  let refetchFn = () => { };
   let emptyText = '';
   let data: any = null;
 
@@ -115,16 +147,23 @@ export default function WalletHistory() {
   const renderItem = ({ item }: { item: any }) => {
     if (historyType === 'recharge') {
       return (
-        <View style={[styles.card, { backgroundColor: bg }]}> 
+        <View style={[styles.card, { backgroundColor: bg }]}>
           <View style={styles.cardContent}>
             {/* Avatar: Use first letter of network_type */}
-            <View style={[styles.avatar, { backgroundColor: '#E8F4F8' }]}> 
-              <ThemedText style={[styles.avatarText, { color: '#248AEF' }]}> 
+            <View style={[styles.avatar, { backgroundColor: '#E8F4F8' }]}>
+              <ThemedText style={[styles.avatarText, { color: '#248AEF' }]}>
                 {item.network_type?.[0] || 'R'}
               </ThemedText>
             </View>
             <View style={styles.details}>
-              <ThemedText style={styles.title}>{item.network_type} ({item.status})</ThemedText>
+              <ThemedText style={styles.title}>
+                {item.network_type}{' '}
+                <ThemedText
+                  style={{ color: getStatusColor(item.status, 'recharge'), fontWeight: '700' }}
+                >
+                  ({item.status})
+                </ThemedText>
+              </ThemedText>
               <ThemedText style={styles.description}>
                 Phone: {item.phone}{"\n"}Offer: {item.offer?.name || 'N/A'}
               </ThemedText>
@@ -138,15 +177,22 @@ export default function WalletHistory() {
       );
     } else if (historyType === 'credit') {
       return (
-        <View style={[styles.card, { backgroundColor: bg }]}> 
+        <View style={[styles.card, { backgroundColor: bg }]}>
           <View style={styles.cardContent}>
-            <View style={[styles.avatar, { backgroundColor: '#E8F4F8' }]}> 
-              <ThemedText style={[styles.avatarText, { color: '#248AEF' }]}> 
+            <View style={[styles.avatar, { backgroundColor: '#E8F4F8' }]}>
+              <ThemedText style={[styles.avatarText, { color: '#248AEF' }]}>
                 {item.bank_name?.[0] || 'B'}
               </ThemedText>
             </View>
             <View style={styles.details}>
-              <ThemedText style={styles.title}>{item.bank_name} ({item.status})</ThemedText>
+              <ThemedText style={styles.title}>
+                {item.bank_name}{' '}
+                <ThemedText
+                  style={{ color: getStatusColor(item.status, 'credit'), fontWeight: '700' }}
+                >
+                  ({item.status})
+                </ThemedText>
+              </ThemedText>
               <ThemedText style={styles.description}>
                 Account: {item.account_number}{"\n"}Txn: {item.transaction_id}
               </ThemedText>
@@ -157,22 +203,29 @@ export default function WalletHistory() {
             <View style={styles.rightSection}>
               <ThemedText style={[styles.amount, { color: tint }]}>BDT {item.amount}</ThemedText>
               <ThemedText style={styles.dateTime}>{new Date(item.createdAt).toLocaleString()}</ThemedText>
-              
+
             </View>
           </View>
         </View>
       );
     } else {
       return (
-        <View style={[styles.card, { backgroundColor: bg }]}> 
+        <View style={[styles.card, { backgroundColor: bg }]}>
           <View style={styles.cardContent}>
-            <View style={[styles.avatar, { backgroundColor: '#E8F4F8' }]}> 
-              <ThemedText style={[styles.avatarText, { color: '#248AEF' }]}> 
+            <View style={[styles.avatar, { backgroundColor: '#E8F4F8' }]}>
+              <ThemedText style={[styles.avatarText, { color: '#248AEF' }]}>
                 {item.bank_name?.[0] || 'B'}
               </ThemedText>
             </View>
             <View style={styles.details}>
-              <ThemedText style={styles.title}>{item.bank_name} ({item.status})</ThemedText>
+              <ThemedText style={styles.title}>
+                {item.bank_name}{' '}
+                <ThemedText
+                  style={{ color: getStatusColor(item.status, 'debit'), fontWeight: '700' }}
+                >
+                  ({item.status})
+                </ThemedText>
+              </ThemedText>
               <ThemedText style={styles.description}>
                 Account: {item.account_number}{"\n"}Txn: {item.transaction_id}
               </ThemedText>
@@ -300,7 +353,7 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     paddingHorizontal: 16,
-    
+
     paddingTop: 16,
     marginTop: 8,
     paddingBottom: 8,

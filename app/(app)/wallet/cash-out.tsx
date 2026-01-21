@@ -43,6 +43,10 @@ export default function CashOut() {
   const handleBackPress = () => router.back();
 
   const handleSubmit = async () => {
+    if (!selectedOperator || !form.receiver.trim() || !form.amount.trim()) {
+      Alert.alert('ত্রুটি', 'অনুগ্রহ করে সমস্ত ক্ষেত্র পূরণ করুন।');
+      return;
+    }
     try {
       const res = await debitBalance({
         bank_name: selectedOperator.id.toUpperCase(),
@@ -50,16 +54,15 @@ export default function CashOut() {
         amount: form.amount,
       }).unwrap();
       if (res.success) {
-        Alert.alert('Success', res.message || 'Debit Created!');
+        Alert.alert('সফল', res.message || 'ডেবিট অনুরোধ সফল হয়েছে!');
         router.push({ pathname: '/(app)/wallet/history', params: { initialType: 'debit' } });
       }
     } catch (err: any) {
-      // Check for low balance error (statusCode 400)
       if (err?.err?.statusCode === 400 || err?.status === 400) {
-        Alert.alert('Low Balance', 'Please add balance to continue.');
+        Alert.alert('ব্যালেন্স কম', 'চালিয়ে যেতে অনুগ্রহ করে ব্যালেন্স যোগ করুন।');
         router.replace('/(app)/wallet/add-balance');
       } else {
-        Alert.alert('Error', err?.message || 'Could not process cash out');
+        Alert.alert('ত্রুটি', err?.message || 'ক্যাশ আউট প্রক্রিয়া করা যায়নি');
       }
     }
   };
@@ -78,7 +81,7 @@ export default function CashOut() {
   return (
     <ThemedView style={styles.container}>
       <RechargeHeader
-        title="Cash out Request"
+        title="ক্যাশ আউট অনুরোধ"
         showBack
         onBackPress={handleBackPress}
       />
@@ -94,7 +97,7 @@ export default function CashOut() {
           keyboardShouldPersistTaps="handled"
         >
           <View style={[styles.card, { backgroundColor: bg }]}>
-            <ThemedText style={styles.label}>Select Operator</ThemedText>
+            <ThemedText style={styles.label}>অপারেটর নির্বাচন করুন</ThemedText>
             <Pressable style={[styles.dropdown, { borderColor: '#E5E8ED' }]} onPress={toggleOperators}>
               <View style={styles.dropdownLeft}>
                 <Image source={selectedOperator.logo} style={styles.operatorLogo} resizeMode="contain" />
@@ -121,17 +124,17 @@ export default function CashOut() {
 
             <View style={styles.divider} />
 
-            <ThemedText style={styles.label}>Select Receiver Number</ThemedText>
+            <ThemedText style={styles.label}>রিসিভার নম্বর নির্বাচন করুন</ThemedText>
             <RoundedInput
-              placeholder="Enter Receiver Number"
+              placeholder="রিসিভার নম্বর লিখুন"
               value={form.receiver}
               onChangeText={(text) => handleChange('receiver', text)}
               keyboardType="phone-pad"
             />
 
-            <ThemedText style={[styles.label, { marginTop: 10 }]}>Enter Amount</ThemedText>
+            <ThemedText style={[styles.label, { marginTop: 10 }]}>পরিমাণ লিখুন</ThemedText>
             <RoundedInput
-              placeholder="Enter Amount"
+              placeholder="পরিমাণ লিখুন"
               value={form.amount}
               onChangeText={(text) => handleChange('amount', text)}
               keyboardType="numeric"
@@ -140,14 +143,10 @@ export default function CashOut() {
 
           <View style={{ height: 12 }} />
           <View style={styles.bottomAction}>
-            <CustomButton title={isDebiting ? 'Processing...' : 'Submit'} onPress={handleSubmit} disabled={isDebiting} />
+            <CustomButton title={isDebiting ? 'প্রক্রিয়াধীন...' : 'জমা দিন'} onPress={handleSubmit} disabled={isDebiting} />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-
-
-
-
     </ThemedView>
   );
 }
