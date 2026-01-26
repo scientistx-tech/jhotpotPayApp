@@ -1,5 +1,5 @@
 import { baseApi } from "./baseApi";
-interface RechargeOfferResponse {
+export interface RechargeOfferResponse {
   success: boolean;
   message: string;
   data: RechargeOffer[];
@@ -79,12 +79,16 @@ export const rechargeApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getRechargeOffers: builder.query<
       RechargeOfferResponse,
-      { sim_type: string; network_type: string }
+      {
+        sim_type?: string;
+        network_type?: string;
+        amount?: string;
+      }
     >({
-      query: ({ sim_type, network_type }) => ({
+      query: ({ sim_type, network_type, amount }) => ({
         url: `/recharge/recharge-offer`,
         method: "GET",
-        params: { sim_type, network_type },
+        params: { sim_type, network_type, amount: amount || "" },
       }),
     }),
     recharge: builder.mutation<RechargeResponse, RechargeRequest>({

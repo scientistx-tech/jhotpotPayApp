@@ -1,23 +1,38 @@
-import { ActionButton, RechargeHeader, RecipientCard } from '@/components/recharge';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { useThemeColor } from '@/hooks/use-theme-color';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
-import { usePhone } from '../../../context/PhoneContext';
+import {
+  ActionButton,
+  RechargeHeader,
+  RecipientCard,
+} from "@/components/recharge";
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
+import { useThemeColor } from "@/hooks/use-theme-color";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useMemo, useState } from "react";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { usePhone } from "../../../context/PhoneContext";
 
+import {
+  rechargeApi,
+  RechargeOfferResponse,
+  useRechargeMutation,
+} from "@/api/rechargeApi";
+import OfferDetailsModal from "@/components/recharge/offer-details-modal";
+import { z } from "zod";
 
-import { useRechargeMutation } from '@/api/rechargeApi';
-import OfferDetailsModal from '@/components/recharge/offer-details-modal';
-import { z } from 'zod';
-
-import { useCheckAuthQuery } from '@/api/authApi';
-
+import { useCheckAuthQuery } from "@/api/authApi";
+import { store } from "@/store/store";
 
 const sim_type = z.enum(["PRE_PAID", "POST_PAID"]);
 type SimType = z.infer<typeof sim_type>;
-type AmountCategory = 'amount' | 'internet' | 'minute' | 'bundle' | 'call-rate';
+type AmountCategory = "amount" | "internet" | "minute" | "bundle" | "call-rate";
 
 type Offer = {
   id: string;
@@ -26,22 +41,19 @@ type Offer = {
   isNew?: boolean;
 };
 
-const AMOUNT_OFFERS: Offer[] = [
-
-];
+const AMOUNT_OFFERS: Offer[] = [];
 
 const CATEGORIES: { id: AmountCategory; label: string }[] = [
-  { id: 'amount', label: 'টাকা' },
-  { id: 'internet', label: 'ইন্টারনেট' },
-  { id: 'minute', label: 'মিনিট' },
-  { id: 'bundle', label: 'বান্ডেল' },
-  { id: 'call-rate', label: 'কল রেট' },
+  { id: "amount", label: "টাকা" },
+  { id: "internet", label: "ইন্টারনেট" },
+  { id: "minute", label: "মিনিট" },
+  { id: "bundle", label: "বান্ডেল" },
+  { id: "call-rate", label: "কল রেট" },
 ];
-
 
 export default function RechargeAmount() {
   const router = useRouter();
-  const tint = useThemeColor({}, 'tint');
+  const tint = useThemeColor({}, "tint");
 
   const { data, refetch } = useCheckAuthQuery();
   const userData = (data as any)?.data || {};
@@ -54,53 +66,101 @@ export default function RechargeAmount() {
   }>();
   const { phone: phoneContext } = usePhone();
   const phone = params?.phone || phoneContext;
-  const initialSimType = params?.sim_type || 'PRE_PAID';
-  const initialNetworkType = params?.network_type || 'GRAMEENPHONE';
+  const initialSimType = params?.sim_type || "PRE_PAID";
+  const initialNetworkType = params?.network_type || "GRAMEENPHONE";
   const [simType, setSimType] = useState<SimType>(initialSimType);
-  const [activeCategory, setActiveCategory] = useState<AmountCategory>('amount');
+  const [activeCategory, setActiveCategory] =
+    useState<AmountCategory>("amount");
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
-  const [customAmount, setCustomAmount] = useState('');
+  const [customAmount, setCustomAmount] = useState("");
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [recharge, { isLoading: isRechargeLoading, isSuccess: isRechargeSuccess, isError: isRechargeError, error: rechargeError }] = useRechargeMutation();
+  const [offer, setOffer] = useState<RechargeOfferResponse | undefined>();
+
+  const [
+    recharge,
+    {
+      isLoading: isRechargeLoading,
+      isSuccess: isRechargeSuccess,
+      isError: isRechargeError,
+      error: rechargeError,
+    },
+  ] = useRechargeMutation();
   const [rechargeResult, setRechargeResult] = useState<any>(null);
+  const [isLoading, setIsloading] = useState(false);
 
   const networkType = initialNetworkType;
 
   const finalAmount = useMemo(() => customAmount || null, [customAmount]);
-  const finalPrice = useMemo(() => customAmount ? `BDT: ${customAmount}` : null, [customAmount]);
+  const finalPrice = useMemo(
+    () => (customAmount ? `BDT: ${customAmount}` : null),
+    [customAmount],
+  );
+  console.log(offer);
 
   const handleCategoryPress = (category: AmountCategory) => {
     setActiveCategory(category);
-    const navParams = { phone, network_type: params?.network_type, sim_type: params?.sim_type };
-    if (category === 'internet') {
-      router.replace({ pathname: '/(app)/recharge/internet', params: navParams });
-    } else if (category === 'call-rate') {
-      router.replace({ pathname: '/(app)/recharge/call-rate', params: navParams });
-    } else if (category === 'minute') {
-      router.replace({ pathname: '/(app)/recharge/minute', params: navParams });
-    } else if (category === 'bundle') {
-      router.replace({ pathname: '/(app)/recharge/bundle', params: navParams });
+    const navParams = {
+      phone,
+      network_type: params?.network_type,
+      sim_type: params?.sim_type,
+    };
+    if (category === "internet") {
+      router.replace({
+        pathname: "/(app)/recharge/internet",
+        params: navParams,
+      });
+    } else if (category === "call-rate") {
+      router.replace({
+        pathname: "/(app)/recharge/call-rate",
+        params: navParams,
+      });
+    } else if (category === "minute") {
+      router.replace({ pathname: "/(app)/recharge/minute", params: navParams });
+    } else if (category === "bundle") {
+      router.replace({ pathname: "/(app)/recharge/bundle", params: navParams });
     }
   };
 
+  const handleProceedPress = async () => {
+    if (!canProceed) return;
 
-  const handleProceedPress = () => {
+    setIsloading(true);
 
-    if (canProceed) {
-      setShowDetailsModal(true);
+    try {
+      // Always fetch based on latest simType, networkType, and amount
+      const data = await store
+        .dispatch(
+          rechargeApi.endpoints.getRechargeOffers.initiate({
+            sim_type: simType,
+            network_type: networkType,
+            amount: customAmount ? Number(customAmount) : undefined,
+          }),
+        )
+        .unwrap();
+
+      setOffer(data); // Update offer state
+      setShowDetailsModal(true); // Show modal with latest offer
+    } catch (error: any) {
+      alert(
+        error?.data?.message ||
+          "Something went wrong while fetching offer details.",
+      );
+    } finally {
+      setIsloading(false);
     }
   };
 
   const handleRecharge = async () => {
     if (!canProceed) return;
     if (!phone) {
-      alert('Phone number is required.');
+      alert("Phone number is required.");
       return;
     }
     let payload: any = {
       sim_type: simType,
       network_type: networkType,
       phone,
+      ...(offer?.data?.[0]?.id && { offerId: offer.data[0].id }),
     };
 
     if (customAmount) {
@@ -114,13 +174,13 @@ export default function RechargeAmount() {
       if (result?.success) {
         await refetch();
         setShowDetailsModal(false);
-        alert(result?.message || 'Recharge successful!');
-        router.replace('/(app)/wallet/history');
+        alert(result?.message || "Recharge successful!");
+        router.replace("/(app)/wallet/history");
       }
     } catch (e: any) {
       // Error handled by isRechargeError
-      console.log(e)
-      alert(e?.data?.message || 'Recharge failed. Please try again.');
+      console.log(e);
+      alert(e?.data?.message || "Recharge failed. Please try again.");
     }
   };
 
@@ -128,7 +188,10 @@ export default function RechargeAmount() {
     router.back();
   };
 
-  const canProceed = useMemo(() => finalAmount !== null && finalAmount !== '', [finalAmount]);
+  const canProceed = useMemo(
+    () => finalAmount !== null && finalAmount !== "",
+    [finalAmount],
+  );
 
   return (
     <ThemedView style={styles.container}>
@@ -140,15 +203,12 @@ export default function RechargeAmount() {
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={0}
       >
         <ScrollView
           style={{ flex: 1 }}
-          contentContainerStyle={[
-            styles.screen,
-            { flexGrow: 1 }
-          ]}
+          contentContainerStyle={[styles.screen, { flexGrow: 1 }]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
@@ -157,27 +217,42 @@ export default function RechargeAmount() {
 
             {/* TypeSelector replaced with simType selector */}
             <View style={{ marginVertical: 12, marginHorizontal: 16 }}>
-              <View style={{ flexDirection: 'row', gap: 20 }}>
+              <View style={{ flexDirection: "row", gap: 20 }}>
                 {["PRE_PAID", "POST_PAID"].map((type) => (
                   <TouchableOpacity
                     key={type}
-                    style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 8,
+                    }}
                     onPress={() => setSimType(type as SimType)}
                   >
-                    <View style={{
-                      width: 20,
-                      height: 20,
-                      borderRadius: 10,
-                      borderWidth: 2,
-                      borderColor: tint,
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                    }}>
+                    <View
+                      style={{
+                        width: 20,
+                        height: 20,
+                        borderRadius: 10,
+                        borderWidth: 2,
+                        borderColor: tint,
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
                       {simType === type && (
-                        <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: tint }} />
+                        <View
+                          style={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: 4,
+                            backgroundColor: tint,
+                          }}
+                        />
                       )}
                     </View>
-                    <ThemedText style={{ fontSize: 14, fontWeight: '500' }}>{type === 'PRE_PAID' ? 'Prepaid' : 'Postpaid'}</ThemedText>
+                    <ThemedText style={{ fontSize: 14, fontWeight: "500" }}>
+                      {type === "PRE_PAID" ? "Prepaid" : "Postpaid"}
+                    </ThemedText>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -192,34 +267,52 @@ export default function RechargeAmount() {
                     onPress={() => handleCategoryPress(cat.id)}
                     style={styles.categoryBtn}
                   >
-                    <ThemedText style={[styles.categoryLabel, isActive && styles.categoryLabelActive]}>
+                    <ThemedText
+                      style={[
+                        styles.categoryLabel,
+                        isActive && styles.categoryLabelActive,
+                      ]}
+                    >
                       {cat.label}
                     </ThemedText>
-                    {isActive && <View style={[styles.activeBar, { backgroundColor: tint }]} />}
+                    {isActive && (
+                      <View
+                        style={[styles.activeBar, { backgroundColor: tint }]}
+                      />
+                    )}
                   </TouchableOpacity>
                 );
               })}
             </View>
           </View>
 
-          <View style={{ flex: 1, justifyContent: 'space-between', gap: 5 }}>
-            <View >
+          <View style={{ flex: 1, justifyContent: "space-between", gap: 5 }}>
+            <View>
               {/* Amount Tab */}
-              {activeCategory === 'amount' && (
+              {activeCategory === "amount" && (
                 <View style={styles.amountSelectionContainer}>
                   <View style={styles.amountButtonsColumn}>
                     {AMOUNT_OFFERS.map((offer) => {
-                      const isSelected = selectedOfferId === offer.id && !customAmount;
+                      const isSelected =
+                        selectedOfferId === offer.id && !customAmount;
                       return (
                         <TouchableOpacity
                           key={offer.id}
-                          style={[styles.amountButton, isSelected && styles.amountButtonActive]}
+                          style={[
+                            styles.amountButton,
+                            isSelected && styles.amountButtonActive,
+                          ]}
                           onPress={() => {
                             setSelectedOfferId(offer.id);
-                            setCustomAmount('');
+                            setCustomAmount("");
                           }}
                         >
-                          <ThemedText style={[styles.amountButtonText, isSelected && styles.amountButtonTextActive]}>
+                          <ThemedText
+                            style={[
+                              styles.amountButtonText,
+                              isSelected && styles.amountButtonTextActive,
+                            ]}
+                          >
                             {offer.amount}
                           </ThemedText>
                         </TouchableOpacity>
@@ -233,7 +326,7 @@ export default function RechargeAmount() {
                       value={customAmount}
                       onChangeText={(text) => {
                         setCustomAmount(text);
-                        if (text !== '') setSelectedOfferId(null);
+                        if (text !== "") setSelectedOfferId(null);
                       }}
                       keyboardType="numeric"
                       placeholderTextColor="#248AEF"
@@ -245,22 +338,19 @@ export default function RechargeAmount() {
 
               {/*  */}
               <View style={styles.availableBalanceContainer}>
-                <ThemedText style={styles.availableBalanceText}>উপলব্ধ ব্যালেন্স: ৳{userData.balance || '0'} টাকা</ThemedText>
+                <ThemedText style={styles.availableBalanceText}>
+                  উপলব্ধ ব্যালেন্স: ৳{userData.balance || "0"} টাকা
+                </ThemedText>
               </View>
-
             </View>
-
           </View>
         </ScrollView>
-
-
-
       </KeyboardAvoidingView>
 
       {/* <View style={styles.spacer} /> */}
       <View style={{ marginTop: 90 }}>
-        {
-          !showDetailsModal && <View style={styles.bottomSection}>
+        {!showDetailsModal && (
+          <View style={styles.bottomSection}>
             <View style={{ flex: 1 }}>
               <ActionButton
                 label="Back"
@@ -269,25 +359,38 @@ export default function RechargeAmount() {
               />
             </View>
             <View style={{ flex: 1 }}>
-              <ActionButton label="Next" onPress={handleProceedPress} disabled={!canProceed} />
+              <ActionButton
+                loading={isLoading}
+                label="Next"
+                onPress={handleProceedPress}
+                disabled={!canProceed}
+              />
             </View>
           </View>
-        }
+        )}
       </View>
 
       <OfferDetailsModal
         visible={showDetailsModal}
         onClose={() => setShowDetailsModal(false)}
         recipientName="MD. Mystogan Islam"
-        recipientPhone={phone || ''}
-        offerTitle={customAmount ? `${customAmount} Amount` : 'N/A'}
-        validity={''}
+        recipientPhone={phone || ""}
+        offerTitle={
+          offer && offer?.data?.length > 0 ? `${offer.data[0].name}` : ""
+        }
+        validity={
+          offer && offer?.data?.length > 0 ? `${offer.data[0].validity}` : ""
+        }
         cashback={undefined}
-        price={finalPrice ?? 'BDT: --'}
+        price={finalPrice ?? "BDT: --"}
         availableBalance="20,000 BDT"
         onProceed={handleRecharge}
         loading={isRechargeLoading}
-        error={isRechargeError ? (rechargeError?.data?.message || 'Recharge failed') : undefined}
+        error={
+          isRechargeError
+            ? rechargeError?.data?.message || "Recharge failed"
+            : undefined
+        }
         headerTitle="Recharge Details"
       />
     </ThemedView>
@@ -297,7 +400,7 @@ export default function RechargeAmount() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f7fb',
+    backgroundColor: "#f5f7fb",
     marginBottom: 20,
   },
   content: {
@@ -308,25 +411,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 16,
     marginTop: 20,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.06,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 3 },
     elevation: 4,
   },
   categoryRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingHorizontal: 16,
     marginTop: 12,
     borderTopWidth: 1,
-    borderColor: '#e6e6e6',
-    justifyContent: 'space-between',
+    borderColor: "#e6e6e6",
+    justifyContent: "space-between",
   },
   categoryBtn: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 12,
     flex: 1,
   },
@@ -336,11 +439,11 @@ const styles = StyleSheet.create({
   },
   categoryLabelActive: {
     opacity: 1,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   activeBar: {
     height: 3,
-    width: '80%',
+    width: "80%",
     borderRadius: 12,
     marginTop: 8,
   },
@@ -349,55 +452,55 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
   },
   amountButtonsColumn: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 16,
   },
   amountButton: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 12,
     paddingVertical: 14,
     paddingHorizontal: 24,
     borderWidth: 1,
-    borderColor: '#E3E7ED',
-    alignItems: 'center',
+    borderColor: "#E3E7ED",
+    alignItems: "center",
     flex: 1,
     marginHorizontal: 4,
   },
   amountButtonActive: {
-    borderColor: '#248AEF',
+    borderColor: "#248AEF",
   },
   amountButtonText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#11181C',
+    fontWeight: "600",
+    color: "#11181C",
   },
   amountButtonTextActive: {
-    color: '#248AEF',
+    color: "#248AEF",
   },
   typeAmountSection: {
     marginTop: 12,
     marginBottom: 8,
   },
   customAmountInput: {
-    backgroundColor: '#F8FAFD',
+    backgroundColor: "#F8FAFD",
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E3E7ED',
+    borderColor: "#E3E7ED",
     paddingVertical: 12,
     paddingHorizontal: 16,
     fontSize: 16,
-    fontWeight: '600',
-    color: '#11181C',
+    fontWeight: "600",
+    color: "#11181C",
   },
   availableBalanceContainer: {
     marginTop: 16,
-    alignItems: 'center',
+    alignItems: "center",
   },
   availableBalanceText: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#248AEF',
+    fontWeight: "600",
+    color: "#248AEF",
   },
   spacer: {
     height: 1050,
@@ -406,13 +509,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     paddingBottom: 35,
-    display: 'flex',
-    flexDirection: 'row',
+    display: "flex",
+    flexDirection: "row",
     gap: 12,
   },
   screen: {
-    paddingHorizontal: 20
-  }
+    paddingHorizontal: 20,
+  },
 });
-
-

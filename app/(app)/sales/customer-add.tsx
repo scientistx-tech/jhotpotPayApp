@@ -26,7 +26,7 @@ export default function ProductAdd() {
     const handleBackPress = () => router.back();
 
     const handleSubmit = async () => {
-        if (!name || !email || !phone || !address) {
+        if (!name || !phone || !address) {
             Alert.alert('Validation', 'Please fill all required fields.');
             return;
         }
@@ -82,7 +82,7 @@ export default function ProductAdd() {
                         onChangeText={setName}
                     />
                     <RoundedInput
-                        label="ইমেইল *"
+                        label="ইমেইল "
                         placeholder="ইমেইল লিখুন"
                         value={email}
                         onChangeText={setEmail}

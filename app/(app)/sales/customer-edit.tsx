@@ -5,8 +5,7 @@ import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const CustomerEdit = () => {
     const router = useRouter();
@@ -40,7 +39,7 @@ const CustomerEdit = () => {
     const handleBackPress = () => router.back();
 
     const handleSubmit = async () => {
-        if (!name || !phone || !address || !email) {
+        if (!name || !phone || !address) {
             Alert.alert('Validation', 'সব প্রয়োজনীয় তথ্য দিন।');
             return;
         }
