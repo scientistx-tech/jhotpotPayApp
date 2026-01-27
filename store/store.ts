@@ -12,6 +12,7 @@ import rechargeReducer from "./slices/rechargeSlice";
 import saleReducer from "./slices/saleSlice";
 import contactReducer from "./slices/contactSlice";
 import bannerReducer from "./slices/bannerSlice";
+import payBillReducer from "./slices/payBillSlice";
 
 
 export const store = configureStore({
@@ -25,6 +26,7 @@ export const store = configureStore({
     package: packageReducer,
     contact: contactReducer,
     banner: bannerReducer,
+    payBill: payBillReducer,
     [baseApi.reducerPath]: baseApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>

@@ -1,242 +1,12 @@
+import { useGetBillCategoriesQuery, useGetBillersQuery } from '@/api/payBillApi';
 import RechargeHeader from '@/components/recharge/recharge-header';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
-import { ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
-
-type BillCategory = {
-  id: string;
-  label: string;
-  icon: string;
-  iconType: 'ionicons' | 'material' | 'material-community';
-};
-
-const BILL_CATEGORIES: BillCategory[] = [
-  { id: 'electricity', label: 'বিদ্যুৎ', icon: 'flash', iconType: 'ionicons' },
-  { id: 'gas', label: 'গ্যাস', icon: 'gas-cylinder', iconType: 'material-community' },
-  { id: 'tv', label: 'টিভি', icon: 'tv', iconType: 'ionicons' },
-
-];
-
-type BillInstitution = {
-  id: string;
-  name: string;
-  nameEn: string;
-  type: string;
-  categoryId: string;
-  meterId?: string;
-  icon: string;
-};
-
-const RECENT_BILLS: BillInstitution[] = [
-  // Electricity
-  {
-    id: '1',
-    name: 'বিদ্যুৎ',
-    nameEn: 'Palli Bidyut (Prepaid)',
-    type: 'বিদ্যুৎ',
-    categoryId: 'electricity',
-    meterId: '40510477344',
-    icon: 'flash',
-  },
-  {
-    id: '2',
-    name: 'বিদ্যুৎ',
-    nameEn: 'Palli Bidyut (Postpaid)',
-    type: 'বিদ্যুৎ',
-    categoryId: 'electricity',
-    icon: 'flash',
-  },
-  {
-    id: '3',
-    name: 'বিদ্যুৎ',
-    nameEn: 'DESCO (Prepaid)',
-    type: 'বিদ্যুৎ',
-    categoryId: 'electricity',
-    icon: 'flash',
-  },
-  {
-    id: '4',
-    name: 'বিদ্যুৎ',
-    nameEn: 'DESCO (Postpaid)',
-    type: 'বিদ্যুৎ',
-    categoryId: 'electricity',
-    icon: 'flash',
-  },
-  {
-    id: '5',
-    name: 'বিদ্যুৎ',
-    nameEn: 'DPDC (Prepaid)',
-    type: 'বিদ্যুৎ',
-    categoryId: 'electricity',
-    icon: 'flash',
-  },
-  {
-    id: '6',
-    name: 'বিদ্যুৎ',
-    nameEn: 'DPDC (Postpaid)',
-    type: 'বিদ্যুৎ',
-    categoryId: 'electricity',
-    icon: 'flash',
-  },
-  {
-    id: '68',
-    name: 'বিদ্যুৎ',
-    nameEn: 'DPDC (Miscellaneous)',
-    type: 'বিদ্যুৎ',
-    categoryId: 'electricity',
-    icon: 'flash',
-  },
-  {
-    id: '8',
-    name: 'বিদ্যুৎ',
-    nameEn: 'NESCO (Prepaid)',
-    type: 'বিদ্যুৎ',
-    categoryId: 'electricity',
-    icon: 'flash',
-  },
-   {
-    id: '9',
-    name: 'বিদ্যুৎ',
-    nameEn: 'NESCO (Postpaid)',
-    type: 'বিদ্যুৎ',
-    categoryId: 'electricity',
-    icon: 'flash',
-  },
-   {
-    id: '10',
-    name: 'বিদ্যুৎ',
-    nameEn: 'BPDB (Postpaid)',
-    type: 'বিদ্যুৎ',
-    categoryId: 'electricity',
-    icon: 'flash',
-  },
-   {
-    id: '11',
-    name: 'বিদ্যুৎ',
-    nameEn: 'BPDB (Prepaid)',
-    type: 'বিদ্যুৎ',
-    categoryId: 'electricity',
-    icon: 'flash',
-  },
-   {
-    id: '12',
-    name: 'বিদ্যুৎ',
-    nameEn: 'BPDB (Prepaid)',
-    type: 'বিদ্যুৎ',
-    categoryId: 'electricity',
-    icon: 'flash',
-  },
-   {
-    id: '132',
-    name: 'বিদ্যুৎ',
-    nameEn: 'BPDB (Miscellaneous)',
-    type: 'বিদ্যুৎ',
-    categoryId: 'electricity',
-    icon: 'flash',
-  },
-   {
-    id: '13',
-    name: 'বিদ্যুৎ',
-    nameEn: 'Westzone (Prepaid)',
-    type: 'বিদ্যুৎ',
-    categoryId: 'electricity',
-    icon: 'flash',
-  },
-   {
-    id: '888',
-    name: 'বিদ্যুৎ',
-    nameEn: 'Westzone (Postpaid)',
-    type: 'বিদ্যুৎ',
-    categoryId: 'electricity',
-    icon: 'flash',
-  },
-  // TV
-  {
-    id: '7',
-    name: 'টিভি',
-    nameEn: 'AKASH Digital TV',
-    type: 'টিভি',
-    categoryId: 'tv',
-    icon: 'tv',
-  },
- //gas
- {
-    id: '14',
-    name: 'গ্যাস',
-    nameEn: 'Titas Gas Postpaid(Non-metered)',
-    type: 'গ্যাস',
-    categoryId: 'gas',
-    icon: 'gas-cylinder',
- },
- {
-    id: '15',
-    name: 'গ্যাস',
-    nameEn: 'Titas Gas Postpaid(Metered)',
-    type: 'গ্যাস',
-    categoryId: 'gas',
-    icon: 'gas-cylinder',
- },
- {
-    id: '16',
-    name: 'গ্যাস',
-    nameEn: 'Karnaphuli Gas',
-    type: 'গ্যাস',
-    categoryId: 'gas',
-    icon: 'gas-cylinder',
- },
- {
-    id: '17',
-    name: 'গ্যাস',
-    nameEn: 'Pashchimanchal Gas',
-    type: 'গ্যাস',
-    categoryId: 'gas',
-    icon: 'gas-cylinder',
- },
- {
-    id: '18',
-    name: 'গ্যাস',
-    nameEn: 'Jalalabad Gas',
-    type: 'গ্যাস',
-    categoryId: 'gas',
-    icon: 'gas-cylinder',
- },
- {
-    id: '19',
-    name: 'গ্যাস',
-    nameEn: 'Bakhrabad Gas',
-    type: 'গ্যাস',
-    categoryId: 'gas',
-    icon: 'gas-cylinder',
- },
- {
-    id: '8888',
-    name: 'গ্যাস',
-    nameEn: 'Sundarban Gas',
-    type: 'গ্যাস',
-    categoryId: 'gas',
-    icon: 'gas-cylinder',
- },
- {
-    id: '20',
-    name: 'গ্যাস',
-    nameEn: 'Orange Energy Gas Ltd(Metered)',
-    type: 'গ্যাস',
-    categoryId: 'gas',
-    icon: 'gas-cylinder',
- },
- {
-    id: '21',
-    name: 'গ্যাস',
-    nameEn: 'Universal Energy Gas Ltd',
-    type: 'গ্যাস',
-    categoryId: 'gas',
-    icon: 'gas-cylinder',
- },
-];
+import { useEffect, useMemo, useState } from 'react';
+import { Image, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function PayBill() {
   const router = useRouter();
@@ -245,34 +15,91 @@ export default function PayBill() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
+  const { data: categoryData, isLoading: isCategoryLoading } = useGetBillCategoriesQuery();
+  const categories = categoryData?.data ?? [];
+
+  useEffect(() => {
+    if (!selectedCategory && categories.length > 0) {
+      setSelectedCategory(categories[0].id);
+    }
+  }, [categories, selectedCategory]);
+
+  const { data: billerData, isLoading: isBillerLoading } = useGetBillersQuery(
+    { categoryId: selectedCategory || '' },
+    { skip: !selectedCategory }
+  );
+  const billers = billerData?.data ?? [];
+
+  const categoryTitleMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    categories.forEach((cat) => {
+      map[cat.id] = cat.title;
+    });
+    return map;
+  }, [categories]);
+
   const handleBackPress = () => router.back();
 
   // Filter bills by selected category and search query
-  const filteredBills = RECENT_BILLS.filter(bill => {
-    const matchesCategory = selectedCategory
-      ? bill.categoryId === selectedCategory
-      : bill.categoryId === 'electricity'; // Default to electricity
-    
+  const filteredBills = billers.filter((bill) => {
     const matchesSearch = searchQuery
-      ? bill.nameEn.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        bill.name.includes(searchQuery) ||
-        bill.type.includes(searchQuery)
+      ? bill.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        categoryTitleMap[bill.categoryId]?.toLowerCase().includes(searchQuery.toLowerCase())
       : true;
-    
-    return matchesCategory && matchesSearch;
+
+    return matchesSearch;
   });
 
-  const renderIcon = (category: BillCategory, isSelected: boolean = false) => {
+  const renderIcon = (iconUri: string, categoryTitle: string, isSelected: boolean = false) => {
+    // SVG files won't render with Image component in React Native
+    const isSvg = iconUri.toLowerCase().endsWith('.svg');
     const iconColor = isSelected ? '#fff' : tint;
-    const iconProps = { size: 28, color: iconColor };
-    
-    if (category.iconType === 'material') {
-      return <MaterialIcons name={category.icon as any} {...iconProps} />;
-    } else if (category.iconType === 'material-community') {
-      return <MaterialCommunityIcons name={category.icon as any} {...iconProps} />;
-    } else {
-      return <Ionicons name={category.icon as any} {...iconProps} />;
+
+    if (isSvg) {
+      // Use fallback icons for SVG files
+      let iconName: any = 'document-outline';
+      if (categoryTitle.includes('বিদ্যুৎ')) iconName = 'flash';
+      else if (categoryTitle.includes('টিভি')) iconName = 'tv';
+      else if (categoryTitle.includes('water') || categoryTitle.includes('পানি')) iconName = 'water';
+      else if (categoryTitle.includes('গ্যাস')) iconName = 'flame';
+
+      return <Ionicons name={iconName} size={28} color={iconColor} />;
     }
+
+    return (
+      <Image
+        source={{ uri: iconUri }}
+        style={{ width: 28, height: 28 }}
+        resizeMode="contain"
+      />
+    );
+  };
+
+  const renderBillerIcon = (iconUri: string, billerName: string) => {
+    const isSvg = iconUri.toLowerCase().endsWith('.svg');
+
+    if (isSvg) {
+      // Use fallback icons for SVG files
+      let iconName: any = 'business-outline';
+      if (billerName.toLowerCase().includes('nesco') || billerName.toLowerCase().includes('desco') || 
+          billerName.toLowerCase().includes('dpdc') || billerName.toLowerCase().includes('palli')) {
+        iconName = 'flash';
+      } else if (billerName.toLowerCase().includes('akash') || billerName.toLowerCase().includes('tv')) {
+        iconName = 'tv';
+      } else if (billerName.toLowerCase().includes('gas') || billerName.toLowerCase().includes('titas')) {
+        iconName = 'flame';
+      }
+
+      return <Ionicons name={iconName} size={26} color={tint} />;
+    }
+
+    return (
+      <Image
+        source={{ uri: iconUri }}
+        style={{ width: 26, height: 26 }}
+        resizeMode="contain"
+      />
+    );
   };
 
   return (
@@ -341,8 +168,14 @@ export default function PayBill() {
           <ThemedText style={styles.sectionTitle}>প্রতিষ্ঠানের ধরন</ThemedText>
           
           <View style={styles.categoriesGrid}>
-            {BILL_CATEGORIES.map((category) => {
-              const isSelected = selectedCategory === category.id || (selectedCategory === null && category.id === 'electricity');
+            {isCategoryLoading && (
+              <ThemedText style={styles.sectionLabel}>লোড হচ্ছে...</ThemedText>
+            )}
+            {!isCategoryLoading && categories.length === 0 && (
+              <ThemedText style={styles.sectionLabel}>কোনো ক্যাটাগরি পাওয়া যায়নি</ThemedText>
+            )}
+            {!isCategoryLoading && categories.map((category) => {
+              const isSelected = selectedCategory === category.id;
               return (
                 <TouchableOpacity
                   key={category.id}
@@ -356,13 +189,13 @@ export default function PayBill() {
                     styles.categoryIconContainer,
                     { backgroundColor: isSelected ? tint : '#FFF0F5' }
                   ]}>
-                    {renderIcon(category, isSelected)}
+                    {renderIcon(category.icon, category.title, isSelected)}
                   </View>
                   <ThemedText style={[
                     styles.categoryLabel,
                     isSelected && styles.categoryLabelSelected
                   ]}>
-                    {category.label}
+                    {category.title}
                   </ThemedText>
                 </TouchableOpacity>
               );
@@ -371,35 +204,39 @@ export default function PayBill() {
         </View>
 
         {/* Filtered Bills List */}
-        {filteredBills.length > 0 && (
-          <View style={styles.recentBillsSection}>
-            <ThemedText style={styles.sectionTitle}>সব প্রতিষ্ঠান</ThemedText>
-            {filteredBills.map((bill) => (
-              <TouchableOpacity
-                key={bill.id}
-                style={[styles.recentBillCard, { backgroundColor: '#fff' }]}
-                onPress={() => router.push({
-                  pathname: '/(app)/wallet/bill-payment',
-                  params: {
-                    institutionName: bill.nameEn,
-                    institutionType: bill.type,
-                    categoryId: bill.categoryId,
-                  }
-                })}
-              >
-                <View style={[styles.recentBillLogo, { backgroundColor: `${tint}15` }]}>
-                  <Ionicons name={bill.icon as any} size={20} color={tint} />
-                </View>
-                <View style={styles.recentBillInfo}>
-                  <ThemedText type="defaultSemiBold" style={styles.recentBillName}>
-                    {bill.nameEn}
-                  </ThemedText>
-                  <ThemedText style={styles.recentBillType}>{bill.type}</ThemedText>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
+        <View style={styles.recentBillsSection}>
+          <ThemedText style={styles.sectionTitle}>সব প্রতিষ্ঠান</ThemedText>
+          {isBillerLoading && (
+            <ThemedText style={styles.sectionLabel}>লোড হচ্ছে...</ThemedText>
+          )}
+          {!isBillerLoading && filteredBills.length === 0 && (
+            <ThemedText style={styles.sectionLabel}>কোনো প্রতিষ্ঠান পাওয়া যায়নি</ThemedText>
+          )}
+          {!isBillerLoading && filteredBills.map((bill) => (
+            <TouchableOpacity
+              key={bill.id}
+              style={[styles.recentBillCard, { backgroundColor: '#fff' }]}
+              onPress={() => router.push({
+                pathname: '/(app)/wallet/bill-payment',
+                params: {
+                  institutionName: bill.name,
+                  institutionType: categoryTitleMap[bill.categoryId] || 'বিল',
+                  categoryId: bill.categoryId,
+                }
+              })}
+            >
+              <View style={[styles.recentBillLogo, { backgroundColor: `${tint}15` }]}>
+                {renderBillerIcon(bill.icon, bill.name)}
+              </View>
+              <View style={styles.recentBillInfo}>
+                <ThemedText type="defaultSemiBold" style={styles.recentBillName}>
+                  {bill.name}
+                </ThemedText>
+                <ThemedText style={styles.recentBillType}>{categoryTitleMap[bill.categoryId] || ''}</ThemedText>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
       </ScrollView>
     </ThemedView>
   );
