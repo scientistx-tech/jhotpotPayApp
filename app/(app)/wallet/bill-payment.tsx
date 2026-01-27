@@ -1,3 +1,4 @@
+import { usePayBillMutation } from '@/api/payBillApi';
 import RechargeHeader from '@/components/recharge/recharge-header';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -5,7 +6,8 @@ import { useThemeColor } from '@/hooks/use-theme-color';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 
 export default function BillPayment() {
   const router = useRouter();
@@ -17,30 +19,39 @@ export default function BillPayment() {
     institutionName?: string;
     institutionType?: string;
     categoryId?: string;
+    billerId?: string;
   }>();
 
   const [accountNumber, setAccountNumber] = useState('');
   const [billId, setBillId] = useState('');
   const [amount, setAmount] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [subscriptionId, setSubscriptionId] = useState('');
+
+  const [payBill, { isLoading }] = usePayBillMutation();
+
+  // Determine bill type from institutionType
+  const isElectricityBill = params.institutionType?.includes('বিদ্যুৎ') || params.institutionType?.toLowerCase().includes('electric');
+  const isTvBill = params.institutionType?.includes('টিভি') || params.institutionType?.toLowerCase().includes('tv');
 
   const handleBackPress = () => router.back();
 
-  const handleProceed = () => {
-    // Validate inputs
-    if (!accountNumber.trim()) {
-      Alert.alert('ত্রুটি', 'দয়া করে মিটার/একাউন্ট নম্বর লিখুন');
+  const handleProceed = async () => {
+    // Validate required fields
+    if (!params.billerId) {
+      Alert.alert('ত্রুটি', 'বিলার আইডি পাওয়া যায়নি');
       return;
     }
-    
+
     if (!amount.trim() || isNaN(Number(amount)) || Number(amount) <= 0) {
       Alert.alert('ত্রুটি', 'দয়া করে সঠিক পরিমাণ লিখুন');
       return;
     }
 
-    // Process payment or show confirmation
+    // Show confirmation dialog
     Alert.alert(
       'পেমেন্ট নিশ্চিত করুন',
-      `প্রতিষ্ঠান: ${params.institutionName}\nমিটার/একাউন্ট: ${accountNumber}\n${billId ? `বিল আইডি: ${billId}\n` : ''}পরিমাণ: ৳${amount}`,
+      `প্রতিষ্ঠান: ${params.institutionName}\n${accountNumber ? `মিটার/একাউন্ট: ${accountNumber}\n` : ''}${subscriptionId ? `সাবস্ক্রিপশন আইডি: ${subscriptionId}\n` : ''}${billId ? `বিল আইডি: ${billId}\n` : ''}${phoneNumber ? `ফোন: ${phoneNumber}\n` : ''}পরিমাণ: ৳${amount}`,
       [
         {
           text: 'বাতিল',
@@ -48,10 +59,33 @@ export default function BillPayment() {
         },
         {
           text: 'পে করুন',
-          onPress: () => {
-            // Handle payment logic here
-            Alert.alert('সফল', 'বিল পেমেন্ট সফল হয়েছে');
-            router.back();
+          onPress: async () => {
+            try {
+              const response = await payBill({
+                billerId: params.billerId!,
+                meter_no: accountNumber || '',
+                contact_no: phoneNumber || '',
+                sms_account_no: billId || '',
+                subscription_id: subscriptionId || '',
+                amount: Number(amount),
+              }).unwrap();
+
+              Alert.alert(
+                'সফল',
+                response.message || 'বিল পেমেন্ট সফল হয়েছে',
+                [
+                  {
+                    text: 'ঠিক আছে',
+                    onPress: () => router.push('/(app)/wallet/bill-details'),
+                  },
+                ]
+              );
+            } catch (error: any) {
+              Alert.alert(
+                'ত্রুটি',
+                error?.data?.message || 'বিল পেমেন্ট ব্যর্থ হয়েছে। পুনরায় চেষ্টা করুন।'
+              );
+            }
           },
         },
       ]
@@ -66,7 +100,12 @@ export default function BillPayment() {
         onBackPress={handleBackPress}
       />
 
-      <ScrollView
+      <KeyboardAvoidingView
+                style={{ flex: 1 }}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                keyboardVerticalOffset={0}
+            >
+              <ScrollView
         style={styles.content}
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
@@ -88,28 +127,63 @@ export default function BillPayment() {
 
         {/* Input Fields */}
         <View style={[styles.inputSection, { backgroundColor: '#fff' }]}>
+          {/* Show meter/account number for electricity bills */}
+          {isElectricityBill && (
+            <View style={styles.inputGroup}>
+              <ThemedText style={styles.inputLabel}>মিটার/একাউন্ট নম্বর</ThemedText>
+              <View style={styles.inputWrapper}>
+                <Ionicons name="keypad-outline" size={20} color="#999" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="মিটার/একাউন্ট নম্বর লিখুন"
+                  placeholderTextColor="#aaa"
+                  value={accountNumber}
+                  onChangeText={setAccountNumber}
+                  keyboardType="numeric"
+                />
+              </View>
+            </View>
+          )}
+
+          {/* Show subscription ID for TV bills */}
+          {isTvBill && (
+            <View style={styles.inputGroup}>
+              <ThemedText style={styles.inputLabel}>সাবস্ক্রিপশন আইডি</ThemedText>
+              <View style={styles.inputWrapper}>
+                <Ionicons name="card-outline" size={20} color="#999" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="সাবস্ক্রিপশন আইডি লিখুন"
+                  placeholderTextColor="#aaa"
+                  value={subscriptionId}
+                  onChangeText={setSubscriptionId}
+                />
+              </View>
+            </View>
+          )}
+
           <View style={styles.inputGroup}>
-            <ThemedText style={styles.inputLabel}>একাউন্ট নম্বর *</ThemedText>
+            <ThemedText style={styles.inputLabel}>ফোন নম্বর</ThemedText>
             <View style={styles.inputWrapper}>
-              <Ionicons name="keypad-outline" size={20} color="#999" style={styles.inputIcon} />
+              <Ionicons name="call-outline" size={20} color="#999" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
-                placeholder="কাউন্ট নম্বর লিখুন"
+                placeholder="ফোন নম্বর লিখুন"
                 placeholderTextColor="#aaa"
-                value={accountNumber}
-                onChangeText={setAccountNumber}
-                keyboardType="numeric"
+                value={phoneNumber}
+                onChangeText={setPhoneNumber}
+                keyboardType="phone-pad"
               />
             </View>
           </View>
 
           <View style={styles.inputGroup}>
-            <ThemedText style={styles.inputLabel}>বিল আইডি *</ThemedText>
+            <ThemedText style={styles.inputLabel}>এসএমএস একাউন্ট নম্বর</ThemedText>
             <View style={styles.inputWrapper}>
               <Ionicons name="document-text-outline" size={20} color="#999" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
-                placeholder="বিল আইডি লিখুন"
+                placeholder="এসএমএস একাউন্ট নম্বর লিখুন"
                 placeholderTextColor="#aaa"
                 value={billId}
                 onChangeText={setBillId}
@@ -142,13 +216,20 @@ export default function BillPayment() {
         </View>
       </ScrollView>
 
+            </KeyboardAvoidingView>
+
       {/* Bottom Button */}
       <View style={[styles.bottomSection, { backgroundColor: bg }]}>
         <TouchableOpacity
-          style={[styles.proceedButton, { backgroundColor: tint }]}
+          style={[styles.proceedButton, { backgroundColor: tint, opacity: isLoading ? 0.7 : 1 }]}
           onPress={handleProceed}
+          disabled={isLoading}
         >
-          <ThemedText style={styles.proceedButtonText}>এগিয়ে যান</ThemedText>
+          {isLoading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <ThemedText style={styles.proceedButtonText}>এগিয়ে যান</ThemedText>
+          )}
         </TouchableOpacity>
       </View>
     </ThemedView>

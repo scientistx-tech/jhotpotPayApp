@@ -141,15 +141,7 @@ export default function PayBill() {
 
           {/* Action Buttons */}
           <View style={styles.actionButtons}>
-            <TouchableOpacity 
-              style={styles.actionButton}
-              onPress={() => router.push('/(app)/wallet/receipt-token')}
-            >
-              <View style={[styles.actionIconContainer, { backgroundColor: `${tint}15` }]}>
-                <Ionicons name="receipt-outline" size={32} color={tint} />
-              </View>
-              <ThemedText style={styles.actionButtonText}>রিসিট এবং{'\n'}টোকেন</ThemedText>
-            </TouchableOpacity>
+            
 
             <TouchableOpacity 
               style={styles.actionButton}
@@ -222,6 +214,7 @@ export default function PayBill() {
                   institutionName: bill.name,
                   institutionType: categoryTitleMap[bill.categoryId] || 'বিল',
                   categoryId: bill.categoryId,
+                  billerId: bill.id,
                 }
               })}
             >
