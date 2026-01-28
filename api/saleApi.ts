@@ -89,6 +89,7 @@ export const saleApi = baseApi.injectEndpoints({
         id: string;
         paid: number;
         due: number;
+        subtotal?: number;
       }
     >({
       query: ({ id, ...body }) => ({

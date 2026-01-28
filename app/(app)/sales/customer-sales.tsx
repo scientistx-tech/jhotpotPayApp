@@ -105,8 +105,9 @@ export default function CustomerSales() {
             }).unwrap();
             refetch();
             closeEditModal();
-        } catch (e) {
-            Alert.alert('ত্রুটি', 'বিক্রয় আপডেট করতে ব্যর্থ');
+            Alert.alert('সফল', 'বিক্রয় সফলভাবে আপডেট করা হয়েছে');
+        } catch (e: any) {
+            Alert.alert('ত্রুটি', e?.data?.message || 'বিক্রয় আপডেট করতে ব্যর্থ');
         }
     };
 

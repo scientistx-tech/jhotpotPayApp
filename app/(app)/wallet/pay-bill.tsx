@@ -44,7 +44,7 @@ export default function PayBill() {
   const filteredBills = billers.filter((bill) => {
     const matchesSearch = searchQuery
       ? bill.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        categoryTitleMap[bill.categoryId]?.toLowerCase().includes(searchQuery.toLowerCase())
+      categoryTitleMap[bill.categoryId]?.toLowerCase().includes(searchQuery.toLowerCase())
       : true;
 
     return matchesSearch;
@@ -81,8 +81,8 @@ export default function PayBill() {
     if (isSvg) {
       // Use fallback icons for SVG files
       let iconName: any = 'business-outline';
-      if (billerName.toLowerCase().includes('nesco') || billerName.toLowerCase().includes('desco') || 
-          billerName.toLowerCase().includes('dpdc') || billerName.toLowerCase().includes('palli')) {
+      if (billerName.toLowerCase().includes('nesco') || billerName.toLowerCase().includes('desco') ||
+        billerName.toLowerCase().includes('dpdc') || billerName.toLowerCase().includes('palli')) {
         iconName = 'flash';
       } else if (billerName.toLowerCase().includes('akash') || billerName.toLowerCase().includes('tv')) {
         iconName = 'tv';
@@ -109,7 +109,7 @@ export default function PayBill() {
         showBack
         onBackPress={handleBackPress}
       />
-
+      <View style={{ height: 10 }} />
       <ScrollView
         style={styles.content}
         contentContainerStyle={styles.contentContainer}
@@ -135,15 +135,15 @@ export default function PayBill() {
 
         {/* My Institution Section */}
         <View style={[styles.myInstitutionSection, { backgroundColor: '#fff' }]}>
-         
 
-        
+
+
 
           {/* Action Buttons */}
           <View style={styles.actionButtons}>
-            
 
-            <TouchableOpacity 
+
+            <TouchableOpacity
               style={styles.actionButton}
               onPress={() => router.push('/(app)/wallet/bill-details')}
             >
@@ -158,7 +158,7 @@ export default function PayBill() {
         {/* All Institutions Section */}
         <View style={[styles.allInstitutionsSection, { backgroundColor: '#fff' }]}>
           <ThemedText style={styles.sectionTitle}>প্রতিষ্ঠানের ধরন</ThemedText>
-          
+
           <View style={styles.categoriesGrid}>
             {isCategoryLoading && (
               <ThemedText style={styles.sectionLabel}>লোড হচ্ছে...</ThemedText>
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
   },
   recentBillsSection: {
     paddingVertical: 10,
-        paddingHorizontal: 20,
+    paddingHorizontal: 20,
   },
   recentBillCard: {
     marginHorizontal: 0,
