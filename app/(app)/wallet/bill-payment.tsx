@@ -13,7 +13,7 @@ export default function BillPayment() {
   const router = useRouter();
   const tint = useThemeColor({}, 'tint');
   const bg = useThemeColor({}, 'background');
-  
+
   // Get params from navigation
   const params = useLocalSearchParams<{
     institutionName?: string;
@@ -99,124 +99,124 @@ export default function BillPayment() {
         showBack
         onBackPress={handleBackPress}
       />
-
+     
       <KeyboardAvoidingView
-                style={{ flex: 1 }}
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                keyboardVerticalOffset={0}
-            >
-              <ScrollView
-        style={styles.content}
-        contentContainerStyle={styles.contentContainer}
-        showsVerticalScrollIndicator={false}
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
       >
-        {/* Institution Info Card */}
-        <View style={[styles.infoCard, { backgroundColor: '#fff' }]}>
-          <View style={[styles.iconContainer, { backgroundColor: `${tint}15` }]}>
-            <Ionicons name="business" size={32} color={tint} />
+        <ScrollView
+          style={styles.content}
+          contentContainerStyle={styles.contentContainer}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Institution Info Card */}
+          <View style={[styles.infoCard, { backgroundColor: '#fff' }]}>
+            <View style={[styles.iconContainer, { backgroundColor: `${tint}15` }]}>
+              <Ionicons name="business" size={32} color={tint} />
+            </View>
+            <View style={styles.infoContent}>
+              <ThemedText type="defaultSemiBold" style={styles.institutionName}>
+                {params.institutionName || 'N/A'}
+              </ThemedText>
+              <ThemedText style={styles.institutionType}>
+                {params.institutionType || 'বিল পেমেন্ট'}
+              </ThemedText>
+            </View>
           </View>
-          <View style={styles.infoContent}>
-            <ThemedText type="defaultSemiBold" style={styles.institutionName}>
-              {params.institutionName || 'N/A'}
-            </ThemedText>
-            <ThemedText style={styles.institutionType}>
-              {params.institutionType || 'বিল পেমেন্ট'}
-            </ThemedText>
-          </View>
-        </View>
 
-        {/* Input Fields */}
-        <View style={[styles.inputSection, { backgroundColor: '#fff' }]}>
-          {/* Show meter/account number for electricity bills */}
-          {isElectricityBill && (
+          {/* Input Fields */}
+          <View style={[styles.inputSection, { backgroundColor: '#fff' }]}>
+            {/* Show meter/account number for electricity bills */}
+            {isElectricityBill && (
+              <View style={styles.inputGroup}>
+                <ThemedText style={styles.inputLabel}>মিটার/একাউন্ট নম্বর</ThemedText>
+                <View style={styles.inputWrapper}>
+                  <Ionicons name="keypad-outline" size={20} color="#999" style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="মিটার/একাউন্ট নম্বর লিখুন"
+                    placeholderTextColor="#aaa"
+                    value={accountNumber}
+                    onChangeText={setAccountNumber}
+                    keyboardType="numeric"
+                  />
+                </View>
+              </View>
+            )}
+
+            {/* Show subscription ID for TV bills */}
+            {isTvBill && (
+              <View style={styles.inputGroup}>
+                <ThemedText style={styles.inputLabel}>সাবস্ক্রিপশন আইডি</ThemedText>
+                <View style={styles.inputWrapper}>
+                  <Ionicons name="card-outline" size={20} color="#999" style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="সাবস্ক্রিপশন আইডি লিখুন"
+                    placeholderTextColor="#aaa"
+                    value={subscriptionId}
+                    onChangeText={setSubscriptionId}
+                  />
+                </View>
+              </View>
+            )}
+
             <View style={styles.inputGroup}>
-              <ThemedText style={styles.inputLabel}>মিটার/একাউন্ট নম্বর</ThemedText>
+              <ThemedText style={styles.inputLabel}>ফোন নম্বর</ThemedText>
               <View style={styles.inputWrapper}>
-                <Ionicons name="keypad-outline" size={20} color="#999" style={styles.inputIcon} />
+                <Ionicons name="call-outline" size={20} color="#999" style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
-                  placeholder="মিটার/একাউন্ট নম্বর লিখুন"
+                  placeholder="ফোন নম্বর লিখুন"
                   placeholderTextColor="#aaa"
-                  value={accountNumber}
-                  onChangeText={setAccountNumber}
-                  keyboardType="numeric"
+                  value={phoneNumber}
+                  onChangeText={setPhoneNumber}
+                  keyboardType="phone-pad"
                 />
               </View>
             </View>
-          )}
 
-          {/* Show subscription ID for TV bills */}
-          {isTvBill && (
             <View style={styles.inputGroup}>
-              <ThemedText style={styles.inputLabel}>সাবস্ক্রিপশন আইডি</ThemedText>
+              <ThemedText style={styles.inputLabel}>এসএমএস একাউন্ট নম্বর</ThemedText>
               <View style={styles.inputWrapper}>
-                <Ionicons name="card-outline" size={20} color="#999" style={styles.inputIcon} />
+                <Ionicons name="document-text-outline" size={20} color="#999" style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
-                  placeholder="সাবস্ক্রিপশন আইডি লিখুন"
+                  placeholder="এসএমএস একাউন্ট নম্বর লিখুন"
                   placeholderTextColor="#aaa"
-                  value={subscriptionId}
-                  onChangeText={setSubscriptionId}
+                  value={billId}
+                  onChangeText={setBillId}
                 />
               </View>
             </View>
-          )}
 
-          <View style={styles.inputGroup}>
-            <ThemedText style={styles.inputLabel}>ফোন নম্বর</ThemedText>
-            <View style={styles.inputWrapper}>
-              <Ionicons name="call-outline" size={20} color="#999" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="ফোন নম্বর লিখুন"
-                placeholderTextColor="#aaa"
-                value={phoneNumber}
-                onChangeText={setPhoneNumber}
-                keyboardType="phone-pad"
-              />
+            <View style={styles.inputGroup}>
+              <ThemedText style={styles.inputLabel}>পরিমাণ (টাকা) *</ThemedText>
+              <View style={styles.inputWrapper}>
+                <Ionicons name="cash-outline" size={20} color="#999" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="পরিমাণ লিখুন"
+                  placeholderTextColor="#aaa"
+                  value={amount}
+                  onChangeText={setAmount}
+                  keyboardType="decimal-pad"
+                />
+              </View>
             </View>
           </View>
 
-          <View style={styles.inputGroup}>
-            <ThemedText style={styles.inputLabel}>এসএমএস একাউন্ট নম্বর</ThemedText>
-            <View style={styles.inputWrapper}>
-              <Ionicons name="document-text-outline" size={20} color="#999" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="এসএমএস একাউন্ট নম্বর লিখুন"
-                placeholderTextColor="#aaa"
-                value={billId}
-                onChangeText={setBillId}
-              />
-            </View>
+          {/* Info Notice */}
+          <View style={[styles.noticeCard, { backgroundColor: `${tint}08` }]}>
+            <Ionicons name="information-circle" size={20} color={tint} style={{ marginRight: 8 }} />
+            <ThemedText style={styles.noticeText}>
+              দয়া করে সঠিক তথ্য প্রদান করুন। পেমেন্ট সম্পন্ন হওয়ার পর ফেরত দেওয়া যাবে না।
+            </ThemedText>
           </View>
+        </ScrollView>
 
-          <View style={styles.inputGroup}>
-            <ThemedText style={styles.inputLabel}>পরিমাণ (টাকা) *</ThemedText>
-            <View style={styles.inputWrapper}>
-              <Ionicons name="cash-outline" size={20} color="#999" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="পরিমাণ লিখুন"
-                placeholderTextColor="#aaa"
-                value={amount}
-                onChangeText={setAmount}
-                keyboardType="decimal-pad"
-              />
-            </View>
-          </View>
-        </View>
-
-        {/* Info Notice */}
-        <View style={[styles.noticeCard, { backgroundColor: `${tint}08` }]}>
-          <Ionicons name="information-circle" size={20} color={tint} style={{ marginRight: 8 }} />
-          <ThemedText style={styles.noticeText}>
-            দয়া করে সঠিক তথ্য প্রদান করুন। পেমেন্ট সম্পন্ন হওয়ার পর ফেরত দেওয়া যাবে না।
-          </ThemedText>
-        </View>
-      </ScrollView>
-
-            </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
 
       {/* Bottom Button */}
       <View style={[styles.bottomSection, { backgroundColor: bg }]}>

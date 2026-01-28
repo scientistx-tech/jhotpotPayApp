@@ -40,6 +40,29 @@ export interface SaleResponse {
   data: Sale;
 }
 
+export type UserSales = {
+  total: number;
+  due: number;
+  paid: number;
+};
+
+export type UserSaleItem = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  userId: string;
+  createdAt: string; // ISO date string
+  sales: UserSales;
+};
+
+export type UserSalesResponse = {
+  success: boolean;
+  message: string;
+  data: UserSaleItem[];
+};
+
 export const saleApi = baseApi.injectEndpoints({
   overrideExisting: true,
   endpoints: (builder) => ({
@@ -89,6 +112,13 @@ export const saleApi = baseApi.injectEndpoints({
       }),
       providesTags: ["Sales"],
     }),
+    getUserSales: builder.query<UserSalesResponse, void>({
+      query: () => ({
+        url: "/product/sale/user",
+        method: "GET",
+      }),
+      providesTags: ["Sales"],
+    }),
   }),
 });
 
@@ -96,4 +126,5 @@ export const {
   useCreateSaleMutation,
   useUpdateSaleMutation,
   useGetSalesQuery,
+  useGetUserSalesQuery,
 } = saleApi;
