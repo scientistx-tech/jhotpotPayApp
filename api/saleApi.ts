@@ -40,6 +40,27 @@ export interface SaleResponse {
   data: Sale;
 }
 
+export interface UserSalesInfo {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  userId: string;
+  createdAt: string;
+  sales: {
+    total: number;
+    due: number;
+    paid: number;
+  };
+}
+
+export interface GetUserSalesResponse {
+  success: boolean;
+  message: string;
+  data: UserSalesInfo[];
+}
+
 export const saleApi = baseApi.injectEndpoints({
   overrideExisting: true,
   endpoints: (builder) => ({
@@ -47,9 +68,11 @@ export const saleApi = baseApi.injectEndpoints({
       SaleResponse,
       {
         customerId: string;
+        subtotal: number;
         discount: number;
         paid: number;
         due: number;
+        tax: number;
         products: { productId: string; quantity: number }[];
       }
     >({
@@ -89,6 +112,26 @@ export const saleApi = baseApi.injectEndpoints({
       }),
       providesTags: ["Sales"],
     }),
+    getUserSales: builder.query<GetUserSalesResponse, void>({
+      query: () => ({
+        url: "/product/sale/user",
+        method: "GET",
+      }),
+      providesTags: ["Sales"],
+    }),
+    deleteSale: builder.mutation<
+      { success: boolean; message: string },
+      string
+    >({
+      query: (id) => ({
+        url: `/product/sales/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, id) => [
+        { type: "Sales", id },
+        { type: "Sales", id: "LIST" },
+      ],
+    }),
   }),
 });
 
@@ -96,4 +139,6 @@ export const {
   useCreateSaleMutation,
   useUpdateSaleMutation,
   useGetSalesQuery,
+  useGetUserSalesQuery,
+  useDeleteSaleMutation,
 } = saleApi;
