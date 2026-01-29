@@ -40,28 +40,26 @@ export interface SaleResponse {
   data: Sale;
 }
 
-export type UserSales = {
-  total: number;
-  due: number;
-  paid: number;
-};
-
-export type UserSaleItem = {
+export interface UserSalesInfo {
   id: string;
   name: string;
   email: string;
   phone: string;
   address: string;
   userId: string;
-  createdAt: string; // ISO date string
-  sales: UserSales;
-};
+  createdAt: string;
+  sales: {
+    total: number;
+    due: number;
+    paid: number;
+  };
+}
 
-export type UserSalesResponse = {
+export interface GetUserSalesResponse {
   success: boolean;
   message: string;
-  data: UserSaleItem[];
-};
+  data: UserSalesInfo[];
+}
 
 export const saleApi = baseApi.injectEndpoints({
   overrideExisting: true,
@@ -70,9 +68,11 @@ export const saleApi = baseApi.injectEndpoints({
       SaleResponse,
       {
         customerId: string;
+        subtotal: number;
         discount: number;
         paid: number;
         due: number;
+        tax: number;
         products: { productId: string; quantity: number }[];
       }
     >({
@@ -89,6 +89,7 @@ export const saleApi = baseApi.injectEndpoints({
         id: string;
         paid: number;
         due: number;
+        subtotal?: number;
       }
     >({
       query: ({ id, ...body }) => ({
@@ -112,12 +113,25 @@ export const saleApi = baseApi.injectEndpoints({
       }),
       providesTags: ["Sales"],
     }),
-    getUserSales: builder.query<UserSalesResponse, void>({
+    getUserSales: builder.query<GetUserSalesResponse, void>({
       query: () => ({
         url: "/product/sale/user",
         method: "GET",
       }),
       providesTags: ["Sales"],
+    }),
+    deleteSale: builder.mutation<
+      { success: boolean; message: string },
+      string
+    >({
+      query: (id) => ({
+        url: `/product/sales/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, id) => [
+        { type: "Sales", id },
+        { type: "Sales", id: "LIST" },
+      ],
     }),
   }),
 });
@@ -127,4 +141,5 @@ export const {
   useUpdateSaleMutation,
   useGetSalesQuery,
   useGetUserSalesQuery,
+  useDeleteSaleMutation,
 } = saleApi;

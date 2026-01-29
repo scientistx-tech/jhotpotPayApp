@@ -6,6 +6,7 @@ import { Socket } from 'socket.io-client';
 export interface UseChatsOptions {
   conversationId?: string;
   onNewMessage?: (message: ChatMessage) => void;
+  onMessagesUpdate?: (messages: ChatMessage[]) => void;
 }
 
 /**
@@ -70,14 +71,23 @@ export function useChat(options: UseChatsOptions = {}) {
       options.onNewMessage?.(message);
     };
 
+    const handleMessagesUpdate = (data: { messages: ChatMessage[] }) => {
+      if (__DEV__) {
+        console.log('[Chat] Messages updated:', data.messages.length);
+      }
+      options.onMessagesUpdate?.(data.messages);
+    };
+
     socketRef.current.on('message', handleNewMessage);
+    socketRef.current.on('messages:update', handleMessagesUpdate);
 
     return () => {
       if (socketRef.current) {
         socketRef.current.off('message', handleNewMessage);
+        socketRef.current.off('messages:update', handleMessagesUpdate);
       }
     };
-  }, [options.conversationId, options.onNewMessage]);
+  }, [options.conversationId, options.onNewMessage, options.onMessagesUpdate]);
 
   /**
    * Emit a message to a specific conversation (real-time broadcast)

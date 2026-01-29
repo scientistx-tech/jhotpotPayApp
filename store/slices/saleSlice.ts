@@ -22,14 +22,31 @@ export interface Sale {
 	salesItems: SaleItem[];
 }
 
+export interface UserSalesInfo {
+	id: string;
+	name: string;
+	email: string;
+	phone: string;
+	address: string;
+	userId: string;
+	createdAt: string;
+	sales: {
+		total: number;
+		due: number;
+		paid: number;
+	};
+}
+
 export interface SaleState {
 	sales: Sale[];
+	userSales: UserSalesInfo[];
 	loading: boolean;
 	error: string | null;
 }
 
 const initialState: SaleState = {
 	sales: [],
+	userSales: [],
 	loading: false,
 	error: null,
 };
@@ -59,6 +76,11 @@ const saleSlice = createSlice({
 			state.loading = false;
 			state.error = null;
 		},
+		setUserSales: (state, action: PayloadAction<UserSalesInfo[]>) => {
+			state.userSales = action.payload;
+			state.loading = false;
+			state.error = null;
+		},
 		setLoading: (state, action: PayloadAction<boolean>) => {
 			state.loading = action.payload;
 		},
@@ -71,6 +93,11 @@ const saleSlice = createSlice({
 			state.error = null;
 			state.loading = false;
 		},
+		clearUserSales: (state) => {
+			state.userSales = [];
+			state.error = null;
+			state.loading = false;
+		},
 	},
 });
 
@@ -79,8 +106,10 @@ export const {
 	addSale,
 	updateSale,
 	deleteSale,
+	setUserSales,
 	setLoading,
 	setError,
 	clearSales,
+	clearUserSales,
 } = saleSlice.actions;
 export default saleSlice.reducer;
