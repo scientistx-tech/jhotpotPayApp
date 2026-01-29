@@ -65,9 +65,17 @@ export default function LiveChatModal({ visible, onClose }: Props) {
         const filtered = prev.filter((m) => m.id !== incomingMessage.id);
         return [...filtered, incomingMessage];
       });
+      // Refetch to get updated read statuses for all messages
+      refetch();
       scrollToBottom();
     }
-  }, [conversationId]);
+  }, [conversationId, refetch]);
+
+  // Handle batch message updates (for read status changes)
+  const handleMessagesUpdate = useCallback((updatedMessages: ChatMessage[]) => {
+    setMessages(updatedMessages);
+    scrollToBottom();
+  }, []);
 
   // Auto-scroll to bottom on new messages or when modal opens
   const scrollToBottom = useCallback(() => {
@@ -82,6 +90,7 @@ export default function LiveChatModal({ visible, onClose }: Props) {
   const { isConnected, error, broadcastMessage } = useChat({
     conversationId,
     onNewMessage: handleNewMessage,
+    onMessagesUpdate: handleMessagesUpdate,
   });
 
   useEffect(() => {
@@ -201,6 +210,27 @@ export default function LiveChatModal({ visible, onClose }: Props) {
                         >
                           {message.text}
                         </Text>
+                        {/* {
+                          message.sender && !message.read && (
+                            <View style={{ flexDirection: 'row', gap: 4, marginTop: 4 }}>
+                              <Ionicons name="checkmark" size={14} color="#666" />
+                            </View>
+                          )
+                        } */}
+
+                          {
+                          message.sender && message.read ? (
+                            <View style={{ flexDirection: 'row', gap: 4, marginTop: 4 }}>
+                              <Ionicons name="checkmark" size={14} color="#666" />
+                                 <Ionicons name="checkmark" size={14} color="#666" />
+                            </View>
+                          ): message.sender && !message.read  &&(
+                            <View style={{ flexDirection: 'row', gap: 4, marginTop: 4 }}>
+                              <Ionicons name="checkmark" size={14} color="#666" />
+                            </View>
+                          )
+                        }
+
                       </View>
                     </View>
                   ))
