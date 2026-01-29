@@ -32,7 +32,7 @@ export default function CustomerSales() {
     const [editPaid, setEditPaid] = useState('');
 
     // New sale input fields with default values from customer data
-    const [dilam, setDilam] = useState(dueSales || '');
+    const [dilam, setDilam] = useState('');
     const [pelam, setPelam] = useState('');
 
     const [createSale, { isLoading: isCreating }] = useCreateSaleMutation();
@@ -203,11 +203,11 @@ export default function CustomerSales() {
                         <ThemedText style={styles.metaText}>পণ্য সংখ্যা: {item.salesItems?.length || 0}</ThemedText>
                     </View>
                     <View style={{ gap: 8 }}>
-                        {item.due > 0 && (
+                        {/* {item.due > 0 && (
                             <TouchableOpacity onPress={() => openEditModal(item)} style={styles.iconButton}>
                                 <Icon name="edit" size={22} color={tint} />
                             </TouchableOpacity>
-                        )}
+                        )} */}
                         <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.iconButton}>
                             <Icon name="delete" size={22} color="#EF4444" />
                         </TouchableOpacity>
@@ -220,13 +220,17 @@ export default function CustomerSales() {
     return (
         <ThemedView style={styles.container}>
             <RechargeHeader
-                title={customerName ? `${customerName} - বিক্রয় তালিকা` : 'বিক্রয় তালিকা'}
+                title={'বিক্রয় তালিকা'}
                 showBack={true}
                 onBackPress={handleBackPress}
             />
 
             <View style={styles.content}>
                 {/* Input Section */}
+                <View style={{ marginBottom: 5, }}>
+                    <ThemedText style={{ fontSize: 16, fontWeight: 600 }}>নাম : {customerName}</ThemedText>
+                    <ThemedText style={{color:"red"}}>পূর্ববর্তী বকেয়া : {dueSales} BDT</ThemedText>
+                </View>
                 <View style={styles.inputSection}>
                     <View style={styles.inputRow}>
                         <View style={styles.inputContainer}>
